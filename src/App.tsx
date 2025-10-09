@@ -1,18 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { auth, db, loginWithGoogle, logout } from "./firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
-import {
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    orderBy,
-    query,
-    where,
-    runTransaction,
-    serverTimestamp,
-} from "firebase/firestore";
-import { CoupleDoc, CoupleView, Person, VoteDoc } from "./models/models";
+import React, {useEffect, useState} from "react";
+import {auth, db, loginWithGoogle, logout} from "./firebase";
+import {onAuthStateChanged, User} from "firebase/auth";
+import {collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp, where,} from "firebase/firestore";
+import {CoupleDoc, CoupleView, Person, VoteDoc} from "./models/models";
 
 function Header({ user }: { user: User | null }) {
     return (
@@ -69,7 +59,8 @@ function CoupleCard({
             <div className="flex items-center gap-4">
                 <div className="flex-1 flex items-center gap-3">
                     <div className="flex items-center gap-2">
-                        <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+                        <div
+                            className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
                             {couple.a.image_url ? (
                                 <img src={couple.a.image_url} alt={couple.a.display_name} />
                             ) : (
