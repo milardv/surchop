@@ -2,4 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { --accent: #ec4899; }
+:root {
+    --accent: #ec4899;
+}
+
+/* style générique */
+.progress-style {
+    width: 100%;
+
+}

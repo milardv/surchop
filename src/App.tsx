@@ -1,132 +1,31 @@
 import React, {useEffect, useState} from "react";
-import {auth, db, loginWithGoogle, logout} from "./firebase";
+import {Navigate, Route, Routes} from "react-router-dom";
 import {onAuthStateChanged, User} from "firebase/auth";
-import {collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp, where,} from "firebase/firestore";
-import {CoupleDoc, CoupleView, Person, VoteDoc} from "./models/models";
+import {collection, doc, getDoc, getDocs, query, runTransaction, serverTimestamp,} from "firebase/firestore";
 
-function Header({ user }: { user: User | null }) {
-    return (
-        <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
-            <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
-                <div className="font-semibold">Le Fun & le Tabou</div>
-                <div>
-                    {user ? (
-                        <div className="flex items-center gap-3">
-                            <img className="w-8 h-8 rounded-full" src={user.photoURL ?? ""} alt="" />
-                            <button className="text-sm underline" onClick={() => logout()}>
-                                Se déconnecter
-                            </button>
-                        </div>
-                    ) : (
-                        <button className="px-3 py-1 rounded bg-pink-500 text-white" onClick={() => loginWithGoogle()}>
-                            Se connecter
-                        </button>
-                    )}
-                </div>
-            </div>
-        </header>
-    );
-}
+import Header from "./components/Header";
+import HomePage from "./pages/HomePage";
+import MyVotesPage from "./pages/MyVotesPage";
 
-function Gauge({ a, b }: { a: number; b: number }) {
-    const total = Math.max(1, a + b);
-    const pctA = Math.round((a / total) * 100);
-    return (
-        <div>
-            <div className="h-2 bg-gray-200 rounded overflow-hidden">
-                <div className="h-full bg-pink-500" style={{ width: `${pctA}%` }} />
-            </div>
-            <div className="text-xs mt-1 text-gray-600">
-                {a} vs {b}
-            </div>
-        </div>
-    );
-}
+import {auth, db} from "./firebase";
+import {CoupleDoc, CoupleView, Person, VoteDoc, VoteView} from "./models/models";
 
-function CoupleCard({
-                        couple,
-                        user,
-                        myChoice,
-                        onVote,
-                    }: {
-    couple: CoupleView;
-    user: User | null;
-    myChoice?: "A" | "B";
-    onVote: (c: CoupleView, choice: "A" | "B") => void;
-}) {
-    return (
-        <div className="p-4 rounded-2xl bg-white shadow-sm border">
-            <div className="flex items-center gap-4">
-                <div className="flex-1 flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                        <div
-                            className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-                            {couple.a.image_url ? (
-                                <img src={couple.a.image_url} alt={couple.a.display_name} />
-                            ) : (
-                                <span className="text-sm">{couple.a.display_name[0]}</span>
-                            )}
-                        </div>
-                        <div className="font-medium">{couple.a.display_name}</div>
-                    </div>
-                    <span className="text-gray-400">vs</span>
-                    <div className="flex items-center gap-2">
-                        <div className="w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-                            {couple.b.image_url ? (
-                                <img src={couple.b.image_url} alt={couple.b.display_name} />
-                            ) : (
-                                <span className="text-sm">{couple.b.display_name[0]}</span>
-                            )}
-                        </div>
-                        <div className="font-medium">{couple.b.display_name}</div>
-                    </div>
-                </div>
-                <div className="w-48">
-                    <Gauge a={couple.countA} b={couple.countB} />
-                </div>
-            </div>
-
-            <div className="mt-4 flex gap-2">
-                <button
-                    disabled={!user}
-                    onClick={() => onVote(couple, "A")}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                        myChoice === "A" ? "bg-pink-50 border-pink-500 text-pink-600" : "hover:bg-gray-50"
-                    }`}
-                >
-                    {couple.a.display_name} surchope
-                </button>
-                <button
-                    disabled={!user}
-                    onClick={() => onVote(couple, "B")}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                        myChoice === "B" ? "bg-pink-50 border-pink-500 text-pink-600" : "hover:bg-gray-50"
-                    }`}
-                >
-                    {couple.b.display_name} surchope
-                </button>
-            </div>
-
-            {!user && <div className="text-xs text-gray-500 mt-2">Connecte-toi pour voter.</div>}
-        </div>
-    );
-}
+/** Représentation locale d'un vote Firestore avec id et Date JS */
 
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
     const [couples, setCouples] = useState<CoupleView[]>([]);
+    const [votesAll, setVotesAll] = useState<VoteView[]>([]);
     const [myVotes, setMyVotes] = useState<Record<string, "A" | "B">>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => onAuthStateChanged(auth, setUser), []);
 
-    // Charge couples + people
+    // Charge couples + people (stats globales via count_a/count_b)
     useEffect(() => {
         (async () => {
-            console.log('get couples')
             const cq = query(collection(db, "/couples"));
             const snap = await getDocs(cq);
-console.log(snap.docs);
             const views: CoupleView[] = [];
             for (const d of snap.docs) {
                 const c = d.data() as CoupleDoc;
@@ -136,13 +35,13 @@ console.log(snap.docs);
                 ]);
                 if (!aSnap.exists() || !bSnap.exists()) continue;
 
-                const a = { id: aSnap.id, ...(aSnap.data() as any) } as Person;
-                const b = { id: bSnap.id, ...(bSnap.data() as any) } as Person;
+                const a = {id: aSnap.id, ...(aSnap.data() as any)} as Person;
+                const b = {id: bSnap.id, ...(bSnap.data() as any)} as Person;
 
                 views.push({
                     id: d.id,
-                    a,
-                    b,
+                    personA: a,
+                    personB: b,
                     countA: c.count_a ?? 0,
                     countB: c.count_b ?? 0,
                 });
@@ -152,26 +51,38 @@ console.log(snap.docs);
         })();
     }, []);
 
-    // Charge mes votes (filtré par uid)
+    // Charge TOUS les votes (sans filtre uid)
     useEffect(() => {
         (async () => {
-            if (!user) {
-                setMyVotes({});
-                return;
-            }
-            const vq = query(collection(db, "votes"), where("uid", "==", user.uid));
+            const vq = query(collection(db, "votes"));
             const snap = await getDocs(vq);
 
-            const mine: Record<string, "A" | "B"> = {};
-            snap.forEach((d) => {
+            const list: VoteView[] = snap.docs.map((d) => {
                 const v = d.data() as VoteDoc;
-                const couple = couples.find((c) => c.id === v.couple_id);
-                if (!couple) return;
-                mine[v.couple_id] = v.people_voted_id === couple.a.id ? "A" : "B";
+                const updatedAt = (v as any).updatedAt?.toDate?.() as Date | undefined;
+                return {id: d.id, ...v, updatedAt};
             });
-            setMyVotes(mine);
+            console.log(list)
+
+            setVotesAll(list);
         })();
-    }, [user, couples]);
+    }, []);
+
+    // Dérive MES votes à partir de votesAll + user + couples
+    useEffect(() => {
+        if (!user) {
+            setMyVotes({});
+            return;
+        }
+        const mine: Record<string, "A" | "B"> = {};
+        for (const v of votesAll) {
+            if (v.uid !== user.uid) continue;
+            const couple = couples.find((c) => c.id === v.couple_id);
+            if (!couple) continue;
+            mine[v.couple_id] = v.people_voted_id === couple.personA.id ? "A" : "B";
+        }
+        setMyVotes(mine);
+    }, [user, votesAll, couples]);
 
     const handleVote = async (c: CoupleView, choice: "A" | "B") => {
         if (!user) return;
@@ -179,7 +90,7 @@ console.log(snap.docs);
         const voteId = `${c.id}_${user.uid}`;
         const voteRef = doc(db, "votes", voteId);
         const coupleRef = doc(db, "couples", c.id);
-        const chosenPersonId = choice === "A" ? c.a.id : c.b.id;
+        const chosenPersonId = choice === "A" ? c.personA.id : c.personB.id;
 
         await runTransaction(db, async (tx) => {
             const [voteSnap, coupleSnap] = await Promise.all([tx.get(voteRef), tx.get(coupleRef)]);
@@ -195,9 +106,10 @@ console.log(snap.docs);
             } else {
                 const prev = voteSnap.data() as VoteDoc;
                 if (prev.people_voted_id === chosenPersonId) {
-                    return; // même choix
+                    // même choix: rien à faire
+                    return;
                 }
-                if (prev.people_voted_id === c.a.id) {
+                if (prev.people_voted_id === c.personA.id) {
                     countA--;
                     countB++;
                 } else {
@@ -206,7 +118,7 @@ console.log(snap.docs);
                 }
             }
 
-            tx.set(coupleRef, { count_a: countA, count_b: countB }, { merge: true });
+            tx.set(coupleRef, {count_a: countA, count_b: countB}, {merge: true});
             tx.set(
                 voteRef,
                 {
@@ -215,24 +127,27 @@ console.log(snap.docs);
                     people_voted_id: chosenPersonId,
                     updatedAt: serverTimestamp(),
                 } as VoteDoc,
-                { merge: true }
+                {merge: true}
             );
         });
 
-        // MAJ optimiste
-        setMyVotes((s) => ({ ...s, [c.id]: choice }));
+        // MAJ optimiste: ma sélection
+        setMyVotes((s) => ({...s, [c.id]: choice}));
+
+        // MAJ optimiste: compteurs du couple
         setCouples((list) =>
             list.map((x) => {
                 if (x.id !== c.id) return x;
                 const prev = myVotes[c.id];
                 if (!prev) {
+                    // premier vote
                     return {
                         ...x,
                         countA: x.countA + (choice === "A" ? 1 : 0),
                         countB: x.countB + (choice === "B" ? 1 : 0),
                     };
                 }
-                if (prev === choice) return x;
+                if (prev === choice) return x; // rien à changer
                 return {
                     ...x,
                     countA: x.countA + (choice === "A" ? 1 : -1),
@@ -240,20 +155,47 @@ console.log(snap.docs);
                 };
             })
         );
+
+        // MAJ optimiste: votesAll (remplace/ajoute mon vote)
+        setVotesAll((prev) => {
+            const next = prev.filter((v) => v.id !== voteId);
+            next.push({
+                id: voteId,
+                couple_id: c.id,
+                uid: user.uid,
+                people_voted_id: chosenPersonId,
+                updatedAt: new Date(),
+            });
+            return next;
+        });
     };
 
     return (
         <div>
-            <Header user={user} />
-            <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
-                {loading && <div>Chargement…</div>}
-
-                {!loading &&
-                    couples.map((c) => (
-                        <CoupleCard key={c.id} couple={c} user={user} myChoice={myVotes[c.id]} onVote={handleVote} />
-                    ))}
-            </main>
-            <footer className="text-center text-xs text-gray-500 py-6">Fait avec amour, aucun jugement 😇</footer>
+            <Header user={user}/>
+            <Routes>
+                <Route
+                    path="/"
+                    element={
+                        <HomePage
+                            user={user}
+                            couples={couples}
+                            myVotes={myVotes}
+                            onVote={handleVote}
+                            loading={loading}
+                            votesAll={votesAll}
+                        />
+                    }
+                />
+                <Route
+                    path="/mes-votes"
+                    element={<MyVotesPage user={user} couples={couples} votesAll={votesAll}/>}
+                />
+                <Route path="*" element={<Navigate to="/" replace/>}/>
+            </Routes>
+            <footer className="text-center text-xs text-gray-500 py-6">
+                Fait avec amour, aucun jugement 😇
+            </footer>
         </div>
     );
 }
