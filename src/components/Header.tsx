@@ -19,6 +19,11 @@ export default function Header({user}: { user: User | null }) {
                             Mes votes
                         </Link>
                     )}
+                    {user && (
+                        <Link to="/ajouter-couple" className="ml-4 text-sm font-medium text-gray-700 hover:underline">
+                            ➕ Ajouter un couple
+                        </Link>
+                    )}
                 </nav>
 
                 <div>

@@ -9,6 +9,7 @@ import MyVotesPage from "./pages/MyVotesPage";
 
 import {auth, db} from "./firebase";
 import {CoupleDoc, CoupleView, Person, VoteDoc, VoteView} from "./models/models";
+import AddCouplePage from "./pages/AddCouplePage";
 
 /** Représentation locale d'un vote Firestore avec id et Date JS */
 
@@ -59,6 +60,7 @@ export default function App() {
 
             const list: VoteView[] = snap.docs.map((d) => {
                 const v = d.data() as VoteDoc;
+                console.log(v)
                 const updatedAt = (v as any).updatedAt?.toDate?.() as Date | undefined;
                 return {id: d.id, ...v, updatedAt};
             });
@@ -191,6 +193,7 @@ export default function App() {
                     path="/mes-votes"
                     element={<MyVotesPage user={user} couples={couples} votesAll={votesAll}/>}
                 />
+                <Route path="/ajouter-couple" element={<AddCouplePage user={user}/>}/>
                 <Route path="*" element={<Navigate to="/" replace/>}/>
             </Routes>
             <footer className="text-center text-xs text-gray-500 py-6">
