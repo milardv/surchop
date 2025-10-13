@@ -24,7 +24,7 @@ export default function CoupleCard({
         <div className="p-4 rounded-2xl bg-white shadow-sm border">
             <div className="flex items-center gap-4 flex-col">
                 <div className="flex-1 flex items-center gap-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-col">
                         <div
                             className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
                             {couple.personA.image_url ? (
@@ -42,7 +42,7 @@ export default function CoupleCard({
 
                     <span className="text-gray-400 text-lg font-semibold">vs</span>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-col">
                         <div
                             className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
                             {couple.personB.image_url ? (

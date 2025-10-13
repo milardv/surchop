@@ -36,7 +36,7 @@ export default function HomePage({
     })
 
     return (
-        <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
+        <main className="max-w-5xl mx-auto px-2 sm:px-4 py-6 space-y-4">
 
             {loading && <div>Chargement…</div>}
 

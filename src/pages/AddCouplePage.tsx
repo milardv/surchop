@@ -40,7 +40,7 @@ export default function AddCouplePage({user}: { user: User | null }) {
         setLoading(true);
 
         try {
-            // 1️⃣ Crée les deux personnes sans couple_id pour l'instant
+            // 1️⃣ Crée les deux personnes
             const peopleCol = collection(db, "people");
             const aRef = await addDoc(peopleCol, {
                 display_name: personA.display_name,
@@ -51,7 +51,7 @@ export default function AddCouplePage({user}: { user: User | null }) {
                 image_url: personB.image_url || "",
             });
 
-            // 2️⃣ Crée le couple (enregistre les deux références)
+            // 2️⃣ Crée le couple
             const coupleRef = doc(collection(db, "couples"));
             await setDoc(coupleRef, {
                 id: coupleRef.id,
@@ -63,7 +63,7 @@ export default function AddCouplePage({user}: { user: User | null }) {
                 createdAt: serverTimestamp(),
             });
 
-            // 3️⃣ Mets à jour chaque personne pour lui ajouter la référence couple_id
+            // 3️⃣ Ajoute couple_id à chaque personne
             await Promise.all([
                 setDoc(aRef, {couple_id: coupleRef.id}, {merge: true}),
                 setDoc(bRef, {couple_id: coupleRef.id}, {merge: true}),
@@ -79,47 +79,84 @@ export default function AddCouplePage({user}: { user: User | null }) {
         }
     };
 
-
     return (
         <main className="max-w-3xl mx-auto px-4 py-10">
             <h2 className="text-lg font-semibold mb-6">Ajouter un nouveau couple</h2>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* === Personne A === */}
                     <div>
                         <h3 className="font-medium mb-2">Personne A</h3>
                         <input
                             type="text"
                             placeholder="Nom"
                             value={personA.display_name}
-                            onChange={(e) => setPersonA({...personA, display_name: e.target.value})}
+                            onChange={(e) =>
+                                setPersonA({...personA, display_name: e.target.value})
+                            }
                             className="w-full border rounded p-2 mb-2"
                         />
                         <input
                             type="text"
                             placeholder="URL photo"
                             value={personA.image_url}
-                            onChange={(e) => setPersonA({...personA, image_url: e.target.value})}
+                            onChange={(e) =>
+                                setPersonA({...personA, image_url: e.target.value})
+                            }
                             className="w-full border rounded p-2"
                         />
+
+                        {/* ✅ Aperçu de l'image A */}
+                        {personA.image_url && (
+                            <div className="mt-3">
+                                <img
+                                    src={personA.image_url}
+                                    alt="Prévisualisation A"
+                                    onError={(e) =>
+                                        ((e.target as HTMLImageElement).style.display = "none")
+                                    }
+                                    className="rounded-xl border max-h-48 object-cover"
+                                />
+                            </div>
+                        )}
                     </div>
 
+                    {/* === Personne B === */}
                     <div>
                         <h3 className="font-medium mb-2">Personne B</h3>
                         <input
                             type="text"
                             placeholder="Nom"
                             value={personB.display_name}
-                            onChange={(e) => setPersonB({...personB, display_name: e.target.value})}
+                            onChange={(e) =>
+                                setPersonB({...personB, display_name: e.target.value})
+                            }
                             className="w-full border rounded p-2 mb-2"
                         />
                         <input
                             type="text"
                             placeholder="URL photo"
                             value={personB.image_url}
-                            onChange={(e) => setPersonB({...personB, image_url: e.target.value})}
+                            onChange={(e) =>
+                                setPersonB({...personB, image_url: e.target.value})
+                            }
                             className="w-full border rounded p-2"
                         />
+
+                        {/* ✅ Aperçu de l'image B */}
+                        {personB.image_url && (
+                            <div className="mt-3">
+                                <img
+                                    src={personB.image_url}
+                                    alt="Prévisualisation B"
+                                    onError={(e) =>
+                                        ((e.target as HTMLImageElement).style.display = "none")
+                                    }
+                                    className="rounded-xl border max-h-48 object-cover"
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
 
