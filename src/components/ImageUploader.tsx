@@ -1,5 +1,5 @@
-import React from "react";
-import {Camera} from "lucide-react";
+import React from 'react';
+import { Camera } from 'lucide-react';
 
 interface ImageUploaderProps {
     label: string;
@@ -10,12 +10,12 @@ interface ImageUploaderProps {
 }
 
 export default function ImageUploader({
-                                          label,
-                                          imageUrl,
-                                          file,
-                                          onFileChange,
-                                          onUrlChange,
-                                      }: ImageUploaderProps) {
+    label,
+    imageUrl,
+    file,
+    onFileChange,
+    onUrlChange,
+}: ImageUploaderProps) {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const f = e.target.files?.[0] ?? null;
         onFileChange(f);
@@ -26,8 +26,7 @@ export default function ImageUploader({
     return (
         <div>
             <div className="flex flex-col items-center gap-3">
-                <div
-                    className="relative w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border">
+                <div className="relative w-32 h-32 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border">
                     {preview ? (
                         <img
                             src={preview}
@@ -35,13 +34,13 @@ export default function ImageUploader({
                             className="object-cover w-full h-full rounded-full"
                         />
                     ) : (
-                        <Camera className="text-gray-400 w-10 h-10"/>
+                        <Camera className="text-gray-400 w-10 h-10" />
                     )}
                     <label
                         htmlFor={`${label}-file`}
                         className="absolute bottom-1 mb-2 bg-pink-500 text-white text-xs px-2 py-1 rounded cursor-pointer shadow hover:bg-pink-600 transition"
                     >
-                        {file || imageUrl ? "Changer" : "Choisir"}
+                        {file || imageUrl ? 'Changer' : 'Choisir'}
                     </label>
                     <input
                         id={`${label}-file`}

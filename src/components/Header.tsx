@@ -1,34 +1,64 @@
-import React, {useState} from "react";
-import {Link} from "react-router-dom";
-import {User} from "firebase/auth";
-import {loginWithGoogle, logout} from "../firebase";
-import {Menu, X} from "lucide-react"; // icons propres
+import { Link, useLocation } from 'react-router-dom';
+import { User } from 'firebase/auth';
+import { Menu, X, Heart, UserPlus, Home, CheckSquare } from 'lucide-react';
+import React, { useState } from 'react';
 
-export default function Header({user}: { user: User | null }) {
+import { loginWithGoogle, logout } from '../firebase';
+
+export default function Header({ user }: { user: User | null }) {
     const [menuOpen, setMenuOpen] = useState(false);
+    const location = useLocation();
+
+    const NavItem = ({
+        to,
+        label,
+        icon: Icon,
+        accent = false,
+    }: {
+        to: string;
+        label: string;
+        icon: any;
+        accent?: boolean;
+    }) => {
+        const active = location.pathname === to;
+        return (
+            <Link
+                to={to}
+                onClick={() => setMenuOpen(false)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition
+                    ${
+                        active
+                            ? 'bg-pink-100 text-pink-700'
+                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }
+                    ${accent ? 'text-pink-600 font-semibold' : ''}`}
+            >
+                <Icon size={16} />
+                {label}
+            </Link>
+        );
+    };
 
     return (
-        <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
+        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b">
             <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
                 {/* Logo + titre */}
-                <Link to="/" className="font-semibold text-base sm:text-lg">
+                <Link to="/" className="font-semibold text-base sm:text-lg flex items-center gap-2">
+                    <Heart className="text-pink-500" size={18} />
                     Le Fun & le Tabou
                 </Link>
 
                 {/* Menu desktop */}
-                <nav className="hidden md:flex items-center gap-4 text-sm">
-                    <Link to="/" className="text-gray-600 hover:text-gray-900">
-                        Tous les couples
-                    </Link>
+                <nav className="hidden md:flex items-center gap-2">
+                    <NavItem to="/" label="Tous les couples" icon={Home} />
+                    {user && <NavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />}
                     {user && (
-                        <Link to="/mes-votes" className="text-gray-600 hover:text-gray-900">
-                            Mes votes
-                        </Link>
-                    )}
-                    {user && (
-                        <Link to="/ajouter-couple" className="text-gray-700 font-medium hover:text-gray-900">
-                            ➕ Ajouter un couple
-                        </Link>
+                        <NavItem
+                            to="/ajouter-couple"
+                            label="Ajouter un couple"
+                            icon={UserPlus}
+                            accent
+                        />
                     )}
                 </nav>
 
@@ -38,11 +68,11 @@ export default function Header({user}: { user: User | null }) {
                         <>
                             <img
                                 className="w-8 h-8 rounded-full border"
-                                src={user.photoURL ?? ""}
-                                alt={user.displayName ?? ""}
+                                src={user.photoURL ?? ''}
+                                alt={user.displayName ?? ''}
                             />
                             <button
-                                className="hidden sm:inline text-sm underline"
+                                className="hidden sm:inline text-sm underline text-gray-600 hover:text-gray-900"
                                 onClick={() => logout()}
                             >
                                 Se déconnecter
@@ -50,7 +80,7 @@ export default function Header({user}: { user: User | null }) {
                         </>
                     ) : (
                         <button
-                            className="px-3 py-1 rounded bg-pink-500 text-white text-sm"
+                            className="px-3 py-1 rounded bg-pink-500 text-white text-sm hover:bg-pink-600 transition"
                             onClick={() => loginWithGoogle()}
                         >
                             Se connecter
@@ -62,35 +92,33 @@ export default function Header({user}: { user: User | null }) {
                         onClick={() => setMenuOpen(!menuOpen)}
                         className="md:hidden p-2 rounded hover:bg-gray-100"
                     >
-                        {menuOpen ? <X size={20}/> : <Menu size={20}/>}
+                        {menuOpen ? <X size={20} /> : <Menu size={20} />}
                     </button>
                 </div>
             </div>
 
-            {/* Menu mobile déroulant */}
+            {/* Menu mobile */}
             {menuOpen && (
-                <nav className="md:hidden bg-white border-t border-gray-200 flex flex-col p-4 space-y-2 text-sm">
-                    <Link to="/" className="hover:underline" onClick={() => setMenuOpen(false)}>
-                        Tous les couples
-                    </Link>
+                <nav className="md:hidden bg-white border-t border-gray-200 flex flex-col p-3 space-y-2 text-sm">
+                    <NavItem to="/" label="Tous les couples" icon={Home} />
+                    {user && <NavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />}
                     {user && (
-                        <Link to="/mes-votes" className="hover:underline" onClick={() => setMenuOpen(false)}>
-                            Mes votes
-                        </Link>
-                    )}
-                    {user && (
-                        <Link to="/ajouter-couple" className="hover:underline" onClick={() => setMenuOpen(false)}>
-                            ➕ Ajouter un couple
-                        </Link>
+                        <NavItem
+                            to="/ajouter-couple"
+                            label="Ajouter un couple"
+                            icon={UserPlus}
+                            accent
+                        />
                     )}
                     {user && (
                         <button
-                            className="text-left underline text-gray-700"
+                            className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md text-left"
                             onClick={() => {
                                 logout();
                                 setMenuOpen(false);
                             }}
                         >
+                            <X size={16} />
                             Se déconnecter
                         </button>
                     )}

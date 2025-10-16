@@ -1,16 +1,17 @@
-import React, {useEffect, useState} from "react";
-import {useNavigate} from "react-router-dom";
-import {User} from "firebase/auth";
-import {collection, getDocs, orderBy, query, where} from "firebase/firestore";
-import {db} from "../firebase";
-import {CoupleView, VoteDoc, VoteView} from "../models/models";
-import CoupleCard from "../components/CoupleCard";
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { User } from 'firebase/auth';
+import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+
+import { db } from '../firebase';
+import { CoupleView, VoteDoc, VoteView } from '../models/models';
+import CoupleCard from '../components/CoupleCard';
 
 export default function MyVotesPage({
-                                        user,
-                                        couples,
-                                        votesAll,
-                                    }: {
+    user,
+    couples,
+    votesAll,
+}: {
     user: User | null;
     couples: CoupleView[];
     votesAll: VoteView[];
@@ -18,7 +19,7 @@ export default function MyVotesPage({
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [entries, setEntries] = useState<
-        { couple: CoupleView; choice: "A" | "B"; updatedAt?: Date }[]
+        { couple: CoupleView; choice: 'A' | 'B'; updatedAt?: Date }[]
     >([]);
 
     useEffect(() => {
@@ -29,20 +30,20 @@ export default function MyVotesPage({
                 return;
             }
             const vq = query(
-                collection(db, "votes"),
-                where("uid", "==", user.uid),
-                orderBy("updatedAt", "desc")
+                collection(db, 'votes'),
+                where('uid', '==', user.uid),
+                orderBy('updatedAt', 'desc'),
             );
             const snap = await getDocs(vq);
 
-            const list: { couple: CoupleView; choice: "A" | "B"; updatedAt?: Date }[] = [];
+            const list: { couple: CoupleView; choice: 'A' | 'B'; updatedAt?: Date }[] = [];
             snap.forEach((d) => {
                 const v = d.data() as VoteDoc;
                 const couple = couples.find((c) => c.id === v.couple_id);
                 if (!couple) return;
-                const choice: "A" | "B" = v.people_voted_id === couple.personA.id ? "A" : "B";
+                const choice: 'A' | 'B' = v.people_voted_id === couple.personA.id ? 'A' : 'B';
                 const ts = (v as any).updatedAt?.toDate?.() as Date | undefined;
-                list.push({couple, choice, updatedAt: ts});
+                list.push({ couple, choice, updatedAt: ts });
             });
 
             setEntries(list);
@@ -57,7 +58,7 @@ export default function MyVotesPage({
                     <h2 className="text-lg font-semibold mb-2">Mes votes</h2>
                     <p className="text-gray-600">Connecte-toi pour voir ton historique de votes.</p>
                     <button
-                        onClick={() => navigate("/")}
+                        onClick={() => navigate('/')}
                         className="mt-4 px-3 py-2 rounded bg-gray-900 text-white"
                     >
                         Retour à l’accueil
@@ -76,13 +77,20 @@ export default function MyVotesPage({
             )}
             {!loading &&
                 entries.map((e, i) => (
-                    <div key={e.couple.id + "_" + i} className="space-y-2">
+                    <div key={e.couple.id + '_' + i} className="space-y-2">
                         {e.updatedAt && (
                             <div className="text-xs text-gray-500">
-                                Mis à jour le {e.updatedAt.toLocaleDateString()} à {e.updatedAt.toLocaleTimeString()}
+                                Mis à jour le {e.updatedAt.toLocaleDateString()} à{' '}
+                                {e.updatedAt.toLocaleTimeString()}
                             </div>
                         )}
-                        <CoupleCard couple={e.couple} user={user} myChoice={e.choice} onlyMyVotes={true} compact/>
+                        <CoupleCard
+                            couple={e.couple}
+                            user={user}
+                            myChoice={e.choice}
+                            onlyMyVotes={true}
+                            compact
+                        />
                     </div>
                 ))}
         </main>

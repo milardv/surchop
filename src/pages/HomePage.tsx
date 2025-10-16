@@ -1,57 +1,47 @@
-import React from "react";
-import {User} from "firebase/auth";
-import {CoupleView, VoteView} from "../models/models";
-import CoupleCard from "../components/CoupleCard";
+import { useState } from 'react';
 
+import CoupleCard from '../components/CoupleCard';
 
-export default function HomePage({
-                                     user,
-                                     couples,
-                                     myVotes,
-                                     onVote,
-                                     loading,
-                                     votesAll,
-                                 }: {
-    user: User | null;
-    couples: CoupleView[];
-    myVotes: Record<string, "A" | "B">;
-    onVote: (c: CoupleView, choice: "A" | "B") => void;
-    loading: boolean;
-    votesAll: VoteView[];
-}) {
-    // Stats globales (tous les votes)
-    console.log(votesAll);
-    const peopleCountMap = new Map<string, number>(); // pour chaque personne, nombre de votes
+export default function HomePage({ user, couples, myVotes, onVote, loading }) {
+    const [filter, setFilter] = useState<'friends' | 'people'>('friends');
 
-    couples.forEach(couple => {
-        peopleCountMap.set(couple.personA.id, 0)
-        peopleCountMap.set(couple.personB.id, 0)
-    })
-    votesAll.forEach((vote: VoteView) => {
-        peopleCountMap.set(vote.people_voted_id, peopleCountMap.get(vote.people_voted_id) + 1);
-    })
-    couples.forEach(couple => {
-        couple.countA = peopleCountMap.get(couple.personA.id);
-        couple.countB = peopleCountMap.get(couple.personB.id);
-    })
+    if (loading) return <div>Chargement…</div>;
+
+    const visibleCouples = couples.filter((c) => c.category === filter);
 
     return (
-        <main className="max-w-5xl mx-auto px-2 sm:px-4 py-6 space-y-4">
+        <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+            {/* 👇 Ton sélecteur d’onglets ici */}
+            <div className="flex border-b mb-6">
+                {['friends', 'people'].map((cat) => (
+                    <button
+                        key={cat}
+                        onClick={() => setFilter(cat as 'friends' | 'people')}
+                        className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition
+                            ${
+                                filter === cat
+                                    ? 'border-pink-500 text-pink-600'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        {cat === 'friends' ? '👫 Potes' : '🌟 People'}
+                    </button>
+                ))}
+            </div>
 
-            {loading && <div>Chargement…</div>}
-
-            {!loading &&
-                couples.map((c) => (
+            {/* 👇 Liste des couples filtrés */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                {visibleCouples.map((c) => (
                     <CoupleCard
                         key={c.id}
                         couple={c}
                         user={user}
-                        myChoice={myVotes[c.id]} // juste pour surligner MON choix éventuel
+                        myChoice={myVotes[c.id]}
                         onVote={onVote}
                         onlyMyVotes={false}
-                        // La jauge s’appuie sur c.countA / c.countB → stats de tout le monde
                     />
                 ))}
+            </div>
         </main>
     );
 }

@@ -1,7 +1,8 @@
-import React from "react";
-import {CoupleView, Person} from "../models/models";
+import React from 'react';
 
-export default function Gauge({couple}: { couple: CoupleView }) {
+import { CoupleView, Person } from '../models/models';
+
+export default function Gauge({ couple }: { couple: CoupleView }) {
     const countA = couple.countA;
     const countB = couple.countB;
     const total = Math.max(1, countA + countB);
@@ -21,17 +22,18 @@ export default function Gauge({couple}: { couple: CoupleView }) {
     return (
         <div>
             <div className="h-2 bg-gray-200 rounded overflow-hidden">
-                <div className="h-full bg-pink-500" style={{width: `${surchopPersonPercentage}%`}}/>
+                <div
+                    className="h-full bg-pink-500"
+                    style={{ width: `${surchopPersonPercentage}%` }}
+                />
             </div>
             <div className="text-xs mt-1 text-gray-600">
-                {countA} vs {countB} • {countA + countB} vote{countA + countB > 1 ? "s" : ""}
+                {countA} vs {countB} • {countA + countB} vote{countA + countB > 1 ? 's' : ''}
             </div>
             <div className="text-xs mt-1 text-gray-600">
-                {hasEquality ? (
-                    'Surchopage à égalité <3'
-                ) : (
-                    surchopPerson.display_name + ' surchop à ' + surchopPersonPercentage + ' %'
-                )}
+                {hasEquality
+                    ? 'Surchopage à égalité <3'
+                    : surchopPerson.display_name + ' surchop à ' + surchopPersonPercentage + ' %'}
             </div>
         </div>
     );

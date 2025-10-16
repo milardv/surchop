@@ -6,12 +6,15 @@ export type Person = {
     count?: number;
 };
 
+type CoupleCategory = 'people' | 'friends';
+
 export type CoupleDoc = {
     people_a_id: string;
     people_b_id: string;
     count_a?: number;
     count_b?: number;
     createdAt?: any;
+    category: CoupleCategory;
 };
 
 export type CoupleView = {
@@ -20,6 +23,7 @@ export type CoupleView = {
     personB: Person;
     countA: number;
     countB: number;
+    category: CoupleCategory;
 };
 
 export type VoteDoc = {
