@@ -71,7 +71,7 @@ export default function AddCouplePage({ user }: { user: User | null }) {
                                 value={data.display_name}
                                 onChange={(e) => set({ ...data, display_name: e.target.value })}
                                 onBlur={() => handleBlur(key as 'A' | 'B')}
-                                className={`w-full border rounded p-2 mb-1 ${
+                                className={`w-full border rounded p-2 mb-4 ${
                                     err ? 'border-red-500 bg-red-50' : 'border-gray-300'
                                 }`}
                             />
