@@ -9,6 +9,7 @@ import {
     query,
     runTransaction,
     serverTimestamp,
+    onSnapshot,
 } from 'firebase/firestore';
 
 import Header from './components/Header';
@@ -32,9 +33,18 @@ export default function App() {
 
     // Charge couples + people (stats globales via count_a/count_b)
     useEffect(() => {
+        let unsub: (() => void) | null = null;
+
         (async () => {
-            const cq = query(collection(db, '/couples'));
-            const snap = await getDocs(cq);
+            // 1️⃣ Chargement initial
+            const snap = await getDocs(collection(db, 'couples'));
+            await processSnapshot(snap);
+
+            // 2️⃣ Puis écoute temps réel
+            unsub = onSnapshot(collection(db, 'couples'), processSnapshot);
+        })();
+
+        async function processSnapshot(snap: any) {
             const views: CoupleView[] = [];
             for (const d of snap.docs) {
                 const c = d.data() as CoupleDoc;
@@ -46,19 +56,20 @@ export default function App() {
 
                 const a = { id: aSnap.id, ...(aSnap.data() as any) } as Person;
                 const b = { id: bSnap.id, ...(bSnap.data() as any) } as Person;
-
                 views.push({
                     id: d.id,
                     personA: a,
                     personB: b,
                     countA: c.count_a ?? 0,
                     countB: c.count_b ?? 0,
-                    category: c.category,
+                    category: c.category ?? 'friends',
                 });
             }
             setCouples(views);
             setLoading(false);
-        })();
+        }
+
+        return () => unsub && unsub();
     }, []);
 
     // Charge TOUS les votes (sans filtre uid)

@@ -45,7 +45,7 @@ export default function Header({ user }: { user: User | null }) {
                 {/* Logo + titre */}
                 <Link to="/" className="font-semibold text-base sm:text-lg flex items-center gap-2">
                     <Heart className="text-pink-500" size={18} />
-                    Le Fun & le Tabou
+                    SURCHOPE
                 </Link>
 
                 {/* Menu desktop */}

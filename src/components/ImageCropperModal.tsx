@@ -11,34 +11,74 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+    const [cropping, setCropping] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const onCropComplete = useCallback((_croppedArea, pixels) => {
         setCroppedAreaPixels(pixels);
     }, []);
 
-    const getCroppedImage = async () => {
-        const image = await createImage(imageSrc);
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d')!;
-        const { width, height, x, y } = croppedAreaPixels;
+    const createImage = async (url: string): Promise<HTMLImageElement> => {
+        if (url.startsWith('data:') || url.startsWith('blob:')) {
+            return loadImage(url);
+        }
 
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+        // 🔁 Proxy CORS public (corsproxy.io)
+        const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
 
-        canvas.toBlob((blob) => {
-            if (blob) onCrop(blob);
-        }, 'image/jpeg');
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error(`Erreur proxy: ${res.status}`);
+
+        const blob = await res.blob();
+        const localUrl = URL.createObjectURL(blob);
+        return loadImage(localUrl);
     };
 
-    const createImage = (url: string): Promise<HTMLImageElement> =>
+    const loadImage = (src: string): Promise<HTMLImageElement> =>
         new Promise((resolve, reject) => {
             const img = new Image();
-            img.addEventListener('load', () => resolve(img));
-            img.addEventListener('error', (e) => reject(e));
-            img.crossOrigin = 'anonymous'; // permet de recadrer des images en URL
-            img.src = url;
+            img.onload = () => resolve(img);
+            img.onerror = (e) => reject(e);
+            img.src = src;
         });
+
+    /** Fonction principale de recadrage */
+    const getCroppedImage = async () => {
+        if (!croppedAreaPixels) {
+            setError('Zone de recadrage non définie');
+            return;
+        }
+
+        setCropping(true);
+        setError(null);
+
+        try {
+            const image = await createImage(imageSrc);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) throw new Error("Impossible d'obtenir le contexte du canvas");
+
+            const { width, height, x, y } = croppedAreaPixels;
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+
+            canvas.toBlob(
+                (blob) => {
+                    setCropping(false);
+                    if (blob) onCrop(blob);
+                    else setError('Échec de la conversion en image.');
+                },
+                'image/jpeg',
+                0.9,
+            );
+        } catch (err: any) {
+            console.error('Erreur lors du recadrage :', err);
+            setError(err.message || 'Erreur inconnue lors du recadrage.');
+            setCropping(false);
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -57,7 +97,7 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
                     />
                 </div>
 
-                {/* slider de zoom fluide */}
+                {/* Slider de zoom fluide */}
                 <input
                     type="range"
                     min={1}
@@ -68,20 +108,30 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
                     className="w-full mt-4 accent-pink-500"
                 />
 
+                {/* Boutons */}
                 <div className="flex gap-3 mt-4">
                     <button
                         onClick={onCancel}
+                        disabled={cropping}
                         className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
                     >
                         Annuler
                     </button>
                     <button
                         onClick={getCroppedImage}
-                        className="px-4 py-2 text-sm bg-pink-500 text-white rounded hover:bg-pink-600"
+                        disabled={cropping}
+                        className={`px-4 py-2 text-sm rounded text-white ${
+                            cropping
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-pink-500 hover:bg-pink-600'
+                        }`}
                     >
-                        Valider
+                        {cropping ? 'Recadrage...' : 'Valider'}
                     </button>
                 </div>
+
+                {/* Message d'erreur */}
+                {error && <p className="text-red-600 text-xs mt-3">{error}</p>}
             </div>
         </div>
     );

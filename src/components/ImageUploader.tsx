@@ -21,9 +21,7 @@ export default function ImageUploader({
 
     const handleFile = (f: File) => {
         const reader = new FileReader();
-        reader.onload = (e) => {
-            setCropImageSrc(e.target?.result as string);
-        };
+        reader.onload = (e) => setCropImageSrc(e.target?.result as string);
         reader.readAsDataURL(f);
     };
 
