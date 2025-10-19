@@ -20,8 +20,8 @@
   "background_color": "#fff0f6",
   "display": "standalone",
   "orientation": "portrait",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/surchop/",
+  "scope": "/surchop/",
   "screenshots": [
     {
       "src": "screenshot-desktop.png",
