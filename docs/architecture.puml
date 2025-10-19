@@ -1,0 +1,63 @@
+@startuml
+title Architecture technique - Surchope 💘
+
+skinparam backgroundColor #FFFFFF
+skinparam componentStyle rectangle
+skinparam shadowing false
+skinparam ArrowColor #ec4899
+skinparam rectangle {
+  BackgroundColor #fff5f8
+  BorderColor #ec4899
+  FontColor #333
+}
+skinparam note {
+  BackgroundColor #fff0f6
+  BorderColor #ec4899
+}
+
+actor Utilisateur as user
+
+package "Navigateur (React + Vite)" as React {
+    package "UI / Composants React" as UI {
+        [HomePage\n(recherche, filtres, couples)] as Home
+        [AddCouplePage\n(formulaire, upload, crop)] as Add
+        [CoupleCard\n(affichage, vote, résultats)] as Card
+        [Modales\n(Intro, PersonInfo, Loader...)] as Modals
+    }
+
+    package "Logique Métiers (Hooks)" as Logic {
+        [useAddCoupleForm\n(validation, upload, Firestore)] as HookAdd
+    }
+
+    package "Utils" as Utils {
+        [uploadToImgBB.ts\n→ appel API ImgBB] as ImgBB
+    }
+
+    package "Firebase SDK" as Firebase {
+        [Firestore\n(couples, people, votes temps réel)] as Firestore
+        [Auth\n(connexion Google, session)] as Auth
+    }
+}
+
+package "Services externes" as External {
+    [ImgBB API\n(Hébergement d’images publiques)] as ImgBBAPI
+    [Wikipedia API\n(Infos sur les personnalités)] as Wiki
+    [GitHub Pages\n(Hébergement statique du site)] as GitHubPages
+}
+
+user --> Home : visite la page
+Home --> Firebase : charge les couples\n(onSnapshot temps réel)
+Add --> ImgBB : upload d’image
+Add --> Firebase : enregistre un couple
+Card --> Firebase : envoie un vote
+Card --> Wiki : récupère bio/personne (PersonInfoModal)
+React --> GitHubPages : déploiement statique
+Utils --> ImgBBAPI : upload images
+
+note right of React
+Application 100% front-end (React + TypeScript)
+Communication via APIs REST (Firebase, ImgBB, Wikipedia)
+Aucun backend à maintenir.
+end note
+
+@enduml

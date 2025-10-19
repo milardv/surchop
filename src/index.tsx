@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
+import { registerSW } from 'virtual:pwa-register';
 
 import App from './App';
 import './index.css';
@@ -15,3 +16,14 @@ root.render(
         </BrowserRouter>
     </React.StrictMode>,
 );
+
+const updateSW = registerSW({
+    onNeedRefresh() {
+        if (confirm('Une nouvelle version est disponible. Recharger ?')) {
+            updateSW(true);
+        }
+    },
+    onOfflineReady() {
+        console.log('L’application est prête à être utilisée hors ligne.');
+    },
+});
