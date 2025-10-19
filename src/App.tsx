@@ -26,12 +26,12 @@ export default function App() {
     const [user, setUser] = useState<User | null>(null);
     const [couples, setCouples] = useState<CoupleView[]>([]);
     const [votesAll, setVotesAll] = useState<VoteView[]>([]);
-    const [myVotes, setMyVotes] = useState<Record<string, 'A' | 'B'>>({});
+    const [myVotes, setMyVotes] = useState<Record<string, 'A' | 'B' | 'tie'>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => onAuthStateChanged(auth, setUser), []);
 
-    // Charge couples + people (stats globales via count_a/count_b)
+    // Charge couples + people (stats globales via count_a/count_b/count_tie)
     useEffect(() => {
         let unsub: (() => void) | null = null;
 
@@ -62,6 +62,7 @@ export default function App() {
                     personB: b,
                     countA: c.count_a ?? 0,
                     countB: c.count_b ?? 0,
+                    countTie: c.count_tie ?? 0, // ⚖️ ajout du compteur égalité
                     category: c.category ?? 'friends',
                 });
             }
@@ -80,11 +81,9 @@ export default function App() {
 
             const list: VoteView[] = snap.docs.map((d) => {
                 const v = d.data() as VoteDoc;
-                console.log(v);
                 const updatedAt = (v as any).updatedAt?.toDate?.() as Date | undefined;
                 return { id: d.id, ...v, updatedAt };
             });
-            console.log(list);
 
             setVotesAll(list);
         })();
@@ -96,23 +95,27 @@ export default function App() {
             setMyVotes({});
             return;
         }
-        const mine: Record<string, 'A' | 'B'> = {};
+        const mine: Record<string, 'A' | 'B' | 'tie'> = {};
         for (const v of votesAll) {
             if (v.uid !== user.uid) continue;
             const couple = couples.find((c) => c.id === v.couple_id);
             if (!couple) continue;
-            mine[v.couple_id] = v.people_voted_id === couple.personA.id ? 'A' : 'B';
+
+            if (v.people_voted_id === 'tie') mine[v.couple_id] = 'tie';
+            else mine[v.couple_id] = v.people_voted_id === couple.personA.id ? 'A' : 'B';
         }
         setMyVotes(mine);
     }, [user, votesAll, couples]);
 
-    const handleVote = async (c: CoupleView, choice: 'A' | 'B') => {
+    // ⚖️ Gestion du vote (A, B ou égalité)
+    const handleVote = async (c: CoupleView, choice: 'A' | 'B' | 'tie') => {
         if (!user) return;
 
         const voteId = `${c.id}_${user.uid}`;
         const voteRef = doc(db, 'votes', voteId);
         const coupleRef = doc(db, 'couples', c.id);
-        const chosenPersonId = choice === 'A' ? c.personA.id : c.personB.id;
+        const chosenPersonId =
+            choice === 'A' ? c.personA.id : choice === 'B' ? c.personB.id : 'tie';
 
         await runTransaction(db, async (tx) => {
             const [voteSnap, coupleSnap] = await Promise.all([tx.get(voteRef), tx.get(coupleRef)]);
@@ -121,26 +124,42 @@ export default function App() {
 
             let countA = coupleDoc.count_a ?? 0;
             let countB = coupleDoc.count_b ?? 0;
+            let countTie = coupleDoc.count_tie ?? 0;
 
             if (!voteSnap.exists()) {
                 if (choice === 'A') countA++;
-                else countB++;
+                else if (choice === 'B') countB++;
+                else countTie++;
             } else {
                 const prev = voteSnap.data() as VoteDoc;
-                if (prev.people_voted_id === chosenPersonId) {
+                const prevChoice =
+                    prev.people_voted_id === c.personA.id
+                        ? 'A'
+                        : prev.people_voted_id === c.personB.id
+                          ? 'B'
+                          : 'tie';
+
+                if (prevChoice === choice) {
                     // même choix: rien à faire
                     return;
                 }
-                if (prev.people_voted_id === c.personA.id) {
-                    countA--;
-                    countB++;
-                } else {
-                    countB--;
-                    countA++;
-                }
+
+                // Annule le vote précédent
+                if (prevChoice === 'A') countA--;
+                else if (prevChoice === 'B') countB--;
+                else countTie--;
+
+                // Ajoute le nouveau vote
+                if (choice === 'A') countA++;
+                else if (choice === 'B') countB++;
+                else countTie++;
             }
 
-            tx.set(coupleRef, { count_a: countA, count_b: countB }, { merge: true });
+            tx.set(
+                coupleRef,
+                { count_a: countA, count_b: countB, count_tie: countTie },
+                { merge: true },
+            );
             tx.set(
                 voteRef,
                 {
@@ -153,32 +172,32 @@ export default function App() {
             );
         });
 
-        // MAJ optimiste: ma sélection
+        // MAJ optimiste
         setMyVotes((s) => ({ ...s, [c.id]: choice }));
 
-        // MAJ optimiste: compteurs du couple
         setCouples((list) =>
             list.map((x) => {
                 if (x.id !== c.id) return x;
                 const prev = myVotes[c.id];
                 if (!prev) {
-                    // premier vote
                     return {
                         ...x,
                         countA: x.countA + (choice === 'A' ? 1 : 0),
                         countB: x.countB + (choice === 'B' ? 1 : 0),
+                        countTie: x.countTie + (choice === 'tie' ? 1 : 0),
                     };
                 }
-                if (prev === choice) return x; // rien à changer
+                if (prev === choice) return x;
+
                 return {
                     ...x,
-                    countA: x.countA + (choice === 'A' ? 1 : -1),
-                    countB: x.countB + (choice === 'B' ? 1 : -1),
+                    countA: x.countA + (choice === 'A' ? 1 : 0) - (prev === 'A' ? 1 : 0),
+                    countB: x.countB + (choice === 'B' ? 1 : 0) - (prev === 'B' ? 1 : 0),
+                    countTie: x.countTie + (choice === 'tie' ? 1 : 0) - (prev === 'tie' ? 1 : 0),
                 };
             }),
         );
 
-        // MAJ optimiste: votesAll (remplace/ajoute mon vote)
         setVotesAll((prev) => {
             const next = prev.filter((v) => v.id !== voteId);
             next.push({
@@ -219,7 +238,7 @@ export default function App() {
             </Routes>
             <footer className="text-center text-xs text-gray-500 py-6">
                 Fait avec amour, aucun jugement 😇 •{' '}
-                <a href="/surchop/confidentialite" className="underline hover:text-gray-700">
+                <a href="/confidentialite" className="underline hover:text-gray-700">
                     Politique de confidentialité
                 </a>
             </footer>

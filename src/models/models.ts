@@ -13,6 +13,7 @@ export type CoupleDoc = {
     people_b_id: string;
     count_a?: number;
     count_b?: number;
+    count_tie: number;
     createdAt?: any;
     category: CoupleCategory;
 };
@@ -23,6 +24,7 @@ export type CoupleView = {
     personB: Person;
     countA: number;
     countB: number;
+    countTie: number;
     category: CoupleCategory;
 };
 

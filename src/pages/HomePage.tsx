@@ -28,7 +28,13 @@ export default function HomePage({ user, couples, myVotes, onVote, loading }) {
                 : `${c.personA.display_name} ${c.personB.display_name}`
                       .toLowerCase()
                       .includes(query.toLowerCase()),
-        );
+        )
+        .sort((a, b) => {
+            const aVoted = !!myVotes[a.id];
+            const bVoted = !!myVotes[b.id];
+            if (aVoted === bVoted) return 0; // les deux déjà votés ou non → garde l’ordre
+            return aVoted ? 1 : -1; // ceux non votés d’abord
+        });
 
     return (
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-6">

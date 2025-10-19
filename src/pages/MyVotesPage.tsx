@@ -18,8 +18,10 @@ export default function MyVotesPage({
 }) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
+
+    // ⚖️ on ajoute le type "tie"
     const [entries, setEntries] = useState<
-        { couple: CoupleView; choice: 'A' | 'B'; updatedAt?: Date }[]
+        { couple: CoupleView; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[]
     >([]);
 
     useEffect(() => {
@@ -29,19 +31,27 @@ export default function MyVotesPage({
                 setLoading(false);
                 return;
             }
+
             const vq = query(
                 collection(db, 'votes'),
                 where('uid', '==', user.uid),
                 orderBy('updatedAt', 'desc'),
             );
+
             const snap = await getDocs(vq);
 
-            const list: { couple: CoupleView; choice: 'A' | 'B'; updatedAt?: Date }[] = [];
+            const list: { couple: CoupleView; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[] = [];
+
             snap.forEach((d) => {
                 const v = d.data() as VoteDoc;
                 const couple = couples.find((c) => c.id === v.couple_id);
                 if (!couple) return;
-                const choice: 'A' | 'B' = v.people_voted_id === couple.personA.id ? 'A' : 'B';
+
+                // ⚖️ on ajoute la gestion du vote "égalité"
+                let choice: 'A' | 'B' | 'tie';
+                if (v.people_voted_id === 'tie') choice = 'tie';
+                else choice = v.people_voted_id === couple.personA.id ? 'A' : 'B';
+
                 const ts = (v as any).updatedAt?.toDate?.() as Date | undefined;
                 list.push({ couple, choice, updatedAt: ts });
             });
@@ -71,10 +81,13 @@ export default function MyVotesPage({
     return (
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
             <h2 className="text-lg font-semibold">Mon historique</h2>
+
             {loading && <div>Chargement…</div>}
+
             {!loading && entries.length === 0 && (
                 <div className="text-gray-600 text-sm">Tu n’as encore voté pour aucun couple.</div>
             )}
+
             {!loading &&
                 entries.map((e, i) => (
                     <div key={e.couple.id + '_' + i} className="space-y-2">
@@ -87,7 +100,7 @@ export default function MyVotesPage({
                         <CoupleCard
                             couple={e.couple}
                             user={user}
-                            myChoice={e.choice}
+                            myChoice={e.choice} // ⚖️ transmet aussi "tie"
                             onlyMyVotes={true}
                             compact
                         />

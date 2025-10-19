@@ -21,8 +21,8 @@ export default defineConfig({
                 background_color: '#fff0f6',
                 display: 'standalone',
                 orientation: 'portrait',
-                scope: '/surchop/',
-                start_url: '/surchop/',
+                scope: '/',
+                start_url: '/',
                 icons: [
                     {
                         src: 'pwa-192x192.png',
@@ -44,5 +44,5 @@ export default defineConfig({
             },
         }),
     ],
-    base: '/surchop/', // important pour GitHub Pages
+    base: '/', // ✅ racine du domaine
 });

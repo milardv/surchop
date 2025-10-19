@@ -3,7 +3,7 @@ import { User } from 'firebase/auth';
 
 import Gauge from './Gauge';
 import { CoupleView } from '../models/models';
-import PersonInfoModal from './PersonInfoModal'; // 👈 ajoute cette ligne
+import PersonInfoModal from './PersonInfoModal';
 
 export default function CoupleCard({
     couple,
@@ -15,13 +15,13 @@ export default function CoupleCard({
 }: {
     couple: CoupleView;
     user: User | null;
-    myChoice?: 'A' | 'B';
-    onVote?: (c: CoupleView, choice: 'A' | 'B') => void;
+    myChoice?: 'A' | 'B' | 'tie'; // ⚖️ ajout de la valeur "tie"
+    onVote?: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void; // ⚖️ même ici
     compact?: boolean;
     onlyMyVotes?: boolean;
 }) {
     const canVote = !!user && !!onVote;
-    const [selectedPerson, setSelectedPerson] = useState<string | null>(null); // 👈
+    const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
     return (
         <div className="p-4 rounded-2xl bg-white shadow-sm border">
@@ -77,9 +77,10 @@ export default function CoupleCard({
                         <div className="text-xs text-gray-500 mt-2">
                             Pour vous{' '}
                             {myChoice === 'A'
-                                ? couple.personA.display_name
-                                : couple.personB.display_name}{' '}
-                            surchope
+                                ? couple.personA.display_name + ' surchope'
+                                : myChoice === 'B'
+                                  ? couple.personB.display_name + ' surchope'
+                                  : 'il y a égalité parfaite'}{' '}
                         </div>
                     ) : (
                         <Gauge couple={couple} />
@@ -88,28 +89,44 @@ export default function CoupleCard({
             </div>
 
             {/* 🗳️ Boutons de vote */}
-            <div className={`mt-4 ${compact ? 'hidden' : 'flex gap-2'}`}>
+            <div className={`mt-4 ${compact ? 'hidden' : 'flex flex-col gap-2'}`}>
+                <div className="flex gap-2">
+                    <button
+                        disabled={!canVote}
+                        onClick={() => onVote && onVote(couple, 'A')}
+                        className={`flex-1 px-3 py-2 rounded border ${
+                            myChoice === 'A'
+                                ? 'bg-pink-50 border-pink-500 text-pink-600'
+                                : 'hover:bg-gray-50'
+                        } ${!canVote ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                        {couple.personA.display_name} surchope
+                    </button>
+
+                    <button
+                        disabled={!canVote}
+                        onClick={() => onVote && onVote(couple, 'B')}
+                        className={`flex-1 px-3 py-2 rounded border ${
+                            myChoice === 'B'
+                                ? 'bg-pink-50 border-pink-500 text-pink-600'
+                                : 'hover:bg-gray-50'
+                        } ${!canVote ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    >
+                        {couple.personB.display_name} surchope
+                    </button>
+                </div>
+
+                {/* ⚖️ Bouton égalité */}
                 <button
                     disabled={!canVote}
-                    onClick={() => onVote && onVote(couple, 'A')}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                        myChoice === 'A'
-                            ? 'bg-pink-50 border-pink-500 text-pink-600'
-                            : 'hover:bg-gray-50'
+                    onClick={() => onVote && onVote(couple, 'tie')}
+                    className={`px-3 py-2 rounded border text-sm font-medium transition ${
+                        myChoice === 'tie'
+                            ? 'bg-blue-50 border-blue-500 text-blue-600'
+                            : 'hover:bg-gray-50 text-gray-600'
                     } ${!canVote ? 'opacity-60 cursor-not-allowed' : ''}`}
                 >
-                    {couple.personA.display_name} surchope
-                </button>
-                <button
-                    disabled={!canVote}
-                    onClick={() => onVote && onVote(couple, 'B')}
-                    className={`flex-1 px-3 py-2 rounded border ${
-                        myChoice === 'B'
-                            ? 'bg-pink-50 border-pink-500 text-pink-600'
-                            : 'hover:bg-gray-50'
-                    } ${!canVote ? 'opacity-60 cursor-not-allowed' : ''}`}
-                >
-                    {couple.personB.display_name} surchope
+                    ⚖️ Égalité parfaite
                 </button>
             </div>
 
