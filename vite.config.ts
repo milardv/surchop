@@ -6,30 +6,36 @@ export default defineConfig({
     plugins: [
         react(),
         VitePWA({
-            registerType: 'autoUpdate', // met à jour le service worker automatiquement
-            includeAssets: ['favicon.svg', 'favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
+            registerType: 'autoUpdate',
+            includeAssets: [
+                'favicon.ico',
+                'apple-touch-icon.png',
+                'pwa-192x192.png',
+                'pwa-512x512.png',
+            ],
             manifest: {
                 name: 'Surchope 💘',
                 short_name: 'Surchope',
                 description: 'Vote qui surchope qui 😏',
                 theme_color: '#ec4899',
-                background_color: '#ffffff',
+                background_color: '#fff0f6',
                 display: 'standalone',
-                start_url: '/surchop/', // ou '/' selon ta config GitHub Pages
+                orientation: 'portrait',
                 scope: '/surchop/',
+                start_url: '/surchop/',
                 icons: [
                     {
-                        src: 'web-app-manifest-192x192',
+                        src: 'pwa-192x192.png',
                         sizes: '192x192',
                         type: 'image/png',
                     },
                     {
-                        src: 'web-app-manifest-512x512',
+                        src: 'pwa-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
                     },
                     {
-                        src: 'web-app-manifest-512x512',
+                        src: 'pwa-512x512.png',
                         sizes: '512x512',
                         type: 'image/png',
                         purpose: 'any maskable',

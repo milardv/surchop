@@ -48,7 +48,7 @@ export default function PersonInfoModal({ name, onClose }: { name: string; onClo
                             <img
                                 src={info.image}
                                 alt={info.title}
-                                className="w-24 h-24 rounded-full mb-3 object-cover"
+                                className="w-48 h-48 rounded-full mb-3 object-cover"
                             />
                         )}
                         <h2 className="text-lg font-semibold">{info.title}</h2>
