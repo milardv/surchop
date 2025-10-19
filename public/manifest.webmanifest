@@ -21,5 +21,21 @@
   "display": "standalone",
   "orientation": "portrait",
   "start_url": "/surchop/",
-  "scope": "/surchop/"
+  "scope": "/surchop/",
+  "screenshots": [
+    {
+      "src": "screenshot-desktop.png",
+      "sizes": "1876x940",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Interface desktop de Surchope"
+    },
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "555x841",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Interface mobile de Surchope"
+    }
+  ]
 }

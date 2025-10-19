@@ -4,6 +4,7 @@ import { Menu, X, Heart, UserPlus, Home, CheckSquare } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { loginWithGoogle, logout } from '../firebase';
+import InstallPrompt from './InstallPrompt';
 
 export default function Header({ user }: { user: User | null }) {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -64,6 +65,7 @@ export default function Header({ user }: { user: User | null }) {
 
                 {/* Zone droite */}
                 <div className="flex items-center gap-3">
+                    <InstallPrompt />
                     {user ? (
                         <>
                             <img
