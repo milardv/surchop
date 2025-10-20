@@ -10,6 +10,7 @@ export default defineConfig({
             includeAssets: [
                 'icons/favicon.ico',
                 'icons/apple-touch-icon.png',
+                'icons/apple-touch-icon-180x180.png',
                 'icons/pwa-192x192.png',
                 'icons/pwa-512x512.png',
                 'icons/*',
@@ -33,6 +34,11 @@ export default defineConfig({
                     {
                         src: 'icons/pwa-512x512.png',
                         sizes: '512x512',
+                        type: 'image/png',
+                    },
+                    {
+                        src: 'icons/apple-touch-icon-180x180.png',
+                        sizes: '180x180',
                         type: 'image/png',
                     },
                     {
