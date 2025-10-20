@@ -5,7 +5,7 @@ import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
 
 import { db } from '../firebase';
 import { CoupleView, VoteDoc, VoteView } from '../models/models';
-import CoupleCard from '../components/CoupleCard';
+import CoupleCard from '../components/CoupleCard/CoupleCard';
 
 export default function MyVotesPage({
     user,

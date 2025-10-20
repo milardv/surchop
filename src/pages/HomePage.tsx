@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import CoupleCard from '../components/CoupleCard';
+import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeIntroModal from '../components/SurchopeIntroModal';
 import SurchopeLoader from '../components/SurchopeLoader';
 import SurchopeFooter from '../components/SurchopeFooter';

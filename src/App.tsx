@@ -10,6 +10,7 @@ import AddCouplePage from './pages/AddCouplePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import useCouples from './hooks/useCouples';
 import useVotes from './hooks/useVotes';
+import CoupleDetailPage from './pages/CoupleDetailPage';
 
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
@@ -43,6 +44,10 @@ export default function App() {
                 />
 
                 <Route path="/ajouter-couple" element={<AddCouplePage user={user} />} />
+                <Route
+                    path="/couple/:id"
+                    element={<CoupleDetailPage couples={couples} user={user} />}
+                />
                 <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
