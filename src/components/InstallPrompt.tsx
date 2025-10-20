@@ -31,15 +31,6 @@ export default function InstallPrompt() {
 
     if (installed || isInStandalone) return null;
 
-    if (isIOS) {
-        return (
-            <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-pink-500 text-white px-4 py-2 rounded-full shadow-md text-sm text-center">
-                💘 Pour installer Surchope :<br />
-                Appuie sur le bouton <b>Partager</b> → <b>“Sur l’écran d’accueil”</b>
-            </div>
-        );
-    }
-
     if (!promptEvent) return null;
 
     return (
@@ -52,7 +43,7 @@ export default function InstallPrompt() {
             }}
             className="inline-flex items-center gap-1 px-3 py-1 rounded bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 active:bg-pink-700 transition shadow-sm"
         >
-            💘 Installer
+            Installer
         </button>
     );
 }
