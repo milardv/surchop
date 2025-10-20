@@ -1,39 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { CoupleView, Person } from '../models/models';
+import { CoupleView } from '../models/models';
 
 export default function Gauge({ couple }: { couple: CoupleView }) {
-    const countA = couple.countA;
-    const countB = couple.countB;
-    const total = Math.max(1, countA + countB);
-    let surchopPersonPercentage: number;
-    let surchopPerson: Person;
-    const hasEquality = countA === countB;
+    const [animatedValue, setAnimatedValue] = useState(0);
+    const aVotes = couple.countA || 0;
+    const bVotes = couple.countB || 0;
+    const total = Math.max(1, aVotes + bVotes);
+    const pctA = Math.round((aVotes / total) * 100);
 
-    if (countA > countB) {
-        surchopPerson = couple.personA;
-        surchopPersonPercentage = Math.round((countA / total) * 100);
-        surchopPerson.count = couple.countA;
-    } else {
-        surchopPerson = couple.personB;
-        surchopPersonPercentage = Math.round((countB / total) * 100);
-        surchopPerson.count = couple.countB;
-    }
+    // Animation fluide à chaque changement
+    useEffect(() => {
+        const start = animatedValue;
+        const end = pctA;
+        const duration = 600; // en ms
+        const startTime = performance.now();
+
+        const animate = (time: number) => {
+            const elapsed = time - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = Math.sin((progress * Math.PI) / 2); // effet spring
+            const current = start + (end - start) * eased;
+            setAnimatedValue(current);
+            if (progress < 1) requestAnimationFrame(animate);
+        };
+
+        requestAnimationFrame(animate);
+    }, [pctA]); // se rejoue à chaque changement de votes
+
     return (
-        <div>
-            <div className="h-2 bg-gray-200 rounded overflow-hidden">
+        <div className="w-full mt-1">
+            <div className="h-2 rounded-full bg-gray-200 overflow-hidden relative">
+                {/* Barre rose animée */}
                 <div
-                    className="h-full bg-pink-500"
-                    style={{ width: `${surchopPersonPercentage}%` }}
+                    className="absolute left-0 top-0 h-full bg-pink-500 transition-all duration-300"
+                    style={{ width: `${animatedValue}%` }}
                 />
             </div>
-            <div className="text-xs mt-1 text-gray-600">
-                {countA} vs {countB} • {countA + countB} vote{countA + countB > 1 ? 's' : ''}
-            </div>
-            <div className="text-xs mt-1 text-gray-600">
-                {hasEquality
-                    ? 'Surchopage à égalité <3'
-                    : surchopPerson.display_name + ' surchop à ' + surchopPersonPercentage + ' %'}
+
+            <div className="text-xs mt-1 text-gray-600 text-center">
+                {aVotes} vs {bVotes} • {aVotes + bVotes} vote{aVotes + bVotes > 1 ? 's' : ''}
             </div>
         </div>
     );

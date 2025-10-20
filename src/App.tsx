@@ -11,6 +11,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import useCouples from './hooks/useCouples';
 import useVotes from './hooks/useVotes';
 import CoupleDetailPage from './pages/CoupleDetailPage';
+import PlayModePage from './pages/PlayModePage';
 
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
@@ -37,7 +38,17 @@ export default function App() {
                         />
                     }
                 />
-
+                <Route
+                    path="/jouer"
+                    element={
+                        <PlayModePage
+                            couples={couples}
+                            user={user}
+                            myVotes={myVotes}
+                            onVote={handleVote}
+                        />
+                    }
+                />
                 <Route
                     path="/mes-votes"
                     element={<MyVotesPage user={user} couples={couples} votesAll={votesAll} />}
