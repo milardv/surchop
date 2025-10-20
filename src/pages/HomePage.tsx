@@ -5,7 +5,21 @@ import SurchopeIntroModal from '../components/SurchopeIntroModal';
 import SurchopeLoader from '../components/SurchopeLoader';
 import SurchopeFooter from '../components/SurchopeFooter';
 
-export default function HomePage({ user, couples, myVotes, onVote, loading }) {
+export default function HomePage({
+    user,
+    couples,
+    myVotes,
+    onVote,
+    loading,
+    deleteCouple,
+}: {
+    user: any;
+    couples: any[];
+    myVotes: Record<string, 'A' | 'B' | 'tie'>;
+    onVote: (c: any, choice: 'A' | 'B' | 'tie') => void;
+    loading: boolean;
+    deleteCouple?: (id: string, userUid: string) => void;
+}) {
     const [filter, setFilter] = useState<'all' | 'friends' | 'people'>('all');
     const [query, setQuery] = useState('');
     const [showIntro, setShowIntro] = useState(false);
@@ -32,8 +46,8 @@ export default function HomePage({ user, couples, myVotes, onVote, loading }) {
         .sort((a, b) => {
             const aVoted = !!myVotes[a.id];
             const bVoted = !!myVotes[b.id];
-            if (aVoted === bVoted) return 0; // les deux déjà votés ou non → garde l’ordre
-            return aVoted ? 1 : -1; // ceux non votés d’abord
+            if (aVoted === bVoted) return 0;
+            return aVoted ? 1 : -1;
         });
 
     return (
@@ -82,6 +96,7 @@ export default function HomePage({ user, couples, myVotes, onVote, loading }) {
                             myChoice={myVotes[c.id]}
                             onVote={onVote}
                             onlyMyVotes={false}
+                            onDelete={deleteCouple}
                         />
                     ))}
                 </div>

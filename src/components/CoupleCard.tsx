@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
+import { Trash2 } from 'lucide-react'; // petite icône discrète 🗑️
 
 import Gauge from './Gauge';
 import { CoupleView } from '../models/models';
@@ -12,19 +13,40 @@ export default function CoupleCard({
     onVote,
     compact = false,
     onlyMyVotes = false,
+    onDelete, // 👈 ajout du callback de suppression
 }: {
     couple: CoupleView;
     user: User | null;
-    myChoice?: 'A' | 'B' | 'tie'; // ⚖️ ajout de la valeur "tie"
-    onVote?: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void; // ⚖️ même ici
+    myChoice?: 'A' | 'B' | 'tie';
+    onVote?: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void;
     compact?: boolean;
     onlyMyVotes?: boolean;
+    onDelete?: (id: string, userUid: string) => void; // 👈 typage suppression
 }) {
     const canVote = !!user && !!onVote;
     const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
+    // 👇 Option de suppression (admin uniquement)
+    const isAdmin = user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2';
+
     return (
-        <div className="p-4 rounded-2xl bg-white shadow-sm border">
+        <div className="relative p-4 rounded-2xl bg-white shadow-sm border hover:shadow-md transition">
+            {/* Bouton suppression admin (très discret, coin supérieur droit) */}
+            {isAdmin && onDelete && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('Supprimer ce couple et les données associées ?')) {
+                            onDelete(couple.id, user!.uid);
+                        }
+                    }}
+                    className="absolute top-2 right-2 opacity-20 hover:opacity-80 transition"
+                    title="Supprimer ce couple"
+                >
+                    <Trash2 size={16} />
+                </button>
+            )}
+
             <div className="flex items-center gap-4 flex-col">
                 <div className="flex-1 flex items-center gap-3">
                     {/* 🧍 Personne A */}
@@ -63,7 +85,7 @@ export default function CoupleCard({
                                     className="object-cover w-full h-full"
                                 />
                             ) : (
-                                <span className="text-lg">{couple.personB?.display_name?.[0]}</span>
+                                <span className="text-lg">{couple.personB.display_name[0]}</span>
                             )}
                         </div>
                         <div className="font-medium text-lg text-center hover:text-pink-600">
@@ -80,7 +102,7 @@ export default function CoupleCard({
                                 ? couple.personA.display_name + ' surchope'
                                 : myChoice === 'B'
                                   ? couple.personB.display_name + ' surchope'
-                                  : 'il y a égalité parfaite'}{' '}
+                                  : 'il y a égalité parfaite'}
                         </div>
                     ) : (
                         <Gauge couple={couple} />
@@ -116,7 +138,7 @@ export default function CoupleCard({
                     </button>
                 </div>
 
-                {/* ⚖️ Bouton égalité */}
+                {/* ⚖️ Égalité */}
                 <button
                     disabled={!canVote}
                     onClick={() => onVote && onVote(couple, 'tie')}
@@ -134,7 +156,7 @@ export default function CoupleCard({
                 <div className="text-xs text-gray-500 mt-2">Connecte-toi pour voter.</div>
             )}
 
-            {/* 👇 Fiche personne (modale Wikipedia) */}
+            {/* 👇 Modale d'infos */}
             {selectedPerson && (
                 <PersonInfoModal name={selectedPerson} onClose={() => setSelectedPerson(null)} />
             )}
