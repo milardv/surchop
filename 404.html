@@ -1,14 +1,86 @@
+<!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <link rel="manifest" href="/manifest.webmanifest" />
-        <meta name="theme-color" content="#ec4899" />
-        <meta charset="UTF-8"/>
-        <meta content="width=device-width,initial-scale=1" name="viewport"/>
-        <title>Surchope</title>
-      <script type="module" crossorigin src="/assets/index-DBTbZUEi.js"></script>
-      <link rel="stylesheet" crossorigin href="/assets/index-CCHRDDvb.css">
-    <link rel="manifest" href="/manifest.webmanifest"></head>
-    <body class="bg-gray-50 text-gray-900">
-        <div id="root"></div>
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- 🏷️ Informations de base -->
+    <title>Surchope 💘</title>
+    <meta
+            name="description"
+            content="Surchope — le jeu pour voter entre les couples les plus improbables et les plus drôles 😏"
+    />
+
+    <!-- 🎨 Couleurs du thème -->
+    <meta name="theme-color" content="#ec4899" />
+    <meta name="background-color" content="#fff0f6" />
+
+    <!-- 📱 PWA Android / Desktop -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- 🍎 Support PWA pour iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Surchope 💘" />
+    <link rel="apple-touch-icon" href="/icons/pwa-512x512.png" />
+
+    <!-- 🖼️ Icônes standard -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa-192x192.png" />
+    <link rel="shortcut icon" href="/icons/favicon.ico" />
+
+    <!-- ⚡ Préchargement & compatibilité -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- 🧠 Fallback couleur avant le rendu React -->
+    <style>
+        html, body {
+            background-color: #fff0f6;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-s5CaOthk.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CA_WzQ1Z.css">
+<link rel="manifest" href="/manifest.webmanifest"></head>
+
+<body class="bg-gray-50 text-gray-900">
+<div id="root"></div>
+
+<!-- 💡 Optionnel : bannière d’installation iPhone -->
+<script>
+    // Invite d'installation personnalisée sur iPhone
+    if (/iphone|ipad|ipod/i.test(window.navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (!localStorage.getItem('surchope_install_prompt')) {
+                    const banner = document.createElement('div');
+                    banner.innerHTML = `
+                                <div style="
+                                    position: fixed;
+                                    bottom: 15px;
+                                    left: 50%;
+                                    transform: translateX(-50%);
+                                    background: #ec4899;
+                                    color: white;
+                                    padding: 10px 16px;
+                                    border-radius: 20px;
+                                    font-size: 14px;
+                                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                                    z-index: 9999;
+                                ">
+                                    💘 Ajoute <b>Surchope</b> à ton écran d'accueil :
+                                    <br />Partage → <b>“Sur l’écran d’accueil”</b>
+                                </div>`;
+                    document.body.appendChild(banner);
+                    setTimeout(() => banner.remove(), 8000);
+                    localStorage.setItem('surchope_install_prompt', 'shown');
+                }
+            }, 1500);
+        });
+    }
+</script>
+
+<!-- ⚛️ React app -->
+</body>
 </html>
