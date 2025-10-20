@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User } from 'firebase/auth';
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, orderBy, query, where } from 'firebase/firestore';
+import { Trash2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { db } from '../firebase';
 import { CoupleView, VoteDoc, VoteView } from '../models/models';
@@ -19,11 +21,11 @@ export default function MyVotesPage({
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
-    // ⚖️ on ajoute le type "tie"
     const [entries, setEntries] = useState<
-        { couple: CoupleView; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[]
+        { id: string; couple: CoupleView; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[]
     >([]);
 
+    // 🔁 Chargement des votes utilisateur
     useEffect(() => {
         (async () => {
             if (!user) {
@@ -39,27 +41,42 @@ export default function MyVotesPage({
             );
 
             const snap = await getDocs(vq);
-
-            const list: { couple: CoupleView; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[] = [];
+            const list: {
+                id: string;
+                couple: CoupleView;
+                choice: 'A' | 'B' | 'tie';
+                updatedAt?: Date;
+            }[] = [];
 
             snap.forEach((d) => {
                 const v = d.data() as VoteDoc;
                 const couple = couples.find((c) => c.id === v.couple_id);
                 if (!couple) return;
 
-                // ⚖️ on ajoute la gestion du vote "égalité"
                 let choice: 'A' | 'B' | 'tie';
                 if (v.people_voted_id === 'tie') choice = 'tie';
                 else choice = v.people_voted_id === couple.personA.id ? 'A' : 'B';
 
                 const ts = (v as any).updatedAt?.toDate?.() as Date | undefined;
-                list.push({ couple, choice, updatedAt: ts });
+                list.push({ id: d.id, couple, choice, updatedAt: ts });
             });
 
             setEntries(list);
             setLoading(false);
         })();
     }, [user, couples]);
+
+    // 🗑️ Supprimer un vote
+    const handleDeleteVote = async (voteId: string) => {
+        if (!confirm('Supprimer ce vote ?')) return;
+        try {
+            await deleteDoc(doc(db, 'votes', voteId));
+            setEntries((prev) => prev.filter((e) => e.id !== voteId));
+        } catch (err) {
+            console.error('Erreur suppression vote:', err);
+            alert('Erreur lors de la suppression du vote.');
+        }
+    };
 
     if (!user) {
         return (
@@ -80,7 +97,7 @@ export default function MyVotesPage({
 
     return (
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
-            <h2 className="text-lg font-semibold">Mon historique</h2>
+            <h2 className="text-lg font-semibold mb-4">Mon historique</h2>
 
             {loading && <div>Chargement…</div>}
 
@@ -88,24 +105,46 @@ export default function MyVotesPage({
                 <div className="text-gray-600 text-sm">Tu n’as encore voté pour aucun couple.</div>
             )}
 
-            {!loading &&
-                entries.map((e, i) => (
-                    <div key={e.couple.id + '_' + i} className="space-y-2">
-                        {e.updatedAt && (
-                            <div className="text-xs text-gray-500">
-                                Mis à jour le {e.updatedAt.toLocaleDateString()} à{' '}
-                                {e.updatedAt.toLocaleTimeString()}
-                            </div>
-                        )}
-                        <CoupleCard
-                            couple={e.couple}
-                            user={user}
-                            myChoice={e.choice} // ⚖️ transmet aussi "tie"
-                            onlyMyVotes={true}
-                            compact
-                        />
-                    </div>
-                ))}
+            <AnimatePresence>
+                {!loading &&
+                    entries.map((e, i) => (
+                        <motion.div
+                            key={e.id}
+                            layout
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                            className="relative bg-white rounded-2xl shadow-sm p-3"
+                        >
+                            {/* 🗓️ Date */}
+                            {e.updatedAt && (
+                                <div className="text-xs text-gray-500 mb-1">
+                                    Mis à jour le {e.updatedAt.toLocaleDateString()} à{' '}
+                                    {e.updatedAt.toLocaleTimeString()}
+                                </div>
+                            )}
+
+                            {/* 🗑️ Bouton suppression */}
+                            <button
+                                onClick={() => handleDeleteVote(e.id)}
+                                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition"
+                                title="Supprimer ce vote"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+
+                            {/* 💞 Couple */}
+                            <CoupleCard
+                                couple={e.couple}
+                                user={user}
+                                myChoice={e.choice}
+                                onlyMyVotes={true}
+                                compact
+                            />
+                        </motion.div>
+                    ))}
+            </AnimatePresence>
         </main>
     );
 }
