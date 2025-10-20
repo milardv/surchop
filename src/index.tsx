@@ -11,7 +11,7 @@ const root = createRoot(container);
 
 root.render(
     <React.StrictMode>
-        <BrowserRouter basename="/surchop">
+        <BrowserRouter basename="/">
             <App />
         </BrowserRouter>
     </React.StrictMode>,

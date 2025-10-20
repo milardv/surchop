@@ -238,7 +238,7 @@ export default function App() {
             </Routes>
             <footer className="text-center text-xs text-gray-500 py-6">
                 Fait avec amour, aucun jugement 😇 •{' '}
-                <a href="/surchop/confidentialite" className="underline hover:text-gray-700">
+                <a href="/confidentialite" className="underline hover:text-gray-700">
                     Politique de confidentialité
                 </a>
             </footer>
