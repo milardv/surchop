@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
     <!-- 🏷️ Informations de base -->
     <title>Surchope 💘</title>
@@ -12,25 +12,27 @@
     />
 
     <!-- 🎨 Couleurs du thème -->
-    <meta name="theme-color" content="#ec4899" />
-    <meta name="background-color" content="#fff0f6" />
+    <meta name="theme-color" content="#ec4899"/>
+    <meta name="background-color" content="#fff0f6"/>
 
     <!-- 📱 PWA Android / Desktop -->
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href="/manifest.webmanifest"/>
 
     <!-- 🍎 Support PWA pour iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Surchope 💘" />
-    <link rel="apple-touch-icon" href="/icons/pwa-512x512.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+    <meta name="apple-mobile-web-app-title" content="Surchope 💘"/>
+    <link rel="apple-touch-icon" href="/icons/pwa-512x512.png"/>
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png"/>
+
 
     <!-- 🖼️ Icônes standard -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa-192x192.png" />
-    <link rel="shortcut icon" href="/icons/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/pwa-192x192.png"/>
+    <link rel="shortcut icon" href="/icons/favicon.ico"/>
 
     <!-- ⚡ Préchargement & compatibilité -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="format-detection" content="telephone=no" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="format-detection" content="telephone=no"/>
 
     <!-- 🧠 Fallback couleur avant le rendu React -->
     <style>
@@ -40,14 +42,14 @@
             padding: 0;
         }
     </style>
-  <script type="module" crossorigin src="/assets/index-s5CaOthk.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CA_WzQ1Z.css">
+  <script type="module" crossorigin src="/assets/index-DAOODgTg.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-efUEOr7k.css">
 <link rel="manifest" href="/manifest.webmanifest"></head>
 
 <body class="bg-gray-50 text-gray-900">
 <div id="root"></div>
 
-<!-- 💡 Optionnel : bannière d’installation iPhone -->
+<!-- bannière d’installation iPhone -->
 <script>
     // Invite d'installation personnalisée sur iPhone
     if (/iphone|ipad|ipod/i.test(window.navigator.userAgent) && !window.matchMedia('(display-mode: standalone)').matches) {
@@ -56,22 +58,14 @@
                 if (!localStorage.getItem('surchope_install_prompt')) {
                     const banner = document.createElement('div');
                     banner.innerHTML = `
-                                <div style="
-                                    position: fixed;
-                                    bottom: 15px;
-                                    left: 50%;
-                                    transform: translateX(-50%);
-                                    background: #ec4899;
-                                    color: white;
-                                    padding: 10px 16px;
-                                    border-radius: 20px;
-                                    font-size: 14px;
-                                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                                    z-index: 9999;
-                                ">
-                                    💘 Ajoute <b>Surchope</b> à ton écran d'accueil :
-                                    <br />Partage → <b>“Sur l’écran d’accueil”</b>
-                                </div>`;
+                      <div style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%);
+                          background:#ec4899; color:white; padding:12px 18px; border-radius:30px;
+                          font-size:15px; box-shadow:0 2px 6px rgba(0,0,0,0.2); z-index:9999;">
+                        💘 Ajoute <b>Surchope</b> à ton écran d’accueil<br/>
+                        Appuie sur <img src="/icons/share_ios_icon.jpg" alt="Partager" style="height:16px;vertical-align:middle;"/>
+                        puis <b>“Sur l’écran d’accueil”</b>
+                      </div>`;
+
                     document.body.appendChild(banner);
                     setTimeout(() => banner.remove(), 8000);
                     localStorage.setItem('surchope_install_prompt', 'shown');
