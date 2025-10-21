@@ -6,6 +6,8 @@ import PersonInfoModal from '../PersonInfoModal';
 import CoupleHeader from './CoupleHeader';
 import CoupleGauge from './CoupleGauge';
 import CoupleVoteButtons from './CoupleVoteButtons';
+import ReportMenu from '../ReportMenu';
+// 👈 import du nouveau composant
 
 export default function CoupleCard({
     couple,
@@ -28,8 +30,13 @@ export default function CoupleCard({
 
     return (
         <div className="relative p-4 rounded-2xl bg-white shadow-sm border hover:shadow-md transition">
-            <CoupleHeader couple={couple} user={user} onDelete={onDelete} compact={compact} />
+            {/* En-tête avec bouton signalement visible uniquement si user connecté */}
+            <div className="flex justify-between items-start">
+                <CoupleHeader couple={couple} user={user} onDelete={onDelete} compact={compact} />
+                {user && !compact && <ReportMenu user={user} couple={couple} />}
+            </div>
 
+            {/* Contenu principal */}
             <div className="flex items-center gap-4 flex-col">
                 <div className="flex-1 flex items-center gap-3 flex-col">
                     <CoupleGauge
@@ -41,6 +48,7 @@ export default function CoupleCard({
                 </div>
             </div>
 
+            {/* Boutons de vote */}
             {!compact && (
                 <CoupleVoteButtons
                     couple={couple}
@@ -51,12 +59,14 @@ export default function CoupleCard({
                 />
             )}
 
+            {/* Message si non connecté */}
             {!user && !compact && (
                 <div className="text-xs text-gray-500 mt-2 text-center">
                     Connecte-toi pour voter.
                 </div>
             )}
 
+            {/* Modal info personne */}
             {selectedPerson && (
                 <PersonInfoModal name={selectedPerson} onClose={() => setSelectedPerson(null)} />
             )}

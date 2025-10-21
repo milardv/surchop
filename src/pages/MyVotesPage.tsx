@@ -9,6 +9,8 @@ import { db } from '../firebase';
 import { CoupleView, VoteDoc, VoteView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 
+import SurchopeLoader from '@/components/SurchopeLoader';
+
 export default function MyVotesPage({
     user,
     couples,
@@ -98,13 +100,10 @@ export default function MyVotesPage({
     return (
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
             <h2 className="text-lg font-semibold mb-4">Mon historique</h2>
-
-            {loading && <div>Chargement…</div>}
-
+            {loading && <SurchopeLoader />}
             {!loading && entries.length === 0 && (
                 <div className="text-gray-600 text-sm">Tu n’as encore voté pour aucun couple.</div>
             )}
-
             <AnimatePresence>
                 {!loading &&
                     entries.map((e, i) => (
@@ -117,18 +116,10 @@ export default function MyVotesPage({
                             transition={{ duration: 0.3 }}
                             className="relative bg-white rounded-2xl shadow-sm p-3"
                         >
-                            {/* 🗓️ Date */}
-                            {e.updatedAt && (
-                                <div className="text-xs text-gray-500 mb-1">
-                                    Mis à jour le {e.updatedAt.toLocaleDateString()} à{' '}
-                                    {e.updatedAt.toLocaleTimeString()}
-                                </div>
-                            )}
-
                             {/* 🗑️ Bouton suppression */}
                             <button
                                 onClick={() => handleDeleteVote(e.id)}
-                                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition"
+                                className="text-gray-400 hover:text-red-500 transition"
                                 title="Supprimer ce vote"
                             >
                                 <Trash2 size={16} />

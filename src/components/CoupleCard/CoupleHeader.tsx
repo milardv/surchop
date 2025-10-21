@@ -28,7 +28,7 @@ export default function CoupleHeader({
     };
 
     return (
-        <div className="absolute top-2 right-2 flex items-center gap-2 opacity-60 hover:opacity-100 transition">
+        <div className="flex items-center gap-2 opacity-60 hover:opacity-100 transition">
             {isAdmin && onDelete && (
                 <button
                     onClick={(e) => {

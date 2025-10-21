@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
+import SurchopeLoader from '@/components/SurchopeLoader';
+
 export default function PersonInfoModal({ name, onClose }: { name: string; onClose: () => void }) {
     const [loading, setLoading] = useState(true);
     const [info, setInfo] = useState<any>(null);
@@ -41,7 +43,7 @@ export default function PersonInfoModal({ name, onClose }: { name: string; onClo
                 </button>
 
                 {loading ? (
-                    <p className="text-center">Chargement...</p>
+                    <SurchopeLoader />
                 ) : info ? (
                     <div className="flex flex-col items-center text-center">
                         {info.image && (
