@@ -18,11 +18,7 @@ root.render(
 );
 
 const updateSW = registerSW({
-    onNeedRefresh() {
-        if (confirm('Une nouvelle version est disponible. Recharger ?')) {
-            updateSW(true);
-        }
-    },
+    immediate: true, // met à jour dès que possible
     onOfflineReady() {
         console.log('L’application est prête à être utilisée hors ligne.');
     },

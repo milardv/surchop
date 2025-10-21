@@ -86,19 +86,6 @@ export default function AddCouplePage({ user }: { user: User | null }) {
                         </div>
                     ))}
                 </div>
-                <div className="mt-6 border-t pt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Catégorie du couple
-                    </label>
-                    <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value as 'people' | 'friends')}
-                        className="border rounded p-2 text-sm w-full"
-                    >
-                        <option value="friends">👫 Connaissances / Potes</option>
-                        <option value="people">🌟 People / Stars</option>
-                    </select>
-                </div>
                 <div className="flex items-start gap-2 border-t pt-4 mt-6">
                     <input
                         id="consent"

@@ -28,7 +28,7 @@ export default function CoupleCard({
 
     return (
         <div className="relative p-4 rounded-2xl bg-white shadow-sm border hover:shadow-md transition">
-            <CoupleHeader couple={couple} user={user} onDelete={onDelete} />
+            <CoupleHeader couple={couple} user={user} onDelete={onDelete} compact={compact} />
 
             <div className="flex items-center gap-4 flex-col">
                 <div className="flex-1 flex items-center gap-3 flex-col">

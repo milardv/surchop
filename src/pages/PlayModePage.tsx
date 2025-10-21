@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
@@ -20,26 +20,39 @@ export default function PlayModePage({
 }) {
     const navigate = useNavigate();
 
-    // 🔍 Couples non votés uniquement
-    const couplesToPlay = useMemo(() => couples.filter((c) => !myVotes[c.id]), [couples, myVotes]);
-
+    const [couplesToPlay] = useState(() => couples.filter((c) => !myVotes[c.id]));
     const [index, setIndex] = useState(0);
     const [finished, setFinished] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);
+    const [voteDirection, setVoteDirection] = useState<'left' | 'right' | 'down' | null>(null);
 
     const nextCouple = () => {
-        if (index < couplesToPlay.length - 1) {
-            setIndex(index + 1);
+        if (index + 1 < couplesToPlay.length) {
+            setIndex((prev) => prev + 1);
         } else {
             setFinished(true);
         }
+        setVoteDirection(null);
     };
 
     const handleVote = (couple: CoupleView, choice: 'A' | 'B' | 'tie') => {
+        if (isAnimating) return;
+        setIsAnimating(true);
         onVote(couple, choice);
-        setTimeout(nextCouple, 400);
+
+        // Détermine la direction d’animation selon le vote
+        if (choice === 'A') setVoteDirection('left');
+        else if (choice === 'B') setVoteDirection('right');
+        else setVoteDirection('down');
+
+        // ⏳ Attend que l’animation de sortie soit terminée avant de passer au suivant
+        setTimeout(() => {
+            nextCouple();
+            setIsAnimating(false);
+        }, 400);
     };
 
-    // 🎉 Déclenche les confettis quand on a fini
+    // 🎉 Confettis à la fin
     useEffect(() => {
         if (finished || couplesToPlay.length === 0) {
             confetti({
@@ -51,8 +64,8 @@ export default function PlayModePage({
         }
     }, [finished, couplesToPlay.length]);
 
-    // 💫 Si terminé ou rien à jouer
-    if (finished || couplesToPlay.length === 0) {
+    // 💫 Écran de fin
+    if (finished || couplesToPlay.length === 0 || index >= couplesToPlay.length) {
         return (
             <main className="max-w-md mx-auto px-4 py-12 flex flex-col items-center justify-center text-center space-y-6">
                 <h1 className="text-3xl font-semibold text-pink-600">🎉 Bravo !</h1>
@@ -84,6 +97,14 @@ export default function PlayModePage({
 
     const couple = couplesToPlay[index];
 
+    // Animation de sortie selon le vote
+    const exitVariants = {
+        left: { opacity: 0, x: -200, rotate: -10 },
+        right: { opacity: 0, x: 200, rotate: 10 },
+        down: { opacity: 0, y: 100, scale: 0.9 },
+        none: { opacity: 0, x: 0 },
+    };
+
     return (
         <main className="max-w-md mx-auto px-4 py-6 flex flex-col items-center justify-center gap-6">
             <div className="flex justify-between w-full items-center">
@@ -94,7 +115,7 @@ export default function PlayModePage({
                     ⬅️ Quitter
                 </button>
                 <div className="text-sm text-gray-400">
-                    {index + 1}/{couplesToPlay.length}
+                    {Math.min(index + 1, couplesToPlay.length)}/{couplesToPlay.length}
                 </div>
             </div>
 
@@ -103,8 +124,8 @@ export default function PlayModePage({
                     key={couple?.id}
                     initial={{ opacity: 0, x: 100 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -100 }}
-                    transition={{ duration: 0.3 }}
+                    exit={exitVariants[voteDirection ?? 'none']}
+                    transition={{ duration: 0.4 }}
                     className="w-full"
                 >
                     {couple && (

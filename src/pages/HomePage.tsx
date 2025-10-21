@@ -22,7 +22,6 @@ export default function HomePage({
     loading: boolean;
     deleteCouple?: (id: string, userUid: string) => void;
 }) {
-    const [filter, setFilter] = useState<'all' | 'friends' | 'people'>('all');
     const [query, setQuery] = useState('');
     const [showIntro, setShowIntro] = useState(false);
     const navigate = useNavigate();
@@ -38,7 +37,6 @@ export default function HomePage({
     if (loading) return <SurchopeLoader />;
 
     const filteredCouples = couples
-        .filter((c) => filter === 'all' || c.category === filter)
         .filter((c) =>
             query.trim() === ''
                 ? true
@@ -66,24 +64,6 @@ export default function HomePage({
                     onChange={(e) => setQuery(e.target.value)}
                     className="w-full sm:w-80 border rounded-full px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
                 />
-
-                {/* Onglets de filtre */}
-                <div className="flex border-b gap-4">
-                    {['all', 'friends', 'people'].map((cat) => (
-                        <button
-                            key={cat}
-                            onClick={() => setFilter(cat as 'all' | 'friends' | 'people')}
-                            className={`flex-1 py-2 text-center text-sm font-medium border-b-2 transition
-                                ${
-                                    filter === cat
-                                        ? 'border-pink-500 text-pink-600'
-                                        : 'border-transparent text-gray-500 hover:text-gray-700'
-                                }`}
-                        >
-                            {cat === 'friends' ? 'Potes' : cat === 'people' ? 'People' : 'Tous'}
-                        </button>
-                    ))}
-                </div>
             </div>
 
             {/* 🔎 Liste des couples */}

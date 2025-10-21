@@ -1,5 +1,6 @@
 import { Share2, Trash2 } from 'lucide-react';
 import { User } from 'firebase/auth';
+import React from 'react';
 
 import { CoupleView } from '../../models/models';
 
@@ -7,10 +8,12 @@ export default function CoupleHeader({
     couple,
     user,
     onDelete,
+    compact,
 }: {
     couple: CoupleView;
     user: User | null;
     onDelete?: (id: string, userUid: string) => void;
+    compact?: boolean;
 }) {
     const isAdmin = user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2';
 
@@ -41,13 +44,15 @@ export default function CoupleHeader({
                 </button>
             )}
 
-            <button
-                onClick={shareOnWhatsApp}
-                title="Partager sur WhatsApp"
-                className="text-green-600 hover:text-green-700"
-            >
-                <Share2 size={16} />
-            </button>
+            {!compact && (
+                <button
+                    onClick={shareOnWhatsApp}
+                    title="Partager sur WhatsApp"
+                    className="text-green-600 hover:text-green-700"
+                >
+                    <Share2 size={16} />
+                </button>
+            )}
         </div>
     );
 }
