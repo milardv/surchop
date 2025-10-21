@@ -16,6 +16,9 @@ export default defineConfig({
                 'icons/pwa-512x512.png',
                 'icons/*',
             ],
+            srcDir: 'src',
+            filename: 'sw.ts',
+            strategies: 'injectManifest',
             manifest: {
                 name: 'Surchope 💘',
                 short_name: 'Surchope',

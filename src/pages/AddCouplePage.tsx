@@ -7,7 +7,7 @@ import { useAddCoupleForm } from '../hooks/useAddCoupleForm';
 
 export default function AddCouplePage({ user }: { user: User | null }) {
     const navigate = useNavigate();
-    const [category, setCategory] = useState<'people' | 'friends'>('friends');
+    const [category, setCategory] = useState<'people' | 'friends'>('people');
 
     const {
         personA,

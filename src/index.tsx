@@ -8,9 +8,11 @@ import './index.css';
 
 import { db } from './firebase';
 
-import { collection, getDocs, orderBy, limit, query } from 'firebase/firestore';
+import { collection, getDocs, orderBy, limit, query, getDoc, doc } from 'firebase/firestore';
 
 import { setupDailyNotification } from './notifications/dailyNotifier';
+
+import { CoupleDoc, CoupleView, Person } from '@/models/models';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
@@ -31,18 +33,40 @@ const updateSW = registerSW({
     },
 });
 
-// ✅ Fonction pour récupérer le dernier couple Firestore
-async function getLatestCouple() {
+// 🔄 cache local pour éviter de redemander plusieurs fois les mêmes personnes
+const personCache = new Map<string, Person>();
+
+async function loadPerson(id: string): Promise<Person | null> {
+    if (personCache.has(id)) return personCache.get(id)!;
+    const snap = await getDoc(doc(db, 'people', id));
+    if (!snap.exists()) return null;
+    const person = { id: snap.id, ...(snap.data() as any) } as Person;
+    personCache.set(id, person);
+    return person;
+}
+
+// ✅ Fonction complète : récupère le dernier couple avec les personnes associées
+export async function getLatestCouple(): Promise<CoupleView | null> {
     try {
         const q = query(collection(db, 'couples'), orderBy('createdAt', 'desc'), limit(1));
         const snap = await getDocs(q);
         if (snap.empty) return null;
-        const doc = snap.docs[0];
-        const data = doc.data() as any;
+
+        const d = snap.docs[0];
+        const c = d.data() as CoupleDoc;
+
+        const personA = await loadPerson(c.people_a_id);
+        const personB = await loadPerson(c.people_b_id);
+        if (!personA || !personB) return null;
+
         return {
-            id: doc.id,
-            personA: data.personA,
-            personB: data.personB,
+            id: d.id,
+            personA,
+            personB,
+            countA: c.count_a ?? 0,
+            countB: c.count_b ?? 0,
+            countTie: c.count_tie ?? 0,
+            category: c.category ?? 'friends',
         };
     } catch (error) {
         console.error('Erreur lors de la récupération du dernier couple :', error);

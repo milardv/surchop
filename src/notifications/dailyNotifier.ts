@@ -19,7 +19,7 @@ export async function setupDailyNotification(
         if (myVotes[id]) return;
 
         // Envoi d'une notification locale
-        new Notification('💘 Nouveau couple à découvrir !', {
+        new Notification('💘 Voici le couple du jour', {
             body: `${personA.display_name} & ${personB.display_name}`,
             icon: '/pwa-192x192.png',
             data: { url: `https://surchope.fr/couple/${id}` },
