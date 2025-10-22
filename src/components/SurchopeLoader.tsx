@@ -1,14 +1,38 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 export default function SurchopeLoader() {
     return (
-        <main className="flex flex-col items-center justify-center h-[80vh] text-pink-600">
-            <div className="relative w-16 h-16 animate-pulse-heart">
-                <div className="absolute inset-0 bg-pink-500 rotate-45 transform rounded-[8px]" />
-                <div className="absolute w-16 h-16 bg-pink-500 rounded-full -top-4 left-0" />
-                <div className="absolute w-16 h-16 bg-pink-500 rounded-full top-0 -left-4" />
-            </div>
-            <p className="mt-6 text-lg font-medium animate-fade-in">Ça surchope fort… 💘</p>
-        </main>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-pink-600">
+            {/* Logo coeur animé */}
+            <motion.img
+                src="/icons/favicon.svg" // fichier dans public/icons/
+                alt="Surchope"
+                className="w-48 h-48 drop-shadow-lg"
+                animate={{
+                    scale: [1, 1.25, 1],
+                    opacity: [0.8, 1, 0.8],
+                }}
+                transition={{
+                    duration: 1.1,
+                    ease: 'easeInOut',
+                    repeat: Infinity,
+                }}
+            />
+
+            {/* Texte animé */}
+            <motion.p
+                className="mt-10 text-2xl font-semibold text-pink-600"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{
+                    duration: 1.5,
+                    repeat: Infinity,
+                    repeatType: 'reverse',
+                }}
+            >
+                Ça surchope fort… 💘
+            </motion.p>
+        </div>
     );
 }
