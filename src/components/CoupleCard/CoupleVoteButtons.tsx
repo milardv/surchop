@@ -21,11 +21,11 @@ export default function CoupleVoteButtons({
         if (!canVote || !onVote) return;
         setVoted(choice);
         onVote(couple, choice);
-        setTimeout(() => setVoted(null), 700); // animation temporaire
+        setTimeout(() => setVoted(null), 700);
     };
 
     const baseClasses =
-        'px-3 py-2 rounded border font-medium transition-transform duration-300 ease-out active:scale-95';
+        'flex-1 px-3 py-2 rounded border font-medium text-sm transition-all duration-200 ease-out active:scale-95 text-center';
     const disabledClasses = !canVote ? 'opacity-60 cursor-not-allowed' : '';
 
     const getAnimationClasses = (choice: 'A' | 'B' | 'tie') => {
@@ -37,57 +37,55 @@ export default function CoupleVoteButtons({
 
     return (
         <>
-            {/* Définition de l’animation "pop" */}
+            {/* Animation "pop" */}
             <style>
                 {`
-          @keyframes pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.12); }
-            100% { transform: scale(1); }
-          }
-        `}
+        @keyframes pop {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.12); }
+          100% { transform: scale(1); }
+        }
+      `}
             </style>
 
-            <div className="mt-4 flex flex-col gap-2">
-                <div className="flex gap-2">
-                    {/* Personne A */}
-                    <button
-                        disabled={!canVote}
-                        onClick={() => handleVote('A')}
-                        className={`${baseClasses} flex-1 ${
-                            myChoice === 'A'
-                                ? 'bg-pink-50 border-pink-500 text-pink-600'
-                                : 'hover:bg-gray-50'
-                        } ${getAnimationClasses('A')} ${disabledClasses}`}
-                    >
-                        {couple.personA.display_name} surchope
-                    </button>
+            <div className="mt-4 flex gap-2 justify-center w-full">
+                {/* A */}
+                <button
+                    disabled={!canVote}
+                    onClick={() => handleVote('A')}
+                    className={`${baseClasses} ${
+                        myChoice === 'A'
+                            ? 'bg-pink-50 border-pink-500 text-pink-600'
+                            : 'hover:bg-gray-50 border-gray-300 text-gray-700'
+                    } ${getAnimationClasses('A')} ${disabledClasses}`}
+                >
+                    {couple.personA.display_name}
+                </button>
 
-                    {/* Personne B */}
-                    <button
-                        disabled={!canVote}
-                        onClick={() => handleVote('B')}
-                        className={`${baseClasses} flex-1 ${
-                            myChoice === 'B'
-                                ? 'bg-pink-50 border-pink-500 text-pink-600'
-                                : 'hover:bg-gray-50'
-                        } ${getAnimationClasses('B')} ${disabledClasses}`}
-                    >
-                        {couple.personB.display_name} surchope
-                    </button>
-                </div>
-
-                {/* Égalité parfaite */}
+                {/* Égalité */}
                 <button
                     disabled={!canVote}
                     onClick={() => handleVote('tie')}
-                    className={`${baseClasses} text-sm ${
+                    className={`${baseClasses} max-w-[120px] ${
                         myChoice === 'tie'
                             ? 'bg-blue-50 border-blue-500 text-blue-600'
-                            : 'hover:bg-gray-50 text-gray-600'
+                            : 'hover:bg-gray-50 border-gray-300 text-gray-500'
                     } ${getAnimationClasses('tie')} ${disabledClasses}`}
                 >
-                    ⚖️ Égalité parfaite
+                    Égalité
+                </button>
+
+                {/* B */}
+                <button
+                    disabled={!canVote}
+                    onClick={() => handleVote('B')}
+                    className={`${baseClasses} ${
+                        myChoice === 'B'
+                            ? 'bg-pink-50 border-pink-500 text-pink-600'
+                            : 'hover:bg-gray-50 border-gray-300 text-gray-700'
+                    } ${getAnimationClasses('B')} ${disabledClasses}`}
+                >
+                    {couple.personB.display_name}
                 </button>
             </div>
         </>

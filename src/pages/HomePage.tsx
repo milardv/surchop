@@ -93,7 +93,7 @@ export default function HomePage({
                 className="fixed bottom-6 right-6 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg p-4 transition transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-pink-300"
                 title="Jouer"
             >
-                <Play size={26} fill="white" className="ml-0.5" />
+                <Play size={32} fill="white" className="ml-0.5" />
             </button>
         </main>
     );

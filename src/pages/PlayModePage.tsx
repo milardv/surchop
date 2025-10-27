@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { ArrowLeft } from 'lucide-react';
 
 import { CoupleView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
@@ -40,19 +41,16 @@ export default function PlayModePage({
         setIsAnimating(true);
         onVote(couple, choice);
 
-        // Détermine la direction d’animation selon le vote
         if (choice === 'A') setVoteDirection('left');
         else if (choice === 'B') setVoteDirection('right');
         else setVoteDirection('down');
 
-        // ⏳ Attend que l’animation de sortie soit terminée avant de passer au suivant
         setTimeout(() => {
             nextCouple();
             setIsAnimating(false);
         }, 400);
     };
 
-    // 🎉 Confettis à la fin
     useEffect(() => {
         if (finished || couplesToPlay.length === 0) {
             confetti({
@@ -64,7 +62,6 @@ export default function PlayModePage({
         }
     }, [finished, couplesToPlay.length]);
 
-    // 💫 Écran de fin
     if (finished || couplesToPlay.length === 0 || index >= couplesToPlay.length) {
         return (
             <main className="max-w-md mx-auto px-4 py-12 flex flex-col items-center justify-center text-center space-y-6">
@@ -97,7 +94,6 @@ export default function PlayModePage({
 
     const couple = couplesToPlay[index];
 
-    // Animation de sortie selon le vote
     const exitVariants = {
         left: { opacity: 0, x: -200, rotate: -10 },
         right: { opacity: 0, x: 200, rotate: 10 },
@@ -110,14 +106,20 @@ export default function PlayModePage({
             <div className="flex justify-between w-full items-center">
                 <button
                     onClick={() => navigate('/')}
-                    className="text-gray-500 hover:text-gray-700 text-sm"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-full shadow-sm text-sm transition active:scale-95"
                 >
-                    ⬅️ Quitter
+                    <ArrowLeft size={16} />
+                    Quitter
                 </button>
                 <div className="text-sm text-gray-400">
                     {Math.min(index + 1, couplesToPlay.length)}/{couplesToPlay.length}
                 </div>
             </div>
+
+            {/* 🌟 Nouveau titre visible et stylé */}
+            <h2 className="text-xl font-extrabold text-center text-pink-600 mt-2 drop-shadow-sm tracking-wide">
+                💞 Qui surchope ?
+            </h2>
 
             <AnimatePresence mode="wait">
                 <motion.div

@@ -57,7 +57,7 @@ export default function App() {
                 <Route path="/ajouter-couple" element={<AddCouplePage user={user} />} />
                 <Route
                     path="/couple/:id"
-                    element={<CoupleDetailPage couples={couples} user={user} />}
+                    element={<CoupleDetailPage couples={couples} user={user} onVote={handleVote} />}
                 />
                 <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

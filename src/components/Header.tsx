@@ -1,6 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { User } from 'firebase/auth';
-import { Menu, X, Heart, UserPlus, Home, CheckSquare } from 'lucide-react';
+import {
+    Menu,
+    X,
+    Heart,
+    UserPlus,
+    Home,
+    CheckSquare,
+    LogOut, // ✅ ajout de l'icône logout
+} from 'lucide-react';
 import React, { useState } from 'react';
 
 import { loginWithGoogle, logout } from '../firebase';
@@ -27,12 +35,12 @@ export default function Header({ user }: { user: User | null }) {
                 to={to}
                 onClick={() => setMenuOpen(false)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition
-                    ${
-                        active
-                            ? 'bg-pink-100 text-pink-700'
-                            : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                    }
-                    ${accent ? 'text-pink-600 font-semibold' : ''}`}
+          ${
+              active
+                  ? 'bg-pink-100 text-pink-700'
+                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+          }
+          ${accent ? 'text-pink-600 font-semibold' : ''}`}
             >
                 <Icon size={16} />
                 {label}
@@ -74,9 +82,11 @@ export default function Header({ user }: { user: User | null }) {
                                 alt={user.displayName ?? ''}
                             />
                             <button
-                                className="hidden sm:inline text-sm underline text-gray-600 hover:text-gray-900"
+                                className="hidden sm:flex flex-row items-center gap-1 text-sm text-gray-600 hover:text-gray-900 underline-offset-2 hover:underline"
                                 onClick={() => logout()}
+                                title="Se déconnecter"
                             >
+                                <LogOut size={16} className="text-gray-600" />
                                 Se déconnecter
                             </button>
                         </>
@@ -120,7 +130,7 @@ export default function Header({ user }: { user: User | null }) {
                                 setMenuOpen(false);
                             }}
                         >
-                            <X size={16} />
+                            <LogOut size={16} className="text-gray-600" />
                             Se déconnecter
                         </button>
                     )}

@@ -1,14 +1,20 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { deleteDoc, doc } from 'firebase/firestore';
+import { useParams, Link } from 'react-router-dom';
+import React from 'react';
 
-import { db } from '../firebase'; // ✅ assure-toi que ton import est correct
 import { CoupleView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeLoader from '../components/SurchopeLoader';
 
-export default function CoupleDetailPage({ couples, user }: { couples: CoupleView[]; user: any }) {
+export default function CoupleDetailPage({
+    couples,
+    user,
+    onVote,
+}: {
+    couples: CoupleView[];
+    user: any;
+    onVote: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void;
+}) {
     const { id } = useParams();
-    const navigate = useNavigate();
     const couple = couples.find((c) => c.id === id);
 
     if (!couple)
@@ -22,19 +28,9 @@ export default function CoupleDetailPage({ couples, user }: { couples: CoupleVie
             </div>
         );
 
-    // 🗑️ Fonction de suppression (visible uniquement si user connecté)
-    const handleDelete = async (coupleId: string, userUid: string) => {
-        const confirmDelete = window.confirm(`Souhaites-tu vraiment supprimer ce couple ?`);
-        if (!confirmDelete) return;
-
-        try {
-            await deleteDoc(doc(db, 'couples', coupleId));
-            alert('Le couple a bien été supprimé 💔');
-            navigate('/'); // redirection après suppression
-        } catch (err) {
-            console.error(err);
-            alert('Erreur lors de la suppression du couple 😢');
-        }
+    // ✅ Vote simple (sans animation)
+    const handleVote = (c: CoupleView, choice: 'A' | 'B' | 'tie') => {
+        onVote(c, choice);
     };
 
     return (
@@ -46,9 +42,9 @@ export default function CoupleDetailPage({ couples, user }: { couples: CoupleVie
             <CoupleCard
                 couple={couple}
                 user={user}
+                onVote={handleVote}
                 compact={false}
                 onlyMyVotes={false}
-                onDelete={handleDelete} // ✅ bouton de suppression activé
             />
 
             <div className="text-center mt-6">

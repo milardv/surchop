@@ -17,18 +17,41 @@ export default function CoupleHeader({
 }) {
     const isAdmin = user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2';
 
-    const shareOnWhatsApp = (e: React.MouseEvent) => {
+    const handleShare = async (e: React.MouseEvent) => {
         e.stopPropagation();
         const baseUrl = window.location.origin;
-        const message = encodeURIComponent(
-            `💘 Vote pour ce couple sur Surchope : ${couple.personA.display_name} & ${couple.personB.display_name} 😏\n👉 ${baseUrl}/couple/${couple.id}`,
-        );
+        const shareUrl = `${baseUrl}/couple/${couple.id}`;
+        const shareText = `💘 Vote pour ce couple sur Surchope : ${couple.personA.display_name} & ${couple.personB.display_name} 😏`;
 
-        window.open(`https://wa.me/?text=${message}`, '_blank');
+        // ✅ Partage natif si disponible
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Surchope 💘',
+                    text: shareText,
+                    url: shareUrl,
+                });
+                return;
+            } catch (err) {
+                console.log('Partage annulé :', err);
+            }
+        }
+
+        // ❎ Fallback : WhatsApp / Instagram
+        const encodedMsg = encodeURIComponent(`${shareText}\n👉 ${shareUrl}`);
+        const whatsappUrl = `https://wa.me/?text=${encodedMsg}`;
+        const instagramUrl = `https://www.instagram.com/`;
+
+        const choice = window.prompt(
+            'Choisis où partager 💬\n\n1️⃣ WhatsApp\n2️⃣ Instagram\n\nTape 1 ou 2 :',
+        );
+        if (choice === '1') window.open(whatsappUrl, '_blank');
+        if (choice === '2') window.open(instagramUrl, '_blank');
     };
 
     return (
-        <div className="flex items-center gap-2 opacity-60 hover:opacity-100 transition">
+        <div className="flex items-center gap-3 opacity-60 hover:opacity-100 transition">
+            {/* Bouton admin supprimer */}
             {isAdmin && onDelete && (
                 <button
                     onClick={(e) => {
@@ -38,19 +61,20 @@ export default function CoupleHeader({
                         }
                     }}
                     title="Supprimer ce couple"
-                    className="hover:text-pink-600"
+                    className="hover:text-pink-600 transition active:scale-95"
                 >
-                    <Trash2 size={16} />
+                    <Trash2 size={20} />
                 </button>
             )}
 
+            {/* Bouton de partage */}
             {!compact && (
                 <button
-                    onClick={shareOnWhatsApp}
-                    title="Partager sur WhatsApp"
-                    className="text-green-600 hover:text-green-700"
+                    onClick={handleShare}
+                    title="Partager"
+                    className="text-pink-600 hover:text-pink-700 transition active:scale-95 p-1"
                 >
-                    <Share2 size={16} />
+                    <Share2 size={24} strokeWidth={2.2} />
                 </button>
             )}
         </div>

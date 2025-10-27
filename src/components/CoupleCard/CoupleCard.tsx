@@ -31,7 +31,7 @@ export default function CoupleCard({
     return (
         <div className="relative p-4 rounded-2xl bg-white shadow-sm border hover:shadow-md transition">
             {/* En-tête avec bouton signalement visible uniquement si user connecté */}
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start mb-3">
                 <CoupleHeader couple={couple} user={user} onDelete={onDelete} compact={compact} />
                 {user && !compact && <ReportMenu user={user} couple={couple} />}
             </div>
