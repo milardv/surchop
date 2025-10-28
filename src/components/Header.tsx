@@ -1,14 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { User } from 'firebase/auth';
-import {
-    Menu,
-    X,
-    Heart,
-    UserPlus,
-    Home,
-    CheckSquare,
-    LogOut, // ✅ ajout de l'icône logout
-} from 'lucide-react';
+import { Menu, X, Heart, UserPlus, Home, CheckSquare, LogOut, Palette } from 'lucide-react';
 import React, { useState } from 'react';
 
 import { loginWithGoogle, logout } from '../firebase';
@@ -17,6 +9,8 @@ import InstallPrompt from './InstallPrompt';
 export default function Header({ user }: { user: User | null }) {
     const [menuOpen, setMenuOpen] = useState(false);
     const location = useLocation();
+
+    const isAdmin = user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2';
 
     const NavItem = ({
         to,
@@ -37,10 +31,10 @@ export default function Header({ user }: { user: User | null }) {
                 className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition
           ${
               active
-                  ? 'bg-pink-100 text-pink-700'
-                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-foreground/70 hover:bg-muted hover:text-foreground'
           }
-          ${accent ? 'text-pink-600 font-semibold' : ''}`}
+          ${accent ? 'text-primary font-semibold' : ''}`}
             >
                 <Icon size={16} />
                 {label}
@@ -49,11 +43,14 @@ export default function Header({ user }: { user: User | null }) {
     };
 
     return (
-        <header className="sticky top-0 z-10 bg-white/90 backdrop-blur border-b">
+        <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
             <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
                 {/* Logo + titre */}
-                <Link to="/" className="font-semibold text-base sm:text-lg flex items-center gap-2">
-                    <Heart className="text-pink-500" size={18} />
+                <Link
+                    to="/"
+                    className="font-semibold text-base sm:text-lg flex items-center gap-2 text-primary"
+                >
+                    <Heart className="text-primary" size={18} />
                     SURCHOPE
                 </Link>
 
@@ -69,30 +66,30 @@ export default function Header({ user }: { user: User | null }) {
                             accent
                         />
                     )}
+                    {/* 🎨 Lien vers le styleguide (admin uniquement) */}
+                    {isAdmin && <NavItem to="/style" label="Styleguide" icon={Palette} accent />}
                 </nav>
 
                 {/* Zone droite */}
                 <div className="flex items-center gap-3">
-                    <InstallPrompt />
                     {user ? (
                         <>
                             <img
-                                className="w-8 h-8 rounded-full border"
+                                className="w-8 h-8 rounded-full border border-border"
                                 src={user.photoURL ?? ''}
-                                alt={user.displayName ?? ''}
                             />
                             <button
-                                className="hidden sm:flex flex-row items-center gap-1 text-sm text-gray-600 hover:text-gray-900 underline-offset-2 hover:underline"
+                                className="hidden sm:flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground underline-offset-2 hover:underline transition"
                                 onClick={() => logout()}
                                 title="Se déconnecter"
                             >
-                                <LogOut size={16} className="text-gray-600" />
+                                <LogOut size={16} className="text-muted-foreground" />
                                 Se déconnecter
                             </button>
                         </>
                     ) : (
                         <button
-                            className="px-3 py-1 rounded bg-pink-500 text-white text-sm hover:bg-pink-600 transition"
+                            className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
                             onClick={() => loginWithGoogle()}
                         >
                             Se connecter
@@ -102,7 +99,7 @@ export default function Header({ user }: { user: User | null }) {
                     {/* Bouton menu mobile */}
                     <button
                         onClick={() => setMenuOpen(!menuOpen)}
-                        className="md:hidden p-2 rounded hover:bg-gray-100"
+                        className="md:hidden p-2 rounded-full hover:bg-muted transition"
                     >
                         {menuOpen ? <X size={20} /> : <Menu size={20} />}
                     </button>
@@ -111,7 +108,7 @@ export default function Header({ user }: { user: User | null }) {
 
             {/* Menu mobile */}
             {menuOpen && (
-                <nav className="md:hidden bg-white border-t border-gray-200 flex flex-col p-3 space-y-2 text-sm">
+                <nav className="md:hidden bg-card border-t border-border flex flex-col p-3 space-y-2 text-sm text-foreground">
                     <NavItem to="/" label="Tous les couples" icon={Home} />
                     {user && <NavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />}
                     {user && (
@@ -122,15 +119,20 @@ export default function Header({ user }: { user: User | null }) {
                             accent
                         />
                     )}
+                    {isAdmin && <NavItem to="/style" label="Styleguide" icon={Palette} accent />}
+
+                    {/* Installer dans le menu mobile 📱 */}
+                    <InstallPrompt />
+
                     {user && (
                         <button
-                            className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md text-left"
+                            className="flex items-center gap-2 px-3 py-2 text-muted-foreground hover:bg-muted rounded-md text-left transition"
                             onClick={() => {
                                 logout();
                                 setMenuOpen(false);
                             }}
                         >
-                            <LogOut size={16} className="text-gray-600" />
+                            <LogOut size={16} className="text-muted-foreground" />
                             Se déconnecter
                         </button>
                     )}

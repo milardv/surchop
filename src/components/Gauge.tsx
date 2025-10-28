@@ -15,12 +15,12 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
 
     const winner =
         aVotes > bVotes
-            ? { name: couple.personA.display_name, pct: pctA }
+            ? { name: couple.personA.display_name, pct: pctA, color: 'text-primary' }
             : bVotes > aVotes
-              ? { name: couple.personB.display_name, pct: pctB }
+              ? { name: couple.personB.display_name, pct: pctB, color: 'text-accent-foreground' }
               : null;
 
-    // Animation fluide
+    // ⚡ Animation fluide
     useEffect(() => {
         const startA = animatedA;
         const startB = animatedB;
@@ -43,16 +43,17 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
 
     return (
         <div className="w-full mt-3 select-none">
-            <div className="relative w-full h-4 bg-gray-200 rounded-full overflow-visible">
+            {/* 🌈 Barre principale */}
+            <div className="relative w-full h-4 bg-muted rounded-full overflow-visible shadow-inner">
                 {/* Barre A */}
                 {aVotes > 0 && (
                     <div
                         className={`absolute left-0 top-0 bottom-0 rounded-l-full transition-all duration-300 ease-out ${
-                            hovered === 'A' ? 'scale-y-150 shadow-lg' : 'scale-y-100'
+                            hovered === 'A' ? 'scale-y-150 shadow-md' : 'scale-y-100'
                         } ${bVotes === 0 ? 'rounded-r-full' : ''}`}
                         style={{
                             width: `${animatedA}%`,
-                            backgroundColor: '#ec4899',
+                            background: 'hsl(var(--primary))',
                             transformOrigin: 'bottom',
                             zIndex: 2,
                         }}
@@ -62,11 +63,7 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                         onTouchEnd={() => setHovered(null)}
                     >
                         {hovered === 'A' && (
-                            <div
-                                className={`absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-semibold text-pink-600 bg-white rounded-full px-2 py-0.5 shadow-lg whitespace-nowrap z-20 transition-transform duration-300 ${
-                                    hovered === 'A' ? 'scale-y-75' : 'scale-y-100'
-                                }`}
-                            >
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-semibold text-primary bg-background border border-border rounded-full px-2 py-0.5 shadow-md whitespace-nowrap z-20 scale-y-75">
                                 {aVotes} votes
                             </div>
                         )}
@@ -77,11 +74,11 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                 {bVotes > 0 && (
                     <div
                         className={`absolute right-0 top-0 bottom-0 rounded-r-full transition-all duration-300 ease-out ${
-                            hovered === 'B' ? 'scale-y-150 shadow-lg' : 'scale-y-100'
+                            hovered === 'B' ? 'scale-y-150 shadow-md' : 'scale-y-100'
                         } ${aVotes === 0 ? 'rounded-l-full' : ''}`}
                         style={{
                             width: `${animatedB}%`,
-                            backgroundColor: '#27DBA5',
+                            background: 'hsl(var(--secondary))',
                             transformOrigin: 'bottom',
                             zIndex: 1,
                         }}
@@ -91,11 +88,7 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                         onTouchEnd={() => setHovered(null)}
                     >
                         {hovered === 'B' && (
-                            <div
-                                className={`absolute -top-5 left-1/2 -translate-x-1/2 text-xs font-semibold text-emerald-500 bg-white rounded-full px-2 py-0.5 shadow-lg whitespace-nowrap z-20 transition-transform duration-300 ${
-                                    hovered === 'B' ? 'scale-y-75' : 'scale-y-100'
-                                }`}
-                            >
+                            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-semibold text-secondary bg-background border border-border rounded-full px-2 py-0.5 shadow-md whitespace-nowrap z-20 scale-y-75">
                                 {bVotes} votes
                             </div>
                         )}
@@ -103,15 +96,18 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                 )}
             </div>
 
-            {/* Résumé */}
-            <div className="text-xs mt-2 text-gray-700 text-center">
+            {/* 🩷 Résumé */}
+            <div className="text-xs mt-2 text-center text-muted-foreground">
                 {winner ? (
                     <>
-                        <span className="font-medium text-pink-600">{winner.name}</span> surchope à{' '}
-                        {Math.round(winner.pct)} %
+                        <span className={`font-semibold ${winner.color}`}>{winner.name}</span>{' '}
+                        surchope à{' '}
+                        <span className="text-foreground font-medium">
+                            {Math.round(winner.pct)} %
+                        </span>
                     </>
                 ) : (
-                    <span className="text-gray-500">égalité parfaite 😳</span>
+                    <span className="text-muted-foreground italic">Égalité parfaite 😳</span>
                 )}
             </div>
         </div>

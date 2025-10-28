@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 
+import Button from '@/components/ui/Button';
+
 interface Props {
     imageSrc: string;
     onCancel: () => void;
@@ -23,9 +25,7 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
             return loadImage(url);
         }
 
-        // 🔁 Proxy CORS public (corsproxy.io)
         const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
-
         const res = await fetch(proxyUrl);
         if (!res.ok) throw new Error(`Erreur proxy: ${res.status}`);
 
@@ -42,7 +42,6 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
             img.src = src;
         });
 
-    /** Fonction principale de recadrage */
     const getCroppedImage = async () => {
         if (!croppedAreaPixels) {
             setError('Zone de recadrage non définie');
@@ -81,9 +80,10 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
     };
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded-2xl w-80 sm:w-96 flex flex-col items-center shadow-lg">
-                <div className="relative w-64 h-64 bg-gray-100 rounded-full overflow-hidden">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-card text-card-foreground border border-border rounded-2xl p-6 w-80 sm:w-96 flex flex-col items-center shadow-lg animate-fadeIn">
+                {/* 🖼️ Zone de recadrage */}
+                <div className="relative w-64 h-64 bg-muted rounded-full overflow-hidden border border-border">
                     <Cropper
                         image={imageSrc}
                         crop={crop}
@@ -97,7 +97,7 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
                     />
                 </div>
 
-                {/* Slider de zoom fluide */}
+                {/* 🔍 Slider de zoom */}
                 <input
                     type="range"
                     min={1}
@@ -105,33 +105,35 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
                     step={0.01}
                     value={zoom}
                     onChange={(e) => setZoom(Number(e.target.value))}
-                    className="w-full mt-4 accent-pink-500"
+                    className="w-full mt-5 accent-[hsl(var(--primary))] cursor-pointer"
                 />
 
-                {/* Boutons */}
-                <div className="flex gap-3 mt-4">
-                    <button
+                {/* 🩷 Boutons d’action */}
+                <div className="flex gap-3 mt-5">
+                    <Button
                         onClick={onCancel}
+                        variant="outline"
+                        size="sm"
                         disabled={cropping}
-                        className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
+                        className="rounded-full"
                     >
                         Annuler
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={getCroppedImage}
+                        variant="primary"
+                        size="sm"
                         disabled={cropping}
-                        className={`px-4 py-2 text-sm rounded text-white ${
-                            cropping
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-pink-500 hover:bg-pink-600'
+                        className={`rounded-full ${
+                            cropping ? 'opacity-70 cursor-not-allowed' : ''
                         }`}
                     >
-                        {cropping ? 'Recadrage...' : 'Valider'}
-                    </button>
+                        {cropping ? 'Recadrage...' : 'Valider 💘'}
+                    </Button>
                 </div>
 
-                {/* Message d'erreur */}
-                {error && <p className="text-red-600 text-xs mt-3">{error}</p>}
+                {/* ⚠️ Message d’erreur */}
+                {error && <p className="text-destructive text-xs mt-3 text-center">{error}</p>}
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
 
 import SurchopeLoader from '@/components/SurchopeLoader';
 
@@ -37,7 +38,7 @@ export default function PersonInfoModal({ name, onClose }: { name: string; onClo
         <AnimatePresence>
             <motion.div
                 key="backdrop"
-                className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+                className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -45,21 +46,23 @@ export default function PersonInfoModal({ name, onClose }: { name: string; onClo
             >
                 <motion.div
                     key="modal"
-                    className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-lg relative overflow-hidden"
+                    className="bg-card text-card-foreground border border-border rounded-2xl p-6 max-w-sm w-full shadow-lg relative overflow-hidden animate-fadeIn"
                     initial={{ opacity: 0, scale: 0.9, y: 10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, y: 10 }}
                     transition={{ duration: 0.25, ease: 'easeOut' }}
                     onClick={(e) => e.stopPropagation()}
                 >
+                    {/* ✖️ Bouton de fermeture */}
                     <button
                         onClick={onClose}
-                        className="absolute top-2 right-3 text-gray-500 hover:text-gray-700"
+                        className="absolute top-3 right-3 p-1 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:ring-offset-2"
+                        title="Fermer"
                     >
-                        ✕
+                        <X size={18} />
                     </button>
 
-                    {/* Contenu avec transition interne */}
+                    {/* Contenu */}
                     <div className="min-h-[250px] flex flex-col items-center justify-center text-center">
                         <AnimatePresence mode="wait">
                             {loading ? (
@@ -84,18 +87,20 @@ export default function PersonInfoModal({ name, onClose }: { name: string; onClo
                                         <img
                                             src={info.image}
                                             alt={info.title}
-                                            className="max-w-full max-h-64 rounded-lg mb-3 object-contain"
+                                            className="max-w-full max-h-64 rounded-lg mb-3 object-contain border border-border"
                                         />
                                     )}
-                                    <h2 className="text-lg font-semibold">{info.title}</h2>
-                                    <p className="text-sm text-gray-600 mb-2">
+                                    <h2 className="text-lg font-semibold text-primary mb-1">
+                                        {info.title}
+                                    </h2>
+                                    <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
                                         {info.summary.slice(0, 200)}...
                                     </p>
                                     <a
                                         href={info.source}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-pink-500 text-sm underline"
+                                        className="text-primary hover:text-primary/80 text-sm font-medium underline underline-offset-2 transition"
                                     >
                                         Voir sur Wikipédia
                                     </a>
@@ -106,7 +111,7 @@ export default function PersonInfoModal({ name, onClose }: { name: string; onClo
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    className="text-center text-gray-500"
+                                    className="text-center text-muted-foreground"
                                 >
                                     Aucune information trouvée 😅
                                 </motion.p>

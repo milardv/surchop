@@ -13,6 +13,8 @@ import useVotes from './hooks/useVotes';
 import CoupleDetailPage from './pages/CoupleDetailPage';
 import PlayModePage from './pages/PlayModePage';
 
+import StyleGuide from '@/tools/StyleGuide';
+
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
     const { couples, loading, deleteCouple } = useCouples();
@@ -60,6 +62,7 @@ export default function App() {
                     element={<CoupleDetailPage couples={couples} user={user} onVote={handleVote} />}
                 />
                 <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
+                <Route path="/style" element={<StyleGuide />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
 

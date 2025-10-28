@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
-import { ArrowLeft } from 'lucide-react';
 
 import { CoupleView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeFooter from '../components/SurchopeFooter';
+
+import BackButton from '@/components/ui/BackButton';
 
 export default function PlayModePage({
     couples,
@@ -20,7 +21,6 @@ export default function PlayModePage({
     onVote: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void;
 }) {
     const navigate = useNavigate();
-
     const [couplesToPlay] = useState(() => couples.filter((c) => !myVotes[c.id]));
     const [index, setIndex] = useState(0);
     const [finished, setFinished] = useState(false);
@@ -28,11 +28,8 @@ export default function PlayModePage({
     const [voteDirection, setVoteDirection] = useState<'left' | 'right' | 'down' | null>(null);
 
     const nextCouple = () => {
-        if (index + 1 < couplesToPlay.length) {
-            setIndex((prev) => prev + 1);
-        } else {
-            setFinished(true);
-        }
+        if (index + 1 < couplesToPlay.length) setIndex((i) => i + 1);
+        else setFinished(true);
         setVoteDirection(null);
     };
 
@@ -62,21 +59,18 @@ export default function PlayModePage({
         }
     }, [finished, couplesToPlay.length]);
 
-    if (finished || couplesToPlay.length === 0 || index >= couplesToPlay.length) {
+    const couple = couplesToPlay[index];
+
+    if (finished || couplesToPlay.length === 0)
         return (
             <main className="max-w-md mx-auto px-4 py-12 flex flex-col items-center justify-center text-center space-y-6">
-                <h1 className="text-3xl font-semibold text-pink-600">🎉 Bravo !</h1>
-                <p className="text-gray-700 leading-relaxed">
-                    Tu as voté pour tous les couples disponibles 💘 Reviens bientôt, de nouveaux
-                    duos t’attendent !
+                <h1 className="text-3xl font-extrabold text-primary drop-shadow-sm">🎉 Bravo !</h1>
+                <p className="text-muted-foreground leading-relaxed">
+                    Tu as voté pour tous les couples disponibles 💘 <br />
+                    Reviens bientôt, de nouveaux duos t’attendent !
                 </p>
 
-                <button
-                    onClick={() => navigate('/')}
-                    className="px-4 py-2 rounded-full bg-pink-500 hover:bg-pink-600 text-white font-medium shadow-sm transition"
-                >
-                    ⬅️ Retour à l’accueil
-                </button>
+                <BackButton to="/" label="Retour à la liste" />
 
                 <motion.div
                     className="mt-8 text-4xl"
@@ -90,9 +84,6 @@ export default function PlayModePage({
                 <SurchopeFooter />
             </main>
         );
-    }
-
-    const couple = couplesToPlay[index];
 
     const exitVariants = {
         left: { opacity: 0, x: -200, rotate: -10 },
@@ -103,24 +94,20 @@ export default function PlayModePage({
 
     return (
         <main className="max-w-md mx-auto px-4 py-6 flex flex-col items-center justify-center gap-6">
+            {/* Header */}
             <div className="flex justify-between w-full items-center">
-                <button
-                    onClick={() => navigate('/')}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-pink-50 hover:bg-pink-100 text-pink-600 rounded-full shadow-sm text-sm transition active:scale-95"
-                >
-                    <ArrowLeft size={16} />
-                    Quitter
-                </button>
-                <div className="text-sm text-gray-400">
-                    {Math.min(index + 1, couplesToPlay.length)}/{couplesToPlay.length}
+                <BackButton to="/" label="Retour à la liste" />
+                <div className="text-sm text-muted-foreground">
+                    {index + 1}/{couplesToPlay.length}
                 </div>
             </div>
 
-            {/* 🌟 Nouveau titre visible et stylé */}
-            <h2 className="text-xl font-extrabold text-center text-pink-600 mt-2 drop-shadow-sm tracking-wide">
+            {/* Titre */}
+            <h2 className="text-xl font-extrabold text-center text-primary mt-2 tracking-wide">
                 💞 Qui surchope ?
             </h2>
 
+            {/* Couple */}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={couple?.id}

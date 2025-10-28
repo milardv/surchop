@@ -7,7 +7,6 @@ import CoupleHeader from './CoupleHeader';
 import CoupleGauge from './CoupleGauge';
 import CoupleVoteButtons from './CoupleVoteButtons';
 import ReportMenu from '../ReportMenu';
-// 👈 import du nouveau composant
 
 export default function CoupleCard({
     couple,
@@ -29,40 +28,42 @@ export default function CoupleCard({
     const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
 
     return (
-        <div className="relative p-4 rounded-2xl bg-white shadow-sm border hover:shadow-md transition">
-            {/* En-tête avec bouton signalement visible uniquement si user connecté */}
+        <div className="relative p-4 rounded-2xl bg-card text-card-foreground border border-border shadow-sm hover:shadow-md transition-all duration-200">
+            {/* En-tête */}
             <div className="flex justify-between items-start mb-3">
                 <CoupleHeader couple={couple} user={user} onDelete={onDelete} compact={compact} />
                 {user && !compact && <ReportMenu user={user} couple={couple} />}
             </div>
 
             {/* Contenu principal */}
-            <div className="flex items-center gap-4 flex-col">
-                <div className="flex-1 flex items-center gap-3 flex-col">
-                    <CoupleGauge
-                        couple={couple}
-                        myChoice={myChoice}
-                        onlyMyVotes={onlyMyVotes}
-                        onSelectPerson={setSelectedPerson}
-                    />
-                </div>
+            <div className="flex flex-col items-center gap-4">
+                <CoupleGauge
+                    couple={couple}
+                    myChoice={myChoice}
+                    onlyMyVotes={onlyMyVotes}
+                    onSelectPerson={setSelectedPerson}
+                />
             </div>
 
             {/* Boutons de vote */}
             {!compact && (
-                <CoupleVoteButtons
-                    couple={couple}
-                    user={user}
-                    canVote={!!user && !!onVote}
-                    myChoice={myChoice}
-                    onVote={onVote}
-                />
+                <div className="mt-3">
+                    <CoupleVoteButtons
+                        couple={couple}
+                        user={user}
+                        canVote={!!user && !!onVote}
+                        myChoice={myChoice}
+                        onVote={onVote}
+                    />
+                </div>
             )}
 
             {/* Message si non connecté */}
             {!user && !compact && (
-                <div className="text-xs text-gray-500 mt-2 text-center">
-                    Connecte-toi pour voter.
+                <div className="mt-4 text-center">
+                    <div className="inline-block bg-primary/10 text-primary text-sm font-medium px-3 py-2 rounded-full shadow-sm">
+                        Connecte-toi pour voter
+                    </div>
                 </div>
             )}
 

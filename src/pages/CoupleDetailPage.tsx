@@ -1,9 +1,11 @@
-import { useParams, Link } from 'react-router-dom';
-import React from 'react';
+import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 
 import { CoupleView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeLoader from '../components/SurchopeLoader';
+
+import BackButton from '@/components/ui/BackButton';
 
 export default function CoupleDetailPage({
     couples,
@@ -17,25 +19,29 @@ export default function CoupleDetailPage({
     const { id } = useParams();
     const couple = couples.find((c) => c.id === id);
 
+    const [myChoice, setMyChoice] = useState<'A' | 'B' | 'tie' | undefined>(undefined);
+
+    useEffect(() => {
+        if (!couple) return;
+        setMyChoice(undefined);
+    }, [couple]);
+
     if (!couple)
         return (
-            <div className="flex flex-col items-center justify-center py-10 text-center text-gray-600">
+            <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
                 <SurchopeLoader />
                 <p>Chargement du couple... 😢</p>
-                <Link to="/" className="mt-4 text-pink-600 hover:underline">
-                    ⬅️ Retourner à l'accueil
-                </Link>
             </div>
         );
 
-    // ✅ Vote simple (sans animation)
     const handleVote = (c: CoupleView, choice: 'A' | 'B' | 'tie') => {
+        setMyChoice(choice);
         onVote(c, choice);
     };
 
     return (
-        <main className="max-w-md mx-auto px-4 py-6">
-            <h1 className="text-2xl font-semibold text-center text-pink-600 mb-4">
+        <main className="max-w-md mx-auto px-4 py-6 text-foreground">
+            <h1 className="text-2xl font-semibold text-center text-primary mb-4">
                 💘 {couple.personA.display_name} & {couple.personB.display_name}
             </h1>
 
@@ -45,13 +51,10 @@ export default function CoupleDetailPage({
                 onVote={handleVote}
                 compact={false}
                 onlyMyVotes={false}
+                myChoice={myChoice}
             />
 
-            <div className="text-center mt-6">
-                <Link to="/" className="text-sm text-gray-500 hover:text-gray-700">
-                    ⬅️ Retour à la liste
-                </Link>
-            </div>
+            <BackButton to="/" label="Retour à la liste" className={'mt-8'} />
         </main>
     );
 }

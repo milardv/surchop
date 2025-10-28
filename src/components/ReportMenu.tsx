@@ -30,7 +30,7 @@ Un utilisateur a signalé un couple sur Surchope :
 💬 Raison : (à compléter)
 
 Merci.
-        `.trim();
+    `.trim();
 
         const mailto = `mailto:contact@surchope.fr?subject=${encodeURIComponent(
             subject,
@@ -41,19 +41,25 @@ Merci.
 
     return (
         <DropdownMenu>
+            {/* 🔘 Bouton de menu */}
             <DropdownMenuTrigger asChild>
                 <button
-                    className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                    className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:ring-offset-2"
                     title="Plus d’options"
                 >
                     <MoreVertical size={18} />
                 </button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" sideOffset={4}>
+            {/* 📋 Menu déroulant */}
+            <DropdownMenuContent
+                align="end"
+                sideOffset={6}
+                className="bg-card text-card-foreground border border-border rounded-lg shadow-md p-1"
+            >
                 <DropdownMenuItem
                     onClick={handleReport}
-                    className="flex items-center gap-2 text-gray-700 cursor-pointer"
+                    className="flex items-center gap-2 px-3 py-2 rounded-md cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted transition"
                 >
                     <Flag size={14} className="text-amber-500" />
                     <span>Signaler ce couple</span>

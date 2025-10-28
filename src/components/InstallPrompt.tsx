@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Download } from 'lucide-react';
 
 export default function InstallPrompt() {
     const [promptEvent, setPromptEvent] = useState<any>(null);
@@ -16,7 +17,6 @@ export default function InstallPrompt() {
         window.addEventListener('beforeinstallprompt', handler);
         window.addEventListener('appinstalled', installedHandler);
 
-        // Détection iOS
         const ua = window.navigator.userAgent.toLowerCase();
         const ios = /iphone|ipad|ipod/.test(ua);
         const standalone = (window.navigator as any).standalone === true;
@@ -31,19 +31,28 @@ export default function InstallPrompt() {
 
     if (installed || isInStandalone) return null;
 
-    if (!promptEvent) return null;
+    const handleInstall = () => {
+        if (promptEvent) {
+            promptEvent.prompt();
+            promptEvent.userChoice.then((choice: any) => {
+                if (choice.outcome === 'accepted') setPromptEvent(null);
+            });
+        } else if (isIOS) {
+            alert(
+                "🍎 Sur iPhone/iPad :\n1️⃣ Appuie sur le bouton 'Partager' (carré avec la flèche)\n2️⃣ Sélectionne 'Sur l’écran d’accueil' 📲",
+            );
+        }
+    };
 
     return (
-        <button
-            onClick={() => {
-                promptEvent.prompt();
-                promptEvent.userChoice.then((choice: any) => {
-                    if (choice.outcome === 'accepted') setPromptEvent(null);
-                });
-            }}
-            className="inline-flex items-center gap-1 px-3 py-1 rounded bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 active:bg-pink-700 transition shadow-sm"
+        <div
+            onClick={handleInstall}
+            className="flex items-center gap-2 px-3 py-2 rounded-md text-primary cursor-pointer hover:bg-muted transition"
         >
-            Installer
-        </button>
+            <Download size={16} className="text-primary" />
+            <span className="font-medium">
+                {isIOS ? 'Ajouter à l’écran d’accueil' : 'Installer l’app'}
+            </span>
+        </div>
     );
 }

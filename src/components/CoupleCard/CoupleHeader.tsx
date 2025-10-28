@@ -50,8 +50,8 @@ export default function CoupleHeader({
     };
 
     return (
-        <div className="flex items-center gap-3 opacity-60 hover:opacity-100 transition">
-            {/* Bouton admin supprimer */}
+        <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition">
+            {/* 🗑️ Bouton admin supprimer */}
             {isAdmin && onDelete && (
                 <button
                     onClick={(e) => {
@@ -61,20 +61,20 @@ export default function CoupleHeader({
                         }
                     }}
                     title="Supprimer ce couple"
-                    className="hover:text-pink-600 transition active:scale-95"
+                    className="p-1.5 rounded-full text-destructive/80 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-[hsl(var(--destructive))]/40 transition active:scale-95"
                 >
-                    <Trash2 size={20} />
+                    <Trash2 size={18} />
                 </button>
             )}
 
-            {/* Bouton de partage */}
+            {/* 📤 Bouton de partage */}
             {!compact && (
                 <button
                     onClick={handleShare}
                     title="Partager"
-                    className="text-pink-600 hover:text-pink-700 transition active:scale-95 p-1"
+                    className="p-1.5 rounded-full text-primary hover:text-primary/80 hover:bg-primary/10 transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]/40"
                 >
-                    <Share2 size={24} strokeWidth={2.2} />
+                    <Share2 size={20} strokeWidth={2.1} />
                 </button>
             )}
         </div>

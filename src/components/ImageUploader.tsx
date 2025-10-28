@@ -3,6 +3,8 @@ import { Camera } from 'lucide-react';
 
 import ImageCropperModal from './ImageCropperModal';
 
+import Button from '@/components/ui/Button';
+
 export default function ImageUploader({
     label,
     imageUrl,
@@ -50,8 +52,8 @@ export default function ImageUploader({
     };
 
     return (
-        <div>
-            {/* zone drag & drop + preview */}
+        <div className="space-y-3">
+            {/* 🖼️ Zone drag & drop + aperçu */}
             <div
                 onDrop={handleDrop}
                 onDragOver={(e) => {
@@ -59,23 +61,25 @@ export default function ImageUploader({
                     setDragOver(true);
                 }}
                 onDragLeave={() => setDragOver(false)}
-                className={`relative w-32 h-32 rounded-full border-2 border-dashed flex items-center justify-center cursor-pointer transition ${
-                    dragOver ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-gray-100'
+                className={`relative w-32 h-32 rounded-full border-2 border-dashed flex items-center justify-center cursor-pointer transition-all duration-200 ${
+                    dragOver
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border bg-muted hover:bg-muted/80'
                 }`}
             >
                 {file || imageUrl ? (
                     <img
                         src={file ? URL.createObjectURL(file) : imageUrl}
                         alt="Aperçu"
-                        className="object-cover w-full h-full rounded-full"
+                        className="object-cover w-full h-full rounded-full border border-border shadow-sm"
                     />
                 ) : (
-                    <Camera className="text-gray-400 w-10 h-10" />
+                    <Camera className="text-muted-foreground w-10 h-10" />
                 )}
 
                 <label
                     htmlFor={`${label}-file`}
-                    className="absolute bottom-1 mb-2 bg-pink-500 text-white text-xs px-2 py-1 rounded cursor-pointer shadow hover:bg-pink-600 transition"
+                    className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-full cursor-pointer shadow hover:opacity-90 transition"
                 >
                     {file || imageUrl ? 'Changer' : 'Choisir'}
                 </label>
@@ -88,30 +92,30 @@ export default function ImageUploader({
                 />
             </div>
 
-            {/* champ URL */}
-            <div className="flex gap-2 items-center mt-3">
+            {/* 🌐 Champ URL */}
+            <div className="flex gap-2 items-center">
                 <input
                     type="text"
                     placeholder="Ou coller une URL d’image"
                     value={imageUrl}
                     onChange={(e) => onUrlChange(e.target.value)}
-                    className="flex-1 border rounded p-2 text-sm"
+                    className="flex-1 bg-background border border-border rounded-full px-3 py-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:ring-offset-2 transition"
                 />
-                <button
+                <Button
                     type="button"
                     onClick={handleUrlCrop}
                     disabled={!imageUrl}
-                    className={`px-3 py-1.5 rounded text-sm text-white ${
-                        imageUrl
-                            ? 'bg-pink-500 hover:bg-pink-600'
-                            : 'bg-gray-300 cursor-not-allowed'
+                    variant={imageUrl ? 'primary' : 'outline'}
+                    size="sm"
+                    className={`rounded-full px-4 py-1.5 text-sm font-medium ${
+                        !imageUrl ? 'opacity-60 cursor-not-allowed' : ''
                     }`}
                 >
                     Recadrer
-                </button>
+                </Button>
             </div>
 
-            {/* modale cropper */}
+            {/* ✂️ Modale cropper */}
             {cropImageSrc && (
                 <ImageCropperModal
                     imageSrc={cropImageSrc}

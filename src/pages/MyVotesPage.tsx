@@ -10,6 +10,9 @@ import { CoupleView, VoteDoc, VoteView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 
 import SurchopeLoader from '@/components/SurchopeLoader';
+import Card from '@/components/ui/Card';
+import IconButton from '@/components/ui/IconButton';
+import BackButton from '@/components/ui/BackButton';
 
 export default function MyVotesPage({
     user,
@@ -80,33 +83,36 @@ export default function MyVotesPage({
         }
     };
 
+    // 🔒 Si l’utilisateur n’est pas connecté
     if (!user) {
         return (
             <main className="max-w-5xl mx-auto px-4 py-10">
-                <div className="p-6 border rounded-2xl bg-white">
-                    <h2 className="text-lg font-semibold mb-2">Mes votes</h2>
-                    <p className="text-gray-600">Connecte-toi pour voir ton historique de votes.</p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="mt-4 px-3 py-2 rounded bg-gray-900 text-white"
-                    >
-                        Retour à l’accueil
-                    </button>
-                </div>
+                <Card className="p-6 text-center bg-card text-card-foreground">
+                    <h2 className="text-lg font-semibold mb-2 text-primary">Mes votes</h2>
+                    <p className="text-muted-foreground">
+                        Connecte-toi pour voir ton historique de votes.
+                    </p>
+                    <BackButton to="/" label="Retour à la liste" className={'mt-8'} />
+                </Card>
             </main>
         );
     }
 
     return (
-        <main className="max-w-5xl mx-auto px-4 py-6 space-y-4">
-            <h2 className="text-lg font-semibold mb-4">Mon historique</h2>
+        <main className="max-w-5xl mx-auto px-4 py-6 space-y-4 text-foreground">
+            <h2 className="text-lg font-semibold mb-4 text-primary">Mon historique</h2>
+
             {loading && <SurchopeLoader />}
+
             {!loading && entries.length === 0 && (
-                <div className="text-gray-600 text-sm">Tu n’as encore voté pour aucun couple.</div>
+                <div className="text-muted-foreground text-sm">
+                    Tu n’as encore voté pour aucun couple 😢
+                </div>
             )}
+
             <AnimatePresence>
                 {!loading &&
-                    entries.map((e, i) => (
+                    entries.map((e) => (
                         <motion.div
                             key={e.id}
                             layout
@@ -114,25 +120,27 @@ export default function MyVotesPage({
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
                             transition={{ duration: 0.3 }}
-                            className="relative bg-white rounded-2xl shadow-sm p-3"
                         >
-                            {/* 🗑️ Bouton suppression */}
-                            <button
-                                onClick={() => handleDeleteVote(e.id)}
-                                className="text-gray-400 hover:text-red-500 transition"
-                                title="Supprimer ce vote"
-                            >
-                                <Trash2 size={16} />
-                            </button>
+                            <Card className="relative p-3 flex flex-col gap-2">
+                                {/* 🗑️ Bouton suppression */}
+                                <div className="">
+                                    <IconButton
+                                        icon={Trash2}
+                                        label="Supprimer ce vote"
+                                        color="default"
+                                        onClick={() => handleDeleteVote(e.id)}
+                                    />
+                                </div>
 
-                            {/* 💞 Couple */}
-                            <CoupleCard
-                                couple={e.couple}
-                                user={user}
-                                myChoice={e.choice}
-                                onlyMyVotes={true}
-                                compact
-                            />
+                                {/* 💞 Couple */}
+                                <CoupleCard
+                                    couple={e.couple}
+                                    user={user}
+                                    myChoice={e.choice}
+                                    onlyMyVotes={true}
+                                    compact
+                                />
+                            </Card>
                         </motion.div>
                     ))}
             </AnimatePresence>

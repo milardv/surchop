@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import ImageUploader from '../components/ImageUploader';
 import { useAddCoupleForm } from '../hooks/useAddCoupleForm';
 
+import BackButton from '@/components/ui/BackButton';
+
 export default function AddCouplePage({ user }: { user: User | null }) {
     const navigate = useNavigate();
     const [category, setCategory] = useState<'people' | 'friends'>('people');
@@ -30,12 +32,7 @@ export default function AddCouplePage({ user }: { user: User | null }) {
                 <div className="p-6 border rounded-2xl bg-white">
                     <h2 className="text-lg font-semibold mb-2">Ajouter un couple</h2>
                     <p className="text-gray-600">Connecte-toi pour pouvoir ajouter un couple.</p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="mt-4 px-3 py-2 rounded bg-gray-900 text-white"
-                    >
-                        Retour à l’accueil
-                    </button>
+                    <BackButton to="/" label="Retour à la liste" className={'mt-8'} />
                 </div>
             </main>
         );
