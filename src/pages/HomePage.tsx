@@ -56,19 +56,6 @@ export default function HomePage({
 
     return (
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 relative text-foreground">
-            Pour créer une mise en page attrayante pour votre site « SURCHOPE.FR », vous pourriez
-            opter pour un design simple et épuré qui met en valeur votre titre et votre slogan.
-            Voici une suggestion : Titre :
-            <h1 style="font-size: 3em; color: #EB4799; text-align: center; font-weight: bold;">
-                SURCHOPE.FR
-            </h1>
-            Slogan :
-            <p style="font-size: 1.5em; color: #EB4799; text-align: center; font-style: italic;">
-                Vote qui surchope qui
-            </p>
-            En utilisant la couleur #EB4799 pour le texte, vous assurez une harmonie visuelle avec
-            l'identité de votre site. Pensez à ajouter des éléments visuels complémentaires qui
-            reflètent l'esprit de votre plateforme et attirent l'attention des visiteurs.
             {showIntro && <SurchopeIntroModal onClose={() => setShowIntro(false)} />}
             {/* 🔍 Barre de recherche */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
