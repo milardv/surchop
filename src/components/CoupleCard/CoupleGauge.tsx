@@ -33,7 +33,7 @@ export default function CoupleGauge({
 
                 {/* 🖼️ Image */}
                 <div
-                    className={`w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 border border-border bg-muted hover:scale-105 ${
+                    className={`w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 ${
                         isWinner ? 'ring-4 ring-primary shadow-md' : ''
                     }`}
                 >
