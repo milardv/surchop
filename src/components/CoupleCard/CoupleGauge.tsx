@@ -24,6 +24,8 @@ export default function CoupleGauge({
                 ? 'ring-primary bg-primary/25 text-primary'
                 : 'ring-secondary bg-secondary/25 text-secondary';
 
+        const colorPerson = index === 'A' ? 'text-primary' : 'text-secondary';
+
         return (
             <div
                 key={index}
@@ -37,21 +39,6 @@ export default function CoupleGauge({
 
                 {/* 🖼️ Image avec halo dégradé visible */}
                 <div className="relative flex items-center justify-center">
-                    {/* 🌈 Halo dégradé (derrière l'image, bien visible) */}
-                    <div
-                        className="absolute rounded-full scale-125"
-                        style={{
-                            width: '100%',
-                            height: '100%',
-                            background: `radial-gradient(circle at center, 
-                hsl(var(--${index === 'A' ? 'primary' : 'secondary'})) 10%, 
-                rgba(255,255,255,1) 80%)`,
-                            filter: 'blur(10px)',
-                            opacity: 0.9,
-                            zIndex: 0,
-                        }}
-                    />
-
                     {/* 🖼️ Image principale */}
                     <div
                         className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 shadow-lg ring-4 ring-white"
@@ -74,7 +61,9 @@ export default function CoupleGauge({
                 </div>
 
                 {/* Nom */}
-                <div className={`font-medium text-base text-center transition-colors duration-200`}>
+                <div
+                    className={`font-medium text-base text-center transition-colors duration-200 ${colorPerson}`}
+                >
                     {person.display_name}
                 </div>
             </div>
