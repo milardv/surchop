@@ -53,7 +53,7 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                         } ${bVotes === 0 ? 'rounded-r-full' : ''}`}
                         style={{
                             width: `${animatedA}%`,
-                            background: 'hsl(var(--primary))',
+                            background: `linear-gradient(to right, hsl(var(--primary)), hsl(var(--blend)))`,
                             transformOrigin: 'bottom',
                             zIndex: 2,
                         }}
@@ -69,8 +69,20 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                         )}
                     </div>
                 )}
-
-                {/* Barre B */}
+                {/* ➡️ NOUVELLE SÉPARATION ⬅️ */}
+                {total > 0 && (
+                    <div
+                        className="absolute top-0 bottom-0 z-30" // z-index plus haut pour être au-dessus des barres
+                        style={{
+                            left: `${animatedA}%`, // Positionne la séparation à la fin de la barre A
+                            width: '2px', // Largeur de la séparation
+                            backgroundColor: 'white', // Couleur blanche pour la séparation
+                            // Ajout d'une ombre subtile pour la faire ressortir sur le dégradé
+                            boxShadow: '0 0 2px rgba(0, 0, 0, 0.2)',
+                        }}
+                    />
+                )}
+                {/* FIN SÉPARATION */} {/* Barre B */}
                 {bVotes > 0 && (
                     <div
                         className={`absolute right-0 top-0 bottom-0 rounded-r-full transition-all duration-300 ease-out ${
@@ -78,7 +90,8 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                         } ${aVotes === 0 ? 'rounded-l-full' : ''}`}
                         style={{
                             width: `${animatedB}%`,
-                            background: 'hsl(var(--secondary))',
+                            // background: 'linear-gradient(.25turn, red, 10%, blue)',
+                            background: `linear-gradient(to left, hsl(var(--secondary)), hsl(var(--blend)))`,
                             transformOrigin: 'bottom',
                             zIndex: 1,
                         }}

@@ -18,7 +18,11 @@ export default function CoupleGauge({
         person: { display_name: string; image_url?: string },
         index: 'A' | 'B',
     ) => {
-        const isWinner = myChoice === index;
+        // 🎨 Détermine la couleur selon le côté
+        const colorClass =
+            index === 'A'
+                ? 'ring-primary bg-primary/25 text-primary'
+                : 'ring-secondary bg-secondary/25 text-secondary';
 
         return (
             <div
@@ -26,36 +30,51 @@ export default function CoupleGauge({
                 className="flex items-center gap-2 flex-col cursor-pointer relative"
                 onClick={() => onSelectPerson(person.display_name)}
             >
-                {/* 💫 Halo animé */}
-                {isWinner && (
-                    <div className="absolute w-28 h-28 md:w-36 md:h-36 rounded-full bg-primary/25 blur-md animate-pulse-ring -z-10" />
-                )}
-
-                {/* 🖼️ Image */}
+                {/* 💫 Halo animé (toujours présent, couleur selon le côté) */}
                 <div
-                    className={`w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 ${
-                        isWinner ? 'ring-4 ring-primary shadow-md' : ''
-                    }`}
-                >
-                    {person.image_url ? (
-                        <img
-                            src={person.image_url}
-                            alt={person.display_name}
-                            className="object-cover w-full h-full"
-                        />
-                    ) : (
-                        <span className="text-lg font-semibold text-muted-foreground">
-                            {person.display_name[0]}
-                        </span>
-                    )}
+                    className={`absolute w-28 h-28 md:w-36 md:h-36 rounded-full blur-md animate-pulse-ring -z-10 ${colorClass}`}
+                />
+
+                {/* 🖼️ Image avec halo dégradé visible */}
+                <div className="relative flex items-center justify-center">
+                    {/* 🌈 Halo dégradé (derrière l'image, bien visible) */}
+                    <div
+                        className="absolute rounded-full scale-125"
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            background: `radial-gradient(circle at center, 
+                hsl(var(--${index === 'A' ? 'primary' : 'secondary'})) 10%, 
+                rgba(255,255,255,1) 80%)`,
+                            filter: 'blur(10px)',
+                            opacity: 0.9,
+                            zIndex: 0,
+                        }}
+                    />
+
+                    {/* 🖼️ Image principale */}
+                    <div
+                        className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 shadow-lg ring-4 ring-white"
+                        style={{
+                            zIndex: 1, // 👈 la photo reste au-dessus du halo
+                        }}
+                    >
+                        {person.image_url ? (
+                            <img
+                                src={person.image_url}
+                                alt={person.display_name}
+                                className="object-cover w-full h-full"
+                            />
+                        ) : (
+                            <span className="text-lg font-semibold text-muted-foreground">
+                                {person.display_name[0]}
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 {/* Nom */}
-                <div
-                    className={`font-medium text-base text-center transition-colors duration-200 ${
-                        isWinner ? 'text-primary' : 'text-card-foreground hover:text-primary/80'
-                    }`}
-                >
+                <div className={`font-medium text-base text-center transition-colors duration-200`}>
                     {person.display_name}
                 </div>
             </div>

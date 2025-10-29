@@ -81,8 +81,11 @@ html, body {
         --primary: 330 80% 60%; /* Ton rose Surchope 💘 */
         --primary-foreground: 0 0% 100%;
 
-        --secondary: 217 91% 60%; /* Bleu complémentaire */
-        --secondary-foreground: 0 0% 100%;
+        /* #851a5d */
+        --secondary: 322, 67%, 31%;
+        --secondary-foreground: 0, 0%, 100%;
+
+        --blend: 326 100% 93%;
 
         --accent: 340 70% 96%;
         --accent-foreground: 330 60% 40%;
