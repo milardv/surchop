@@ -61,9 +61,7 @@ export default function CoupleGauge({
                 </div>
 
                 {/* Nom */}
-                <div
-                    className={`font-medium text-base text-center transition-colors duration-200 ${colorPerson}`}
-                >
+                <div className={`font-medium text-base text-center transition-colors duration-200`}>
                     {person.display_name}
                 </div>
             </div>
