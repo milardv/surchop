@@ -14,6 +14,7 @@ import CoupleDetailPage from './pages/CoupleDetailPage';
 import PlayModePage from './pages/PlayModePage';
 
 import StyleGuide from '@/tools/StyleGuide';
+import ValidateCouplesPage from '@/pages/ValidateCouplesPage';
 
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
@@ -23,7 +24,7 @@ export default function App() {
     useEffect(() => onAuthStateChanged(auth, setUser), []);
 
     return (
-        <div>
+        <div className="pb-16 md:pb-0">
             <Header user={user} />
 
             <Routes>
@@ -61,6 +62,7 @@ export default function App() {
                     path="/couple/:id"
                     element={<CoupleDetailPage couples={couples} user={user} onVote={handleVote} />}
                 />
+                <Route path="/valider-couples" element={<ValidateCouplesPage />} />
                 <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
                 <Route path="/style" element={<StyleGuide />} />
                 <Route path="*" element={<Navigate to="/" replace />} />

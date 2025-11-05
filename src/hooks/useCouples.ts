@@ -24,10 +24,12 @@ export default function useCouples() {
         let unsub: (() => void) | null = null;
 
         (async () => {
-            const snap = await getDocs(collection(db, 'couples'));
+            // ✅ On ne récupère que les couples validés
+            const q = query(collection(db, 'couples'), where('validated', '==', true));
+            const snap = await getDocs(q);
             await processSnapshot(snap);
 
-            unsub = onSnapshot(collection(db, 'couples'), processSnapshot);
+            unsub = onSnapshot(q, processSnapshot);
         })();
 
         async function processSnapshot(snap: any) {

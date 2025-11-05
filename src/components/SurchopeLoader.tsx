@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export default function SurchopeLoader() {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[60vh] text-primary bg-background">
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-primary bg-transparent">
             {/* 💘 Logo cœur animé */}
             <motion.img
                 src="/icons/favicon.svg" // fichier dans public/icons/

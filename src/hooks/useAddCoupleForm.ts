@@ -102,6 +102,7 @@ export function useAddCoupleForm(
                 createdAt: serverTimestamp(),
                 consentCertified: true,
                 category,
+                validated: false,
             });
 
             await Promise.all([

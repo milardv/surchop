@@ -18,13 +18,10 @@ export default function CoupleGauge({
         person: { display_name: string; image_url?: string },
         index: 'A' | 'B',
     ) => {
-        // 🎨 Détermine la couleur selon le côté
         const colorClass =
             index === 'A'
                 ? 'ring-primary bg-primary/25 text-primary'
                 : 'ring-secondary bg-secondary/25 text-secondary';
-
-        const colorPerson = index === 'A' ? 'text-primary' : 'text-secondary';
 
         return (
             <div
@@ -32,19 +29,16 @@ export default function CoupleGauge({
                 className="flex items-center gap-2 flex-col cursor-pointer relative"
                 onClick={() => onSelectPerson(person.display_name)}
             >
-                {/* 💫 Halo animé (toujours présent, couleur selon le côté) */}
+                {/* 💫 Halo animé (agrandi pour correspondre à la nouvelle taille) */}
                 <div
-                    className={`absolute w-28 h-28 md:w-36 md:h-36 rounded-full blur-md animate-pulse-ring -z-10 ${colorClass}`}
+                    className={`absolute w-32 h-32 md:w-40 md:h-40 rounded-full blur-md animate-pulse-ring -z-10 ${colorClass}`}
                 />
 
                 {/* 🖼️ Image avec halo dégradé visible */}
                 <div className="relative flex items-center justify-center">
-                    {/* 🖼️ Image principale */}
                     <div
-                        className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 shadow-lg ring-4 ring-white"
-                        style={{
-                            zIndex: 1, // 👈 la photo reste au-dessus du halo
-                        }}
+                        className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 shadow-lg ring-4 ring-white"
+                        style={{ zIndex: 1 }}
                     >
                         {person.image_url ? (
                             <img
@@ -60,8 +54,7 @@ export default function CoupleGauge({
                     </div>
                 </div>
 
-                {/* Nom */}
-                <div className={`font-medium text-base text-center transition-colors duration-200`}>
+                <div className="font-medium text-base text-center transition-colors duration-200">
                     {person.display_name}
                 </div>
             </div>
@@ -77,7 +70,6 @@ export default function CoupleGauge({
 
     return (
         <>
-            {/* Animation des halos */}
             <style>
                 {`
           @keyframes pulse-ring {

@@ -50,9 +50,7 @@ export default function InstallPrompt() {
             className="flex items-center gap-2 px-3 py-2 rounded-md text-primary cursor-pointer hover:bg-muted transition"
         >
             <Download size={16} className="text-primary" />
-            <span className="font-medium">
-                {isIOS ? 'Ajouter à l’écran d’accueil' : 'Installer l’app'}
-            </span>
+            <span className="font-medium">Installer</span>
         </div>
     );
 }
