@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { User } from 'firebase/auth';
-import { Heart, UserPlus, Home, CheckSquare, LogOut } from 'lucide-react';
+import { Heart, UserPlus, Home, CheckSquare, LogOut, Play } from 'lucide-react';
 import React from 'react';
 
 import { loginWithGoogle, logout } from '../firebase';
@@ -56,7 +56,7 @@ export default function Header({ user }: { user: User | null }) {
 
     return (
         <>
-            {/* HEADER TOP */}
+            {/* 🧭 HEADER TOP (visible sur desktop) */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
                 <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
                     {/* Logo */}
@@ -68,7 +68,18 @@ export default function Header({ user }: { user: User | null }) {
                         SURCHOPE
                     </Link>
 
-                    {/* Partie droite (user / install) */}
+                    {/* Navigation desktop */}
+                    <nav className="hidden md:flex items-center gap-1">
+                        <NavItem to="/" label="Couples" icon={Home} />
+                        {user && <NavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />}
+                        <NavItem to="/jouer" label="Jouer" icon={Play} accent />
+                        {user && <NavItem to="/ajouter-couple" label="Ajouter" icon={UserPlus} />}
+                        {isAdmin && (
+                            <NavItem to="/valider-couples" label="À valider" icon={CheckSquare} />
+                        )}
+                    </nav>
+
+                    {/* Partie droite (profil / connexion) */}
                     <div className="flex items-center gap-2">
                         {user ? (
                             <>
@@ -78,8 +89,7 @@ export default function Header({ user }: { user: User | null }) {
                                     src={user.photoURL ?? ''}
                                     alt={user.displayName ?? 'Avatar'}
                                 />
-
-                                {/* Déconnexion (seulement sur desktop) */}
+                                {/* Déconnexion desktop */}
                                 <button
                                     className="hidden sm:flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground underline-offset-2 hover:underline transition"
                                     onClick={() => logout()}
@@ -97,8 +107,7 @@ export default function Header({ user }: { user: User | null }) {
                                 Se connecter
                             </button>
                         )}
-
-                        {/* Bouton d'installation */}
+                        {/* Bouton d'installation (mobile uniquement) */}
                         <div className="flex sm:hidden">
                             <InstallPrompt />
                         </div>
@@ -106,7 +115,7 @@ export default function Header({ user }: { user: User | null }) {
                 </div>
             </header>
 
-            {/* ✅ Bottom navigation sur mobile (masqué pendant le mode Play) */}
+            {/* 📱 MENU BAS (mobile uniquement) */}
             {!isPlayMode && (
                 <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-background/95 border-t border-border backdrop-blur">
                     <div className="max-w-5xl mx-auto flex items-center justify-around px-2">
@@ -114,27 +123,14 @@ export default function Header({ user }: { user: User | null }) {
                         {user && (
                             <BottomNavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />
                         )}
-
-                        {/* Jouer */}
-                        <Link
-                            to="/jouer"
-                            className="flex flex-col items-center justify-center flex-1 py-2 text-[12px] transition text-primary"
-                            title="Jouer"
-                        >
-                            <div className="relative">
-                                <div className="absolute inset-0 rounded-full bg-primary/20 blur-md animate-pulse opacity-80"></div>
-                                <Heart size={24} className="relative text-primary drop-shadow" />
-                            </div>
-                            <span className="mt-0.5 font-medium">Jouer</span>
-                        </Link>
-
+                        <BottomNavItem to="/jouer" label="Jouer" icon={Play} />
                         {user && (
                             <BottomNavItem to="/ajouter-couple" label="Ajouter" icon={UserPlus} />
                         )}
                         {isAdmin && (
                             <BottomNavItem
                                 to="/valider-couples"
-                                label="À valider"
+                                label="Valider"
                                 icon={CheckSquare}
                             />
                         )}

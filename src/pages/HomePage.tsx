@@ -1,5 +1,4 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeIntroModal from '../components/SurchopeIntroModal';
@@ -23,8 +22,6 @@ export default function HomePage({
     loading: boolean;
     deleteCouple?: (id: string, userUid: string) => void;
 }) {
-    const navigate = useNavigate();
-
     // Tous les hooks ici
     const [query, setQuery] = useState('');
     const [showIntro, setShowIntro] = useState(false);
@@ -32,7 +29,8 @@ export default function HomePage({
 
     // Tri initial : non votés d'abord, exécuté une seule fois
     useEffect(() => {
-        if (couples && couples.length > 0 && orderedCouples.length === 0) {
+        // 🟢 Si c’est le premier chargement → tri initial
+        if (orderedCouples.length === 0 && couples.length > 0) {
             const sorted = [...couples].sort((a, b) => {
                 const aVoted = !!myVotes[a.id];
                 const bVoted = !!myVotes[b.id];
@@ -40,8 +38,32 @@ export default function HomePage({
                 return aVoted ? 1 : -1; // non votés d’abord
             });
             setOrderedCouples(sorted);
+            return;
         }
-    }, [couples]); // pas de dépendance sur myVotes
+
+        // 🟣 Si couples change après le premier tri
+        if (orderedCouples.length > 0 && couples.length > 0) {
+            setOrderedCouples((prev) => {
+                const next = [...prev];
+
+                // ✅ Mettre à jour ou ajouter les couples modifiés
+                couples.forEach((updated) => {
+                    const existingIndex = next.findIndex((c) => c.id === updated.id);
+
+                    if (existingIndex !== -1) {
+                        // On remplace seulement les données du couple modifié
+                        next[existingIndex] = { ...next[existingIndex], ...updated };
+                    } else {
+                        // Nouveau couple → on l’ajoute à la fin
+                        next.push(updated);
+                    }
+                });
+
+                // ✅ Supprimer les couples disparus
+                return next.filter((c) => couples.some((updated) => updated.id === c.id));
+            });
+        }
+    }, [couples, myVotes]);
 
     useEffect(() => {
         const alreadySeen = localStorage.getItem('surchope_intro_seen');

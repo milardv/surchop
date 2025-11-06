@@ -20,13 +20,30 @@ export default function useVotes(user: User | null, couples: CoupleView[]) {
     useEffect(() => {
         const q = query(collection(db, 'votes'));
         const unsub = onSnapshot(q, (snap) => {
-            const list: VoteView[] = snap.docs.map((d) => {
-                const v = d.data() as VoteDoc;
-                const updatedAt = (v as any).updatedAt?.toDate?.() as Date | undefined;
-                return { id: d.id, ...v, updatedAt };
+            setVotesAll((prev) => {
+                let next = [...prev];
+
+                snap.docChanges().forEach((change) => {
+                    const v = change.doc.data() as VoteDoc;
+                    const updatedAt = (v as any).updatedAt?.toDate?.() as Date | undefined;
+                    const newVote: VoteView = { id: change.doc.id, ...v, updatedAt };
+
+                    if (change.type === 'added') {
+                        // Ajouter s’il n’existe pas déjà
+                        if (!next.some((x) => x.id === newVote.id)) next.push(newVote);
+                    } else if (change.type === 'modified') {
+                        // Mettre à jour
+                        next = next.map((x) => (x.id === newVote.id ? newVote : x));
+                    } else if (change.type === 'removed') {
+                        // Supprimer
+                        next = next.filter((x) => x.id !== newVote.id);
+                    }
+                });
+
+                return next;
             });
-            setVotesAll(list);
         });
+
         return () => unsub();
     }, []);
 

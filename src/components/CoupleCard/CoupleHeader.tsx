@@ -36,17 +36,6 @@ export default function CoupleHeader({
                 console.log('Partage annulé :', err);
             }
         }
-
-        // ❎ Fallback : WhatsApp / Instagram
-        const encodedMsg = encodeURIComponent(`${shareText}\n👉 ${shareUrl}`);
-        const whatsappUrl = `https://wa.me/?text=${encodedMsg}`;
-        const instagramUrl = `https://www.instagram.com/`;
-
-        const choice = window.prompt(
-            'Choisis où partager 💬\n\n1️⃣ WhatsApp\n2️⃣ Instagram\n\nTape 1 ou 2 :',
-        );
-        if (choice === '1') window.open(whatsappUrl, '_blank');
-        if (choice === '2') window.open(instagramUrl, '_blank');
     };
 
     return (

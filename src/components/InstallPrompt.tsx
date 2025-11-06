@@ -1,56 +1,61 @@
 import React, { useEffect, useState } from 'react';
-import { Download } from 'lucide-react';
 
 export default function InstallPrompt() {
-    const [promptEvent, setPromptEvent] = useState<any>(null);
-    const [installed, setInstalled] = useState(false);
-    const [isIOS, setIsIOS] = useState(false);
-    const [isInStandalone, setIsInStandalone] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [isInstalled, setIsInstalled] = useState(false);
 
     useEffect(() => {
+        // 🧠 Vérifie si l'app est déjà installée
+        const checkInstalled = () => {
+            const isStandalone =
+                window.matchMedia('(display-mode: standalone)').matches ||
+                (window.navigator as any).standalone === true;
+            setIsInstalled(isStandalone);
+        };
+
+        checkInstalled();
+
+        // 🔔 Si l’utilisateur installe depuis le navigateur
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ App installée');
+            setIsInstalled(true);
+        });
+
+        // 💡 Capture l’événement "avant installation"
         const handler = (e: any) => {
             e.preventDefault();
-            setPromptEvent(e);
+            setDeferredPrompt(e);
         };
-        const installedHandler = () => setInstalled(true);
 
         window.addEventListener('beforeinstallprompt', handler);
-        window.addEventListener('appinstalled', installedHandler);
-
-        const ua = window.navigator.userAgent.toLowerCase();
-        const ios = /iphone|ipad|ipod/.test(ua);
-        const standalone = (window.navigator as any).standalone === true;
-        setIsIOS(ios);
-        setIsInStandalone(standalone);
 
         return () => {
             window.removeEventListener('beforeinstallprompt', handler);
-            window.removeEventListener('appinstalled', installedHandler);
+            window.removeEventListener('appinstalled', () => setIsInstalled(true));
         };
     }, []);
 
-    if (installed || isInStandalone) return null;
+    // ❌ Si déjà installée → on masque le bouton
+    if (isInstalled || !deferredPrompt) return null;
 
-    const handleInstall = () => {
-        if (promptEvent) {
-            promptEvent.prompt();
-            promptEvent.userChoice.then((choice: any) => {
-                if (choice.outcome === 'accepted') setPromptEvent(null);
-            });
-        } else if (isIOS) {
-            alert(
-                "🍎 Sur iPhone/iPad :\n1️⃣ Appuie sur le bouton 'Partager' (carré avec la flèche)\n2️⃣ Sélectionne 'Sur l’écran d’accueil' 📲",
-            );
+    const handleInstall = async () => {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            console.log('Utilisateur a accepté l’installation ✅');
+            setIsInstalled(true);
+        } else {
+            console.log('Utilisateur a refusé l’installation ❌');
         }
+        setDeferredPrompt(null);
     };
 
     return (
-        <div
+        <button
             onClick={handleInstall}
-            className="flex items-center gap-2 px-3 py-2 rounded-md text-primary cursor-pointer hover:bg-muted transition"
+            className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
         >
-            <Download size={16} className="text-primary" />
-            <span className="font-medium">Installer</span>
-        </div>
+            Installer l’app
+        </button>
     );
 }

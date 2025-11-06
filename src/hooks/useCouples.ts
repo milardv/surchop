@@ -3,11 +3,11 @@ import {
     collection,
     doc,
     getDoc,
-    getDocs,
     onSnapshot,
-    deleteDoc,
     query,
     where,
+    getDocs,
+    deleteDoc,
 } from 'firebase/firestore';
 
 import { db } from '../firebase';
@@ -16,46 +16,55 @@ import { CoupleDoc, CoupleView, Person } from '../models/models';
 export default function useCouples() {
     const [couples, setCouples] = useState<CoupleView[]>([]);
     const [loading, setLoading] = useState(true);
-
-    // Cache pour éviter de recharger plusieurs fois les mêmes personnes
     const personCache = new Map<string, Person>();
 
     useEffect(() => {
-        let unsub: (() => void) | null = null;
+        const q = query(collection(db, 'couples'), where('validated', '==', true));
 
-        (async () => {
-            // ✅ On ne récupère que les couples validés
-            const q = query(collection(db, 'couples'), where('validated', '==', true));
-            const snap = await getDocs(q);
-            await processSnapshot(snap);
+        // ✅ async wrapper — Firestore callback cannot be directly async
+        const unsub = onSnapshot(q, (snap) => {
+            const changes = snap.docChanges();
+            if (changes.length === 0) return;
 
-            unsub = onSnapshot(q, processSnapshot);
-        })();
+            // On traite les changements
+            changes.forEach(async (change) => {
+                const c = change.doc.data() as CoupleDoc;
+                const coupleId = change.doc.id;
 
-        async function processSnapshot(snap: any) {
-            const views: CoupleView[] = [];
+                if (change.type === 'removed') {
+                    setCouples((prev) => prev.filter((x) => x.id !== coupleId));
+                    return;
+                }
 
-            for (const d of snap.docs) {
-                const c = d.data() as CoupleDoc;
-
+                // Charger les personnes (avec cache)
                 const a = await loadPerson(c.people_a_id);
                 const b = await loadPerson(c.people_b_id);
-                if (!a || !b) continue;
+                if (!a || !b) return;
 
-                views.push({
-                    id: d.id,
+                const newCouple: CoupleView = {
+                    id: coupleId,
                     personA: a,
                     personB: b,
                     countA: c.count_a ?? 0,
                     countB: c.count_b ?? 0,
                     countTie: c.count_tie ?? 0,
                     category: c.category ?? 'friends',
-                });
-            }
+                };
 
-            setCouples(views);
+                setCouples((prev) => {
+                    const exists = prev.find((x) => x.id === coupleId);
+                    if (!exists && change.type === 'added') {
+                        return [...prev, newCouple];
+                    }
+                    if (exists && change.type === 'modified') {
+                        return prev.map((x) => (x.id === coupleId ? newCouple : x));
+                    }
+                    return prev;
+                });
+            });
+
             setLoading(false);
-        }
+        });
 
         async function loadPerson(id: string): Promise<Person | null> {
             if (personCache.has(id)) return personCache.get(id)!;
@@ -66,13 +75,10 @@ export default function useCouples() {
             return person;
         }
 
-        return () => unsub && unsub();
+        return () => unsub();
     }, []);
 
-    /**
-     * 🔥 Supprime un couple et toutes ses données associées
-     * (votes + personnes liées)
-     */
+    // 🔥 Suppression d’un couple
     const deleteCouple = async (id: string, userUid: string) => {
         if (userUid !== 'EuindCjjeTYx5ABLPCRWdflHy2c2') {
             alert('Tu n’as pas les droits pour supprimer ce couple.');
@@ -82,35 +88,24 @@ export default function useCouples() {
         try {
             const coupleRef = doc(db, 'couples', id);
             const coupleSnap = await getDoc(coupleRef);
-
-            if (!coupleSnap.exists()) {
-                alert('Couple introuvable.');
-                return;
-            }
+            if (!coupleSnap.exists()) return alert('Couple introuvable.');
 
             const couple = coupleSnap.data() as CoupleDoc;
 
-            // 1️⃣ Supprimer tous les votes liés à ce couple
+            // Supprimer votes + personnes
             const votesSnap = await getDocs(
                 query(collection(db, 'votes'), where('couple_id', '==', id)),
             );
             const voteDeletions = votesSnap.docs.map((d) => deleteDoc(d.ref));
 
-            // 2️⃣ Supprimer les deux personnes liées
-            const personARef = doc(db, 'people', couple.people_a_id);
-            const personBRef = doc(db, 'people', couple.people_b_id);
-
-            // 3️⃣ Supprimer le couple lui-même
             await Promise.all([
                 ...voteDeletions,
-                deleteDoc(personARef),
-                deleteDoc(personBRef),
+                deleteDoc(doc(db, 'people', couple.people_a_id)),
+                deleteDoc(doc(db, 'people', couple.people_b_id)),
                 deleteDoc(coupleRef),
             ]);
 
-            // 4️⃣ Mise à jour locale
             setCouples((prev) => prev.filter((c) => c.id !== id));
-
             alert('✅ Couple supprimé avec succès.');
         } catch (err) {
             console.error('Erreur pendant la suppression du couple :', err);
@@ -118,5 +113,5 @@ export default function useCouples() {
         }
     };
 
-    return { couples, loading, setCouples, deleteCouple };
+    return { couples, loading, deleteCouple };
 }
