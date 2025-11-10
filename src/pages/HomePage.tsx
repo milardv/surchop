@@ -1,5 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
+import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { Globe, Heart, Sparkles } from 'lucide-react';
 
+import { db } from '../firebase';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeIntroModal from '../components/SurchopeIntroModal';
 import SurchopeLoader from '../components/SurchopeLoader';
@@ -9,10 +12,10 @@ import SearchBar from '@/components/ui/SearchBar';
 
 export default function HomePage({
     user,
-    couples,
+    couples: initialCouples,
     myVotes,
     onVote,
-    loading,
+    loading: initialLoading,
     deleteCouple,
 }: {
     user: any;
@@ -22,49 +25,63 @@ export default function HomePage({
     loading: boolean;
     deleteCouple?: (id: string, userUid: string) => void;
 }) {
-    // Tous les hooks ici
-    const [query, setQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [showIntro, setShowIntro] = useState(false);
     const [orderedCouples, setOrderedCouples] = useState<any[]>([]);
+    const [filter, setFilter] = useState<'all' | 'fictional' | 'real'>('all');
+    const [loading, setLoading] = useState(initialLoading);
 
-    // Tri initial : non votés d'abord, exécuté une seule fois
     useEffect(() => {
-        // 🟢 Si c’est le premier chargement → tri initial
-        if (orderedCouples.length === 0 && couples.length > 0) {
-            const sorted = [...couples].sort((a, b) => {
-                const aVoted = !!myVotes[a.id];
-                const bVoted = !!myVotes[b.id];
-                if (aVoted === bVoted) return 0;
-                return aVoted ? 1 : -1; // non votés d’abord
-            });
-            setOrderedCouples(sorted);
-            return;
-        }
+        const fetchCouples = async () => {
+            setLoading(true);
+            try {
+                let q = query(collection(db, 'couples'));
+                if (filter === 'fictional') {
+                    q = query(q, where('isFictional', '==', true));
+                } else if (filter === 'real') {
+                    q = query(q, where('isFictional', '==', false));
+                }
 
-        // 🟣 Si couples change après le premier tri
-        if (orderedCouples.length > 0 && couples.length > 0) {
-            setOrderedCouples((prev) => {
-                const next = [...prev];
+                const snapshot = await getDocs(q);
 
-                // ✅ Mettre à jour ou ajouter les couples modifiés
-                couples.forEach((updated) => {
-                    const existingIndex = next.findIndex((c) => c.id === updated.id);
+                // 🔁 Pour chaque couple, aller chercher les deux personnes associées
+                const couples = await Promise.all(
+                    snapshot.docs.map(async (docSnap) => {
+                        const data = docSnap.data();
+                        const [aSnap, bSnap] = await Promise.all([
+                            getDoc(doc(db, 'people', data.people_a_id)),
+                            getDoc(doc(db, 'people', data.people_b_id)),
+                        ]);
 
-                    if (existingIndex !== -1) {
-                        // On remplace seulement les données du couple modifié
-                        next[existingIndex] = { ...next[existingIndex], ...updated };
-                    } else {
-                        // Nouveau couple → on l’ajoute à la fin
-                        next.push(updated);
-                    }
+                        return {
+                            id: docSnap.id,
+                            ...data,
+                            personA: aSnap.exists() ? aSnap.data() : null,
+                            personB: bSnap.exists() ? bSnap.data() : null,
+                        };
+                    }),
+                );
+
+                // 🔍 Tri : non votés d’abord
+                const sorted = [...couples].sort((a, b) => {
+                    const aVoted = !!myVotes[a.id];
+                    const bVoted = !!myVotes[b.id];
+                    if (aVoted === bVoted) return 0;
+                    return aVoted ? 1 : -1;
                 });
 
-                // ✅ Supprimer les couples disparus
-                return next.filter((c) => couples.some((updated) => updated.id === c.id));
-            });
-        }
-    }, [couples, myVotes]);
+                setOrderedCouples(sorted);
+            } catch (e) {
+                console.error('Erreur de chargement des couples :', e);
+            } finally {
+                setLoading(false);
+            }
+        };
 
+        fetchCouples();
+    }, [filter, myVotes]);
+
+    // 🧠 Gère le message d’intro
     useEffect(() => {
         const alreadySeen = localStorage.getItem('surchope_intro_seen');
         if (!alreadySeen) {
@@ -73,17 +90,16 @@ export default function HomePage({
         }
     }, []);
 
-    // Même si loading=true, ce hook doit s’exécuter
+    // 🔍 Filtrage par recherche texte
     const filteredCouples = useMemo(() => {
-        const q = query.trim().toLowerCase();
+        const q = searchQuery.trim().toLowerCase();
         return orderedCouples.filter((c) =>
             q === ''
                 ? true
                 : `${c.personA.display_name} ${c.personB.display_name}`.toLowerCase().includes(q),
         );
-    }, [orderedCouples, query]);
+    }, [orderedCouples, searchQuery]);
 
-    // ✅ plus de "return" conditionnel : on affiche le loader dans le JSX
     return (
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 relative text-foreground">
             {showIntro && <SurchopeIntroModal onClose={() => setShowIntro(false)} />}
@@ -92,15 +108,50 @@ export default function HomePage({
                 <SurchopeLoader />
             ) : (
                 <>
-                    {/* 🔍 Barre de recherche */}
+                    {/* 🧭 Barre de filtres */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div className="flex gap-2 border border-gray-200 rounded-full p-1 bg-white/80 backdrop-blur-sm shadow-sm">
+                            {[
+                                { value: 'all', label: 'Tous', icon: <Globe size={18} /> },
+                                {
+                                    value: 'fictional',
+                                    label: 'Fictifs',
+                                    icon: <Sparkles size={18} />,
+                                },
+                                { value: 'real', label: 'Réels', icon: <Heart size={18} /> },
+                            ].map((f) => {
+                                const isActive = filter === f.value;
+                                return (
+                                    <button
+                                        key={f.value}
+                                        onClick={() => setFilter(f.value as any)}
+                                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition-all
+            ${
+                isActive
+                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white shadow-md scale-[1.05]'
+                    : 'text-gray-700 hover:bg-gray-100 hover:shadow-sm'
+            }`}
+                                    >
+                                        <span
+                                            className={`transition-transform ${
+                                                isActive ? 'scale-110 drop-shadow-sm' : 'opacity-80'
+                                            }`}
+                                        >
+                                            {f.icon}
+                                        </span>
+                                        <span>{f.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* 🔍 Barre de recherche */}
                         <SearchBar
-                            value={query}
-                            onChange={setQuery}
+                            value={searchQuery}
+                            onChange={setSearchQuery}
                             placeholder="Rechercher un couple ou un prénom..."
                         />
                     </div>
-
                     {/* 💑 Liste des couples */}
                     {filteredCouples.length === 0 ? (
                         <p className="text-center text-muted-foreground mt-6">
@@ -108,17 +159,19 @@ export default function HomePage({
                         </p>
                     ) : (
                         <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4 pb-24">
-                            {filteredCouples.map((c) => (
-                                <CoupleCard
-                                    key={c.id}
-                                    couple={c}
-                                    user={user}
-                                    myChoice={myVotes[c.id]}
-                                    onVote={onVote}
-                                    onlyMyVotes={false}
-                                    onDelete={deleteCouple}
-                                />
-                            ))}
+                            {filteredCouples.map((c) =>
+                                c.personA && c.personB ? (
+                                    <CoupleCard
+                                        key={c.id}
+                                        couple={c}
+                                        user={user}
+                                        myChoice={myVotes[c.id]}
+                                        onVote={onVote}
+                                        onlyMyVotes={false}
+                                        onDelete={deleteCouple}
+                                    />
+                                ) : null,
+                            )}
                         </div>
                     )}
                 </>

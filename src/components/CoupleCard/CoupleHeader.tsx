@@ -1,4 +1,4 @@
-import { Share2, Trash2 } from 'lucide-react';
+import { Share2, Trash2, Film, Heart } from 'lucide-react';
 import { User } from 'firebase/auth';
 import React from 'react';
 
@@ -21,9 +21,8 @@ export default function CoupleHeader({
         e.stopPropagation();
         const baseUrl = window.location.origin;
         const shareUrl = `${baseUrl}/couple/${couple.id}`;
-        const shareText = `💘 Vote pour ce couple sur Surchope : ${couple.personA.display_name} & ${couple.personB.display_name} 😏`;
+        const shareText = `💘 Vote pour ce couple sur Surchope : ${couple.personA?.display_name} & ${couple.personB.display_name} 😏`;
 
-        // ✅ Partage natif si disponible
         if (navigator.share) {
             try {
                 await navigator.share({
@@ -31,7 +30,6 @@ export default function CoupleHeader({
                     text: shareText,
                     url: shareUrl,
                 });
-                return;
             } catch (err) {
                 console.log('Partage annulé :', err);
             }
@@ -39,7 +37,31 @@ export default function CoupleHeader({
     };
 
     return (
-        <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition">
+        <div className="flex items-center gap-3 opacity-90 hover:opacity-100 transition">
+            {/* 🏷️ Badge fictif ou réel */}
+            {couple.isFictional !== undefined && (
+                <div
+                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
+                        ${
+                            couple.isFictional
+                                ? 'bg-purple-100 text-purple-700'
+                                : 'bg-pink-100 text-pink-700'
+                        }
+                    `}
+                    title={couple.isFictional ? 'Couple fictif' : 'Couple réel'}
+                >
+                    {couple.isFictional ? (
+                        <>
+                            <Film size={14} strokeWidth={2} /> <span>Fictif</span>
+                        </>
+                    ) : (
+                        <>
+                            <Heart size={14} strokeWidth={2.2} /> <span>Réel</span>
+                        </>
+                    )}
+                </div>
+            )}
+
             {/* 🗑️ Bouton admin supprimer */}
             {isAdmin && onDelete && (
                 <button

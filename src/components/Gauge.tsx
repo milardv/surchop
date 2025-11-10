@@ -55,7 +55,7 @@ export default function Gauge({ couple }: { couple: CoupleView }) {
                 ) : (
                     <>
                         <span className="font-semibold text-primary">
-                            {isAWinner ? couple.personA.display_name : couple.personB.display_name}
+                            {isAWinner ? couple.personA?.display_name : couple.personB.display_name}
                         </span>{' '}
                         surchope à{' '}
                         <span className="text-foreground font-medium">

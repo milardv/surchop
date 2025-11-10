@@ -17,6 +17,7 @@ export function useAddCoupleForm(
     user: any,
     navigate: (path: string) => void,
     category: 'friends' | 'people',
+    isFictional: boolean | null, // ✅ champ ajouté
 ) {
     const [personA, setPersonA] = useState({
         display_name: '',
@@ -42,18 +43,24 @@ export function useAddCoupleForm(
 
     const handleBlur = async (which: 'A' | 'B') => {
         const person = which === 'A' ? personA : personB;
-        if (!person.display_name.trim()) return;
-        const exists = await checkPersonExists(person.display_name);
+        if (!person?.display_name.trim()) return;
+        const exists = await checkPersonExists(person?.display_name);
         setNameErrors((prev) => ({
             ...prev,
             [which]: exists
-                ? `Le nom "${person.display_name}" existe déjà dans un autre couple.`
+                ? `Le nom "${person?.display_name}" existe déjà dans un autre couple.`
                 : '',
         }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        // 🧩 Validation supplémentaire pour le couple fictif
+        if (isFictional === null) {
+            setError('Veuillez indiquer si le couple est fictif ou réel.');
+            return;
+        }
 
         if (!personA.display_name || !personB.display_name) {
             setError('Les deux noms sont obligatoires.');
@@ -76,11 +83,13 @@ export function useAddCoupleForm(
         setLoading(true);
 
         try {
+            // 📸 Upload images si besoin
             let aImageURL = personA.image_url;
             let bImageURL = personB.image_url;
             if (personA.file) aImageURL = await uploadToImgBB(personA.file);
             if (personB.file) bImageURL = await uploadToImgBB(personB.file);
 
+            // 👥 Création des documents dans Firestore
             const peopleCol = collection(db, 'people');
             const aRef = await addDoc(peopleCol, {
                 display_name: personA.display_name,
@@ -91,6 +100,7 @@ export function useAddCoupleForm(
                 image_url: bImageURL ?? '',
             });
 
+            // 💑 Création du couple
             const coupleRef = doc(collection(db, 'couples'));
             await setDoc(coupleRef, {
                 id: coupleRef.id,
@@ -103,8 +113,10 @@ export function useAddCoupleForm(
                 consentCertified: true,
                 category,
                 validated: false,
+                isFictional, // ✅ ajouté ici
             });
 
+            // 🔗 Ajoute la référence du couple dans les personnes
             await Promise.all([
                 setDoc(aRef, { couple_id: coupleRef.id }, { merge: true }),
                 setDoc(bRef, { couple_id: coupleRef.id }, { merge: true }),

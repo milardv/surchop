@@ -1,10 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
 import { User } from 'firebase/auth';
-import { Heart, UserPlus, Home, CheckSquare, LogOut, Play } from 'lucide-react';
+import { CheckSquare, Heart, Home, LogOut, Play, UserPlus } from 'lucide-react';
 import React from 'react';
 
 import { loginWithGoogle, logout } from '../firebase';
-import InstallPrompt from './InstallPrompt';
 
 export default function Header({ user }: { user: User | null }) {
     const location = useLocation();
@@ -101,16 +100,33 @@ export default function Header({ user }: { user: User | null }) {
                             </>
                         ) : (
                             <button
-                                className="px-3 py-1 rounded-full bg-primary text-primary-foreground text-sm hover:opacity-90 transition"
                                 onClick={() => loginWithGoogle()}
+                                className="
+        flex items-center justify-center gap-3
+        px-4 py-2
+        bg-white text-black
+        border border-gray-300 rounded-full
+        shadow-sm
+        hover:bg-gray-50 active:scale-[0.98]
+        transition
+    "
                             >
-                                Se connecter
+                                <img
+                                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/2048px-Google_%22G%22_logo.svg.png"
+                                    alt="Logo Google"
+                                    className="w-5 h-5"
+                                    loading="lazy"
+                                />
+                                <span className="font-medium text-sm">Connexion Google</span>
                             </button>
                         )}
+
                         {/* Bouton d'installation (mobile uniquement) */}
-                        <div className="flex sm:hidden">
+
+                        {/*<div className="flex sm:hidden">
                             <InstallPrompt />
                         </div>
+                        */}
                     </div>
                 </div>
             </header>

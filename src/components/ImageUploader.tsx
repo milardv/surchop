@@ -79,7 +79,7 @@ export default function ImageUploader({
 
                 <label
                     htmlFor={`${label}-file`}
-                    className="absolute bottom-1 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-full cursor-pointer shadow hover:opacity-90 transition"
+                    className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-medium px-2 py-1 rounded-full cursor-pointer shadow hover:opacity-90 transition"
                 >
                     {file || imageUrl ? 'Changer' : 'Choisir'}
                 </label>

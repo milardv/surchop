@@ -27,7 +27,7 @@ export default function CoupleGauge({
             <div
                 key={index}
                 className="flex items-center gap-2 flex-col cursor-pointer relative"
-                onClick={() => onSelectPerson(person.display_name)}
+                onClick={() => onSelectPerson(person?.display_name)}
             >
                 {/* 💫 Halo animé (agrandi pour correspondre à la nouvelle taille) */}
                 <div
@@ -40,22 +40,22 @@ export default function CoupleGauge({
                         className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 shadow-lg ring-4 ring-white"
                         style={{ zIndex: 1 }}
                     >
-                        {person.image_url ? (
+                        {person?.image_url ? (
                             <img
                                 src={person.image_url}
-                                alt={person.display_name}
+                                alt={person?.display_name}
                                 className="object-cover w-full h-full"
                             />
                         ) : (
                             <span className="text-lg font-semibold text-muted-foreground">
-                                {person.display_name[0]}
+                                {person?.display_name[0]}
                             </span>
                         )}
                     </div>
                 </div>
 
                 <div className="font-medium text-base text-center transition-colors duration-200">
-                    {person.display_name}
+                    {person?.display_name}
                 </div>
             </div>
         );
@@ -63,9 +63,9 @@ export default function CoupleGauge({
 
     const resultText =
         myChoice === 'A'
-            ? `${couple.personA.display_name} surchope 💘`
+            ? `${couple.personA?.display_name} surchope 💘`
             : myChoice === 'B'
-              ? `${couple.personB.display_name} surchope 💘`
+              ? `${couple.personB?.display_name} surchope 💘`
               : 'égalité parfaite 😳';
 
     return (

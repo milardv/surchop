@@ -8,6 +8,8 @@ import CoupleGauge from './CoupleGauge';
 import CoupleVoteButtons from './CoupleVoteButtons';
 import ReportMenu from '../ReportMenu';
 
+import { loginWithGoogle } from '@/firebase';
+
 export default function CoupleCard({
     couple,
     user,
@@ -54,6 +56,7 @@ export default function CoupleCard({
                         canVote={!!user && !!onVote}
                         myChoice={myChoice}
                         onVote={onVote}
+                        onLoginClick={() => loginWithGoogle()}
                     />
                 </div>
             )}

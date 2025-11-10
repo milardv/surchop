@@ -2,14 +2,16 @@ import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 
-import ImageUploader from '../components/ImageUploader';
 import { useAddCoupleForm } from '../hooks/useAddCoupleForm';
+// <— utilitaire précédent
 
 import BackButton from '@/components/ui/BackButton';
+import { PersonInput } from '@/components/PersonInput';
 
 export default function AddCouplePage({ user }: { user: User | null }) {
     const navigate = useNavigate();
     const [category, setCategory] = useState<'people' | 'friends'>('people');
+    const [isFictional, setIsFictional] = useState<boolean>(false);
 
     const {
         personA,
@@ -24,7 +26,7 @@ export default function AddCouplePage({ user }: { user: User | null }) {
         canSubmit,
         handleBlur,
         handleSubmit,
-    } = useAddCoupleForm(user, navigate, category);
+    } = useAddCoupleForm(user, navigate, category, isFictional); // 👈 passe isFictional au hook
 
     if (!user) {
         return (
@@ -42,47 +44,84 @@ export default function AddCouplePage({ user }: { user: User | null }) {
         <main className="max-w-3xl mx-auto px-4 py-10">
             <h2 className="text-lg font-semibold mb-6">Ajouter un nouveau couple</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 💘 Type de couple */}
+            <div className="border-t pt-6 mt-8 mb-8">
+                <p className="text-sm font-medium text-gray-800 mb-3">
+                    Type de couple <span className="text-red-500">*</span>
+                </p>
+
+                <div className="flex gap-9">
                     {[
                         {
-                            label: 'Personne A',
-                            data: personA,
-                            set: setPersonA,
-                            err: nameErrors.A,
-                            key: 'A',
+                            label: 'Fictif',
+                            value: true,
+                            description: 'Personnages historique, films, séries, etc.',
+                            color: 'from-purple-500 to-pink-500',
+                            icon: '🎬',
                         },
                         {
-                            label: 'Personne B',
-                            data: personB,
-                            set: setPersonB,
-                            err: nameErrors.B,
-                            key: 'B',
+                            label: 'Réel',
+                            value: false,
+                            description: 'Vrai couple (célébrités, amis, etc.)',
+                            color: 'from-blue-500 to-green-500',
+                            icon: '💑',
                         },
-                    ].map(({ label, data, set, err, key }) => (
-                        <div key={label}>
-                            <h3 className="font-medium mb-2">{label}</h3>
-                            <input
-                                type="text"
-                                placeholder="Nom"
-                                value={data.display_name}
-                                onChange={(e) => set({ ...data, display_name: e.target.value })}
-                                onBlur={() => handleBlur(key as 'A' | 'B')}
-                                className={`w-full border rounded p-2 mb-4 ${
-                                    err ? 'border-red-500 bg-red-50' : 'border-gray-300'
-                                }`}
-                            />
-                            {err && <div className="text-xs text-red-600 mb-2">{err}</div>}
-                            <ImageUploader
-                                label={label}
-                                imageUrl={data.image_url}
-                                file={data.file}
-                                onFileChange={(file) => set({ ...data, file })}
-                                onUrlChange={(url) => set({ ...data, image_url: url })}
-                            />
-                        </div>
+                    ].map((option) => (
+                        <button
+                            key={option.label}
+                            type="button"
+                            onClick={() => setIsFictional(option.value)}
+                            className={`flex-1 p-4 rounded-xl border-2 transition-all duration-200 text-left shadow-sm 
+          ${
+              isFictional === option.value
+                  ? `border-transparent bg-gradient-to-r ${option.color} text-white scale-105`
+                  : 'border-gray-300 bg-white hover:border-gray-400'
+          }`}
+                        >
+                            <div className="flex items-center gap-3">
+                                <span className="text-2xl">{option.icon}</span>
+                                <div>
+                                    <p className="font-semibold">{option.label}</p>
+                                    <p
+                                        className={`text-xs ${
+                                            isFictional === option.value
+                                                ? 'text-white/90'
+                                                : 'text-gray-500'
+                                        }`}
+                                    >
+                                        {option.description}
+                                    </p>
+                                </div>
+                            </div>
+                        </button>
                     ))}
                 </div>
+            </div>
+
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit(e);
+                }}
+                className="space-y-6"
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <PersonInput
+                        label="Personne A"
+                        person={personA}
+                        setPerson={setPersonA}
+                        err={nameErrors.A}
+                        handleBlur={handleBlur}
+                    />
+                    <PersonInput
+                        label="Personne B"
+                        person={personB}
+                        setPerson={setPersonB}
+                        err={nameErrors.B}
+                        handleBlur={handleBlur}
+                    />
+                </div>
+
                 <div className="flex items-start gap-2 border-t pt-4 mt-6">
                     <input
                         id="consent"
@@ -102,9 +141,9 @@ export default function AddCouplePage({ user }: { user: User | null }) {
 
                 <button
                     type="submit"
-                    disabled={!canSubmit}
+                    disabled={!canSubmit || isFictional === null}
                     className={`px-4 py-2 rounded text-white ${
-                        canSubmit
+                        canSubmit && isFictional !== null
                             ? 'bg-blue-600 hover:bg-blue-700'
                             : 'bg-gray-300 cursor-not-allowed'
                     }`}
