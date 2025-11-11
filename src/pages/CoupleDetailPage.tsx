@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
-import { CoupleView } from '../models/models';
+import { Couple } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeLoader from '../components/SurchopeLoader';
 
@@ -12,9 +12,9 @@ export default function CoupleDetailPage({
     user,
     onVote,
 }: {
-    couples: CoupleView[];
+    couples: Couple[];
     user: any;
-    onVote: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void;
+    onVote: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
 }) {
     const { id } = useParams();
     const couple = couples.find((c) => c.id === id);
@@ -34,7 +34,7 @@ export default function CoupleDetailPage({
             </div>
         );
 
-    const handleVote = (c: CoupleView, choice: 'A' | 'B' | 'tie') => {
+    const handleVote = (c: Couple, choice: 'A' | 'B' | 'tie') => {
         setMyChoice(choice);
         onVote(c, choice);
     };

@@ -2,7 +2,7 @@ import React from 'react';
 import { Flag, MoreVertical } from 'lucide-react';
 import { User } from 'firebase/auth';
 
-import { CoupleView } from '../models/models';
+import { Couple } from '../models/models';
 
 import {
     DropdownMenu,
@@ -11,7 +11,7 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export default function ReportMenu({ user, couple }: { user: User; couple: CoupleView }) {
+export default function ReportMenu({ user, couple }: { user: User; couple: Couple }) {
     const handleReport = () => {
         const confirmReport = window.confirm(
             `Souhaites-tu signaler le couple "${couple.personA.display_name} et ${couple.personB.display_name}" ?`,

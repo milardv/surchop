@@ -24,7 +24,7 @@ export async function fetchWikipediaSuggestions(
     lastFetchTime = Date.now();
 
     try {
-        const url = `https://en.wikipedia.org/w/api.php?action=query&generator=prefixsearch&gpssearch=${encodeURIComponent(
+        const url = `https://fr.wikipedia.org/w/api.php?action=query&generator=prefixsearch&gpssearch=${encodeURIComponent(
             query,
         )}&prop=pageimages&piprop=thumbnail&pithumbsize=100&format=json&origin=*&gpslimit=5`;
 
@@ -46,5 +46,25 @@ export async function fetchWikipediaSuggestions(
     } catch (error) {
         console.error('Erreur Wikipédia autocomplete:', error);
         return [];
+    }
+}
+// 🖼️ Récupère une image de meilleure qualité pour une page précise
+export async function fetchWikipediaImageHD(title: string): Promise<string | null> {
+    try {
+        const url = `https://fr.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(
+            title,
+        )}&prop=pageimages&piprop=original|thumbnail&pithumbsize=1000&format=json&origin=*`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const pages = data?.query?.pages;
+        if (!pages) return null;
+
+        const firstPage = Object.values(pages)[0] as any;
+        return firstPage?.original?.source || firstPage?.thumbnail?.source || null;
+    } catch (error) {
+        console.error('Erreur récupération image HD Wikipédia:', error);
+        return null;
     }
 }

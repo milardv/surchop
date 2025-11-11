@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Gauge from '../Gauge';
-import { CoupleView } from '../../models/models';
+import { Couple } from '../../models/models';
 
 export default function CoupleGauge({
     couple,
@@ -9,7 +9,7 @@ export default function CoupleGauge({
     onlyMyVotes,
     onSelectPerson,
 }: {
-    couple: CoupleView;
+    couple: Couple;
     myChoice?: 'A' | 'B' | 'tie';
     onlyMyVotes: boolean;
     onSelectPerson: (name: string) => void;

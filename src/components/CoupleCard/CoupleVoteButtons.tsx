@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { CoupleView } from '../../models/models';
+import { Couple } from '../../models/models';
 
 export default function CoupleVoteButtons({
     couple,
@@ -10,11 +10,11 @@ export default function CoupleVoteButtons({
     onVote,
     onLoginClick, // 👈 nouveau
 }: {
-    couple: CoupleView;
+    couple: Couple;
     user: any;
     canVote: boolean;
     myChoice?: 'A' | 'B' | 'tie';
-    onVote?: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void;
+    onVote?: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
     onLoginClick?: () => void; // 👈 callback optionnel
 }) {
     const [voted, setVoted] = useState<'A' | 'B' | 'tie' | null>(null);

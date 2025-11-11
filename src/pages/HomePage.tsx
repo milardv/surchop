@@ -9,19 +9,19 @@ import SurchopeLoader from '../components/SurchopeLoader';
 import SurchopeFooter from '../components/SurchopeFooter';
 
 import SearchBar from '@/components/ui/SearchBar';
+import { Couple } from '@/models/models';
 
 export default function HomePage({
     user,
-    couples: initialCouples,
     myVotes,
     onVote,
     loading: initialLoading,
     deleteCouple,
 }: {
     user: any;
-    couples: any[];
+    couples: Couple[];
     myVotes: Record<string, 'A' | 'B' | 'tie'>;
-    onVote: (c: any, choice: 'A' | 'B' | 'tie') => void;
+    onVote: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
     loading: boolean;
     deleteCouple?: (id: string, userUid: string) => void;
 }) {
@@ -35,7 +35,7 @@ export default function HomePage({
         const fetchCouples = async () => {
             setLoading(true);
             try {
-                let q = query(collection(db, 'couples'));
+                let q = query(collection(db, 'couples'), where('validated', '==', true));
                 if (filter === 'fictional') {
                     q = query(q, where('isFictional', '==', true));
                 } else if (filter === 'real') {
@@ -47,17 +47,21 @@ export default function HomePage({
                 // 🔁 Pour chaque couple, aller chercher les deux personnes associées
                 const couples = await Promise.all(
                     snapshot.docs.map(async (docSnap) => {
-                        const data = docSnap.data();
+                        let data = docSnap.data();
                         const [aSnap, bSnap] = await Promise.all([
                             getDoc(doc(db, 'people', data.people_a_id)),
                             getDoc(doc(db, 'people', data.people_b_id)),
                         ]);
-
+                        console.log(data.count_a);
+                        const personA = aSnap.exists() ? aSnap.data() : null;
+                        personA.id = data.people_a_id;
+                        const personB = bSnap.exists() ? bSnap.data() : null;
+                        personB.id = data.people_b_id;
                         return {
                             id: docSnap.id,
                             ...data,
-                            personA: aSnap.exists() ? aSnap.data() : null,
-                            personB: bSnap.exists() ? bSnap.data() : null,
+                            personA,
+                            personB,
                         };
                     }),
                 );
@@ -79,7 +83,7 @@ export default function HomePage({
         };
 
         fetchCouples();
-    }, [filter, myVotes]);
+    }, [filter]);
 
     // 🧠 Gère le message d’intro
     useEffect(() => {

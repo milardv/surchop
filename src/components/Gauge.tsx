@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 
-import { CoupleView } from '../models/models';
+import { Couple } from '../models/models';
 
-export default function Gauge({ couple }: { couple: CoupleView }) {
+export default function Gauge({ couple }: { couple: Couple }) {
     const [animatedPct, setAnimatedPct] = useState(0);
 
-    const aVotes = couple.countA || 0;
-    const bVotes = couple.countB || 0;
+    const aVotes = couple.count_a || 0;
+    const bVotes = couple.count_b || 0;
     const total = Math.max(1, aVotes + bVotes);
 
     const pctA = (aVotes / total) * 100;

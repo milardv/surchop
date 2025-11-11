@@ -1,14 +1,15 @@
 export type Person = {
     id: string;
     display_name: string;
-    image_url?: string;
     couple_id: string;
+    image_url?: string;
     count?: number;
 };
 
 type CoupleCategory = 'people' | 'friends';
 
-export type CoupleDoc = {
+export type Couple = {
+    id: string;
     people_a_id: string;
     people_b_id: string;
     count_a?: number;
@@ -16,19 +17,14 @@ export type CoupleDoc = {
     count_tie: number;
     createdAt?: any;
     category: CoupleCategory;
-};
-
-export type CoupleView = {
-    id: string;
-    personA: Person;
-    personB: Person;
-    countA: number;
-    countB: number;
-    countTie: number;
-    category: CoupleCategory;
+    validated: boolean;
+    isFictional: boolean;
+    personA?: Person;
+    personB?: Person;
 };
 
 export type VoteDoc = {
+    id: string;
     couple_id: string;
     uid: string;
     people_voted_id: string; // = a.id ou b.id

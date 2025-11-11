@@ -113,7 +113,7 @@ export function useAddCoupleForm(
                 consentCertified: true,
                 category,
                 validated: false,
-                isFictional, // ✅ ajouté ici
+                isFictional,
             });
 
             // 🔗 Ajoute la référence du couple dans les personnes

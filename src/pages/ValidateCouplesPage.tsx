@@ -1,54 +1,67 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, updateDoc, doc, where, query } from 'firebase/firestore';
-import { getDoc, deleteDoc } from 'firebase/firestore';
+import {
+    collection,
+    getDocs,
+    updateDoc,
+    doc,
+    where,
+    query,
+    getDoc,
+    deleteDoc,
+} from 'firebase/firestore';
 
 import { db } from '../firebase';
-import { CoupleDoc, CoupleView, Person } from '../models/models';
+import { Couple, Person } from '../models/models';
 
 export default function ValidateCouplesPage() {
-    const [couples, setCouples] = useState<CoupleView[]>([]);
+    const [couples, setCouples] = useState<Couple[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         (async () => {
-            const q = query(collection(db, 'couples'), where('validated', '!=', true));
-            const snap = await getDocs(q);
+            try {
+                const q = query(collection(db, 'couples'), where('validated', '!=', true));
+                const snap = await getDocs(q);
+                const result: Couple[] = [];
 
-            const result: CoupleView[] = [];
+                for (const d of snap.docs) {
+                    const c = d.data() as Couple;
 
-            for (const d of snap.docs) {
-                const c = d.data() as CoupleDoc;
+                    // 🔍 Récupération des personnes liées
+                    const [aSnap, bSnap] = await Promise.all([
+                        getDoc(doc(db, 'people', c.people_a_id)),
+                        getDoc(doc(db, 'people', c.people_b_id)),
+                    ]);
 
-                // Récupération des personnes liées
-                const aSnap = await getDoc(doc(db, 'people', c.people_a_id));
-                const bSnap = await getDoc(doc(db, 'people', c.people_b_id));
+                    if (!aSnap.exists() || !bSnap.exists()) continue;
 
-                if (!aSnap.exists() || !bSnap.exists()) continue;
+                    const a = { id: aSnap.id, ...(aSnap.data() as Person) };
+                    const b = { id: bSnap.id, ...(bSnap.data() as Person) };
 
-                const a = { id: aSnap.id, ...(aSnap.data() as Person) };
-                const b = { id: bSnap.id, ...(bSnap.data() as Person) };
+                    result.push({
+                        ...c,
+                        id: d.id,
+                        personA: a,
+                        personB: b,
+                    });
+                }
 
-                result.push({
-                    id: d.id,
-                    personA: a,
-                    personB: b,
-                    countA: c.count_a ?? 0,
-                    countB: c.count_b ?? 0,
-                    countTie: c.count_tie ?? 0,
-                    category: c.category ?? 'friends',
-                });
+                setCouples(result);
+            } catch (err) {
+                console.error('Erreur de chargement des couples à valider :', err);
+            } finally {
+                setLoading(false);
             }
-
-            setCouples(result);
-            setLoading(false);
         })();
     }, []);
 
+    // ✅ Validation
     async function handleValidate(id: string) {
         await updateDoc(doc(db, 'couples', id), { validated: true });
         setCouples((prev) => prev.filter((c) => c.id !== id));
     }
 
+    // ❌ Refus (suppression totale)
     async function handleRefuse(id: string) {
         if (!confirm('Supprimer définitivement ce couple ?')) return;
 
@@ -56,9 +69,8 @@ export default function ValidateCouplesPage() {
         const coupleSnap = await getDoc(coupleRef);
         if (!coupleSnap.exists()) return;
 
-        const couple = coupleSnap.data() as CoupleDoc;
+        const couple = coupleSnap.data() as Couple;
 
-        // Supprime aussi les personnes liées
         await Promise.all([
             deleteDoc(doc(db, 'people', couple.people_a_id)),
             deleteDoc(doc(db, 'people', couple.people_b_id)),
@@ -68,6 +80,7 @@ export default function ValidateCouplesPage() {
         setCouples((prev) => prev.filter((c) => c.id !== id));
     }
 
+    // 💡 États d’attente
     if (loading) {
         return <div className="p-6 text-center text-gray-500">Chargement des couples…</div>;
     }
@@ -76,6 +89,7 @@ export default function ValidateCouplesPage() {
         return <div className="p-6 text-center text-gray-500">Aucun couple à valider 🎉</div>;
     }
 
+    // 🧠 Rendu principal
     return (
         <main className="max-w-4xl mx-auto px-4 py-8">
             <h2 className="text-xl font-semibold mb-6 text-primary">Validation des couples</h2>
@@ -88,20 +102,31 @@ export default function ValidateCouplesPage() {
                     >
                         <div className="flex items-center gap-4">
                             <div className="flex -space-x-4">
-                                {[c.personA, c.personB].map((p) => (
-                                    <img
-                                        key={p.id}
-                                        src={p.image_url}
-                                        alt={p.display_name}
-                                        className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
-                                    />
-                                ))}
+                                {[c.personA, c.personB].map(
+                                    (p) =>
+                                        p && (
+                                            <img
+                                                key={p.id}
+                                                src={p.image_url}
+                                                alt={p.display_name}
+                                                className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
+                                            />
+                                        ),
+                                )}
                             </div>
+
                             <div>
                                 <div className="font-medium">
-                                    {c.personA.display_name} ❤️ {c.personB.display_name}
+                                    {c.personA?.display_name} ❤️ {c.personB?.display_name}
                                 </div>
-                                <div className="text-xs text-gray-500">{c.category}</div>
+                                <div className="text-xs text-gray-500 capitalize">
+                                    {c.category === 'friends' ? '👫 Amis' : '🌍 People'}
+                                    {c.isFictional && (
+                                        <span className="ml-2 inline-flex items-center text-purple-600 font-medium">
+                                            ✨ Fictif
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
 

@@ -91,6 +91,7 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
                         aspect={1}
                         cropShape="round"
                         showGrid={false}
+                        restrictPosition={false} // 👈 permet de déplacer l'image librement
                         onCropChange={setCrop}
                         onZoomChange={setZoom}
                         onCropComplete={onCropComplete}
@@ -100,8 +101,8 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
                 {/* 🔍 Slider de zoom */}
                 <input
                     type="range"
-                    min={1}
-                    max={3}
+                    min={0.1} // 👈 permet de zoomer très loin en arrière
+                    max={10} // 👈 permet de zoomer très loin en avant
                     step={0.01}
                     value={zoom}
                     onChange={(e) => setZoom(Number(e.target.value))}

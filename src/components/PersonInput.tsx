@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 
-import { fetchWikipediaSuggestions } from '@/utils/fetchWikipediaSuggestions';
+import {
+    fetchWikipediaImageHD,
+    fetchWikipediaSuggestions,
+} from '@/utils/fetchWikipediaSuggestions';
 import ImageUploader from '@/components/ImageUploader';
 
 export function PersonInput({
@@ -62,13 +65,24 @@ export function PersonInput({
                     {suggestions.map((s, i) => (
                         <li
                             key={i}
-                            onClick={() => {
+                            onClick={async () => {
+                                // 👉 On affiche tout de suite le nom
                                 setPerson({
                                     ...person,
                                     display_name: s.title,
                                     image_url: s.thumbnail || '',
                                 });
                                 setSuggestions([]);
+
+                                // 🔍 Ensuite, on va chercher une image HD
+                                const hdUrl = await fetchWikipediaImageHD(s.title);
+                                if (hdUrl) {
+                                    setPerson({
+                                        ...person,
+                                        display_name: s.title,
+                                        image_url: hdUrl,
+                                    });
+                                }
                             }}
                             className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-3"
                         >

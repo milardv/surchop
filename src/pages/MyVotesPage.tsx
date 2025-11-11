@@ -6,7 +6,7 @@ import { Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { db } from '../firebase';
-import { CoupleView, VoteDoc, VoteView } from '../models/models';
+import { Couple, VoteDoc, VoteView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 
 import SurchopeLoader from '@/components/SurchopeLoader';
@@ -20,14 +20,14 @@ export default function MyVotesPage({
     votesAll,
 }: {
     user: User | null;
-    couples: CoupleView[];
+    couples: Couple[];
     votesAll: VoteView[];
 }) {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
 
     const [entries, setEntries] = useState<
-        { id: string; couple: CoupleView; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[]
+        { id: string; couple: Couple; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[]
     >([]);
 
     // 🔁 Chargement des votes utilisateur
@@ -48,7 +48,7 @@ export default function MyVotesPage({
             const snap = await getDocs(vq);
             const list: {
                 id: string;
-                couple: CoupleView;
+                couple: Couple;
                 choice: 'A' | 'B' | 'tie';
                 updatedAt?: Date;
             }[] = [];

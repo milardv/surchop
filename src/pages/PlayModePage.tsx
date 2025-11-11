@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-import { CoupleView } from '../models/models';
+import { Couple } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeFooter from '../components/SurchopeFooter';
 
@@ -15,10 +15,10 @@ export default function PlayModePage({
     myVotes,
     onVote,
 }: {
-    couples: CoupleView[];
+    couples: Couple[];
     user: any;
     myVotes: Record<string, 'A' | 'B' | 'tie'>;
-    onVote: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void;
+    onVote: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
 }) {
     const navigate = useNavigate();
     const [couplesToPlay] = useState(() => couples.filter((c) => !myVotes[c.id]));
@@ -33,7 +33,7 @@ export default function PlayModePage({
         setVoteDirection(null);
     };
 
-    const handleVote = (couple: CoupleView, choice: 'A' | 'B' | 'tie') => {
+    const handleVote = (couple: Couple, choice: 'A' | 'B' | 'tie') => {
         if (isAnimating) return;
         setIsAnimating(true);
         onVote(couple, choice);

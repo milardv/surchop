@@ -12,7 +12,7 @@ import { collection, getDocs, orderBy, limit, query, getDoc, doc } from 'firebas
 
 import { setupDailyNotification } from './notifications/dailyNotifier';
 
-import { CoupleDoc, CoupleView, Person } from '@/models/models';
+import { Couple, Person } from '@/models/models';
 
 const container = document.getElementById('root')!;
 const root = createRoot(container);
@@ -46,14 +46,14 @@ async function loadPerson(id: string): Promise<Person | null> {
 }
 
 // ✅ Fonction complète : récupère le dernier couple avec les personnes associées
-export async function getLatestCouple(): Promise<CoupleView | null> {
+export async function getLatestCouple(): Promise<Couple | null> {
     try {
         const q = query(collection(db, 'couples'), orderBy('createdAt', 'desc'), limit(1));
         const snap = await getDocs(q);
         if (snap.empty) return null;
 
         const d = snap.docs[0];
-        const c = d.data() as CoupleDoc;
+        const c = d.data() as Couple;
 
         const personA = await loadPerson(c.people_a_id);
         const personB = await loadPerson(c.people_b_id);

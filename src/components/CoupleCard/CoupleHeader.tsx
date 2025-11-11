@@ -2,7 +2,7 @@ import { Share2, Trash2, Film, Heart } from 'lucide-react';
 import { User } from 'firebase/auth';
 import React from 'react';
 
-import { CoupleView } from '../../models/models';
+import { Couple } from '../../models/models';
 
 export default function CoupleHeader({
     couple,
@@ -10,7 +10,7 @@ export default function CoupleHeader({
     onDelete,
     compact,
 }: {
-    couple: CoupleView;
+    couple: Couple;
     user: User | null;
     onDelete?: (id: string, userUid: string) => void;
     compact?: boolean;

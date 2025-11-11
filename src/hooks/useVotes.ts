@@ -1,55 +1,36 @@
 import { useEffect, useState } from 'react';
-import {
-    collection,
-    doc,
-    onSnapshot,
-    query,
-    runTransaction,
-    serverTimestamp,
-} from 'firebase/firestore';
+import { collection, doc, getDocs, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 
 import { db } from '../firebase';
-import { CoupleView, VoteDoc, VoteView } from '../models/models';
+import { Couple, VoteDoc, VoteView } from '../models/models';
 
-export default function useVotes(user: User | null, couples: CoupleView[]) {
+export default function useVotes(user: User | null, couples: Couple[]) {
     const [votesAll, setVotesAll] = useState<VoteView[]>([]);
     const [myVotes, setMyVotes] = useState<Record<string, 'A' | 'B' | 'tie'>>({});
 
-    // Écoute temps réel des votes
+    // 📦 Charger tous les votes une seule fois au montage
     useEffect(() => {
-        const q = query(collection(db, 'votes'));
-        const unsub = onSnapshot(q, (snap) => {
-            setVotesAll((prev) => {
-                let next = [...prev];
-
-                snap.docChanges().forEach((change) => {
-                    const v = change.doc.data() as VoteDoc;
+        const fetchVotes = async () => {
+            try {
+                const snap = await getDocs(collection(db, 'votes'));
+                const allVotes: VoteView[] = snap.docs.map((docSnap) => {
+                    const v = docSnap.data() as VoteDoc;
                     const updatedAt = (v as any).updatedAt?.toDate?.() as Date | undefined;
-                    const newVote: VoteView = { id: change.doc.id, ...v, updatedAt };
-
-                    if (change.type === 'added') {
-                        // Ajouter s’il n’existe pas déjà
-                        if (!next.some((x) => x.id === newVote.id)) next.push(newVote);
-                    } else if (change.type === 'modified') {
-                        // Mettre à jour
-                        next = next.map((x) => (x.id === newVote.id ? newVote : x));
-                    } else if (change.type === 'removed') {
-                        // Supprimer
-                        next = next.filter((x) => x.id !== newVote.id);
-                    }
+                    return { id: docSnap.id, ...v, updatedAt };
                 });
-
-                return next;
-            });
-        });
-
-        return () => unsub();
+                setVotesAll(allVotes);
+            } catch (err) {
+                console.error('Erreur de chargement des votes :', err);
+            }
+        };
+        fetchVotes();
     }, []);
 
-    // Dérive mes votes personnels
+    // 🧠 Dérive les votes personnels
     useEffect(() => {
         if (!user) return setMyVotes({});
+
         const mine: Record<string, 'A' | 'B' | 'tie'> = {};
         for (const v of votesAll) {
             if (v.uid !== user.uid) continue;
@@ -62,8 +43,8 @@ export default function useVotes(user: User | null, couples: CoupleView[]) {
         setMyVotes(mine);
     }, [user, votesAll, couples]);
 
-    // Gestion du vote
-    const handleVote = async (c: CoupleView, choice: 'A' | 'B' | 'tie') => {
+    // 🗳️ Gestion du vote (transaction sécurisée)
+    const handleVote = async (c: Couple, choice: 'A' | 'B' | 'tie') => {
         if (!user) return;
 
         const voteId = `${c.id}_${user.uid}`;
@@ -72,48 +53,72 @@ export default function useVotes(user: User | null, couples: CoupleView[]) {
         const chosenPersonId =
             choice === 'A' ? c.personA.id : choice === 'B' ? c.personB.id : 'tie';
 
-        await runTransaction(db, async (tx) => {
-            const [voteSnap, coupleSnap] = await Promise.all([tx.get(voteRef), tx.get(coupleRef)]);
-            if (!coupleSnap.exists()) throw new Error('Couple not found');
-            const coupleDoc = coupleSnap.data() as any;
+        try {
+            await runTransaction(db, async (tx) => {
+                const [voteSnap, coupleSnap] = await Promise.all([
+                    tx.get(voteRef),
+                    tx.get(coupleRef),
+                ]);
+                if (!coupleSnap.exists()) throw new Error('Couple not found');
+                const coupleData = coupleSnap.data() as any;
 
-            let { count_a = 0, count_b = 0, count_tie = 0 } = coupleDoc;
-            if (!voteSnap.exists()) {
-                if (choice === 'A') count_a++;
-                else if (choice === 'B') count_b++;
-                else count_tie++;
-            } else {
-                const prev = voteSnap.data() as VoteDoc;
-                const prevChoice =
-                    prev.people_voted_id === c.personA.id
-                        ? 'A'
-                        : prev.people_voted_id === c.personB.id
-                          ? 'B'
-                          : 'tie';
-                if (prevChoice === choice) return;
-                if (prevChoice === 'A') count_a--;
-                else if (prevChoice === 'B') count_b--;
-                else count_tie--;
-                if (choice === 'A') count_a++;
-                else if (choice === 'B') count_b++;
-                else count_tie++;
-            }
+                let { count_a = 0, count_b = 0, count_tie = 0 } = coupleData;
+                if (!voteSnap.exists()) {
+                    // Nouveau vote
+                    if (choice === 'A') count_a++;
+                    else if (choice === 'B') count_b++;
+                    else count_tie++;
+                } else {
+                    // Mise à jour du vote existant
+                    const prev = voteSnap.data() as VoteDoc;
+                    const prevChoice =
+                        prev.people_voted_id === c.personA.id
+                            ? 'A'
+                            : prev.people_voted_id === c.personB.id
+                              ? 'B'
+                              : 'tie';
+                    if (prevChoice === choice) return; // rien à changer
 
-            tx.set(coupleRef, { count_a, count_b, count_tie }, { merge: true });
-            tx.set(
-                voteRef,
-                {
+                    if (prevChoice === 'A') count_a--;
+                    else if (prevChoice === 'B') count_b--;
+                    else count_tie--;
+
+                    if (choice === 'A') count_a++;
+                    else if (choice === 'B') count_b++;
+                    else count_tie++;
+                }
+
+                // 🔄 Sauvegarde transactionnelle
+                tx.set(coupleRef, { count_a, count_b, count_tie }, { merge: true });
+                tx.set(
+                    voteRef,
+                    {
+                        couple_id: c.id,
+                        uid: user.uid,
+                        people_voted_id: chosenPersonId,
+                        updatedAt: serverTimestamp(),
+                    },
+                    { merge: true },
+                );
+            });
+
+            // 🧠 Met à jour localement l’état sans rechargement
+            setMyVotes((s) => ({ ...s, [c.id]: choice }));
+            setVotesAll((prev) => {
+                const existing = prev.find((v) => v.id === `${c.id}_${user.uid}`);
+                const updated: VoteView = {
+                    id: `${c.id}_${user.uid}`,
                     couple_id: c.id,
                     uid: user.uid,
                     people_voted_id: chosenPersonId,
-                    updatedAt: serverTimestamp(),
-                },
-                { merge: true },
-            );
-        });
-
-        // MAJ optimiste
-        setMyVotes((s) => ({ ...s, [c.id]: choice }));
+                    updatedAt: new Date(),
+                };
+                if (existing) return prev.map((v) => (v.id === existing.id ? updated : v));
+                return [...prev, updated];
+            });
+        } catch (err) {
+            console.error('Erreur pendant le vote :', err);
+        }
     };
 
     return { votesAll, myVotes, handleVote };

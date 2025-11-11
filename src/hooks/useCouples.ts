@@ -11,24 +11,22 @@ import {
 } from 'firebase/firestore';
 
 import { db } from '../firebase';
-import { CoupleDoc, CoupleView, Person } from '../models/models';
+import { Couple, Person } from '../models/models';
 
 export default function useCouples() {
-    const [couples, setCouples] = useState<CoupleView[]>([]);
+    const [couples, setCouples] = useState<Couple[]>([]);
     const [loading, setLoading] = useState(true);
     const personCache = new Map<string, Person>();
 
     useEffect(() => {
         const q = query(collection(db, 'couples'), where('validated', '==', true));
 
-        // ✅ async wrapper — Firestore callback cannot be directly async
         const unsub = onSnapshot(q, (snap) => {
             const changes = snap.docChanges();
             if (changes.length === 0) return;
 
-            // On traite les changements
             changes.forEach(async (change) => {
-                const c = change.doc.data() as CoupleDoc;
+                const data = change.doc.data() as Couple;
                 const coupleId = change.doc.id;
 
                 if (change.type === 'removed') {
@@ -36,19 +34,17 @@ export default function useCouples() {
                     return;
                 }
 
-                // Charger les personnes (avec cache)
-                const a = await loadPerson(c.people_a_id);
-                const b = await loadPerson(c.people_b_id);
+                const [a, b] = await Promise.all([
+                    loadPerson(data.people_a_id),
+                    loadPerson(data.people_b_id),
+                ]);
                 if (!a || !b) return;
 
-                const newCouple: CoupleView = {
+                const newCouple: Couple = {
+                    ...data,
                     id: coupleId,
                     personA: a,
                     personB: b,
-                    countA: c.count_a ?? 0,
-                    countB: c.count_b ?? 0,
-                    countTie: c.count_tie ?? 0,
-                    category: c.category ?? 'friends',
                 };
 
                 setCouples((prev) => {
@@ -78,7 +74,6 @@ export default function useCouples() {
         return () => unsub();
     }, []);
 
-    // 🔥 Suppression d’un couple
     const deleteCouple = async (id: string, userUid: string) => {
         if (userUid !== 'EuindCjjeTYx5ABLPCRWdflHy2c2') {
             alert('Tu n’as pas les droits pour supprimer ce couple.');
@@ -90,9 +85,8 @@ export default function useCouples() {
             const coupleSnap = await getDoc(coupleRef);
             if (!coupleSnap.exists()) return alert('Couple introuvable.');
 
-            const couple = coupleSnap.data() as CoupleDoc;
+            const couple = coupleSnap.data() as Couple;
 
-            // Supprimer votes + personnes
             const votesSnap = await getDocs(
                 query(collection(db, 'votes'), where('couple_id', '==', id)),
             );

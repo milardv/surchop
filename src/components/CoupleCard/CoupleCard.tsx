@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 
-import { CoupleView } from '../../models/models';
+import { Couple } from '../../models/models';
 import PersonInfoModal from '../PersonInfoModal';
 import CoupleHeader from './CoupleHeader';
 import CoupleGauge from './CoupleGauge';
@@ -19,10 +19,10 @@ export default function CoupleCard({
     onlyMyVotes = false,
     onDelete,
 }: {
-    couple: CoupleView;
+    couple: Couple;
     user: User | null;
     myChoice?: 'A' | 'B' | 'tie';
-    onVote?: (c: CoupleView, choice: 'A' | 'B' | 'tie') => void;
+    onVote?: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
     compact?: boolean;
     onlyMyVotes?: boolean;
     onDelete?: (id: string, userUid: string) => void;
