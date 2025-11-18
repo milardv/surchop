@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+    <url>
+        <loc>https://www.surchope.fr/</loc>
+        <priority>1.0</priority>
+        <changefreq>daily</changefreq>
+    </url>
+
+    <url>
+        <loc>https://www.surchope.fr/jouer</loc>
+        <priority>0.9</priority>
+        <changefreq>daily</changefreq>
+    </url>
+
+    <url>
+        <loc>https://www.surchope.fr/mes-votes</loc>
+        <priority>0.7</priority>
+        <changefreq>weekly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://www.surchope.fr/ajouter-couple</loc>
+        <priority>0.5</priority>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <url>
+        <loc>https://www.surchope.fr/confidentialite</loc>
+        <priority>0.3</priority>
+        <changefreq>yearly</changefreq>
+    </url>
+
+</urlset>

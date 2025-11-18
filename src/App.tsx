@@ -15,6 +15,7 @@ import PlayModePage from './pages/PlayModePage';
 
 import StyleGuide from '@/tools/StyleGuide';
 import ValidateCouplesPage from '@/pages/ValidateCouplesPage';
+import FaqPage from '@/pages/Faq';
 
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
@@ -64,6 +65,7 @@ export default function App() {
                 />
                 <Route path="/valider-couples" element={<ValidateCouplesPage />} />
                 <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
+                <Route path="/faq" element={<FaqPage />} />
                 <Route path="/style" element={<StyleGuide />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
