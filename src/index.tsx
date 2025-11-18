@@ -73,6 +73,3 @@ export async function getLatestCouple(): Promise<Couple | null> {
         return null;
     }
 }
-
-// ✅ Active les notifications quotidiennes si supportées
-setupDailyNotification(getLatestCouple);
