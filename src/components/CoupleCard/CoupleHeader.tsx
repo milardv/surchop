@@ -1,8 +1,9 @@
-import { Share2, Trash2, Film, Heart } from 'lucide-react';
-import { User } from 'firebase/auth';
+import {Film, Heart, Pencil, Share2, Trash2} from 'lucide-react';
+import {User} from 'firebase/auth';
 import React from 'react';
+import {useNavigate} from 'react-router-dom';
 
-import { Couple } from '../../models/models';
+import {Couple} from '../../models/models';
 
 export default function CoupleHeader({
     couple,
@@ -16,6 +17,7 @@ export default function CoupleHeader({
     compact?: boolean;
 }) {
     const isAdmin = user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2';
+    const navigate = useNavigate();
 
     const handleShare = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -75,6 +77,20 @@ export default function CoupleHeader({
                     className="p-1.5 rounded-full text-destructive/80 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-[hsl(var(--destructive))]/40 transition active:scale-95"
                 >
                     <Trash2 size={18} />
+                </button>
+            )}
+
+            {/* ✏️ Bouton admin modifier */}
+            {isAdmin && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/modifier-couple/${couple.id}`);
+                    }}
+                    title="Modifier ce couple"
+                    className="p-1.5 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-100/40 transition active:scale-95"
+                >
+                    <Pencil size={18}/>
                 </button>
             )}
 

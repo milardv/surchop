@@ -1,9 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
-import { User } from 'firebase/auth';
-import { CheckSquare, Heart, Home, LogOut, Play, UserPlus } from 'lucide-react';
+import {Link, useLocation} from 'react-router-dom';
+import {User} from 'firebase/auth';
+import {CheckSquare, Heart, Home, LogOut, Play, UserPlus} from 'lucide-react';
 import React from 'react';
 
-import { loginWithGoogle, logout } from '../firebase';
+import {loginWithGoogle, logout} from '../firebase';
 
 export default function Header({ user }: { user: User | null }) {
     const location = useLocation();
@@ -44,11 +44,13 @@ export default function Header({ user }: { user: User | null }) {
         return (
             <Link
                 to={to}
-                className={`flex flex-col items-center justify-center flex-1 py-1.5 text-[11px] transition
-                    ${active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`flex flex-col items-center justify-center flex-1 py-3 
+                transition-all duration-150 
+                ${active ? 'text-primary scale-[1.1] font-semibold' : 'text-muted-foreground hover:text-foreground'}
+            `}
             >
-                <Icon size={18} />
-                <span className="mt-0.5">{label}</span>
+                <Icon size={26} className="mb-1"/>
+                <span className="text-[13px] tracking-wide">{label}</span>
             </Link>
         );
     };
@@ -133,8 +135,14 @@ export default function Header({ user }: { user: User | null }) {
 
             {/* 📱 MENU BAS (mobile uniquement) */}
             {!isPlayMode && (
-                <nav className="md:hidden fixed bottom-0 inset-x-0 z-50 bg-background/95 border-t border-border backdrop-blur">
-                    <div className="max-w-5xl mx-auto flex items-center justify-around px-2">
+                <nav
+                    className="md:hidden fixed bottom-0 inset-x-0 z-50
+        bg-background/95 backdrop-blur-xl
+        border-t border-border
+        py-2 shadow-[0_-3px_12px_rgba(0,0,0,0.08)]
+        h-20"
+                >
+                    <div className="max-w-5xl mx-auto flex items-center justify-around px-4 h-full">
                         <BottomNavItem to="/" label="Couples" icon={Home} />
                         {user && (
                             <BottomNavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />

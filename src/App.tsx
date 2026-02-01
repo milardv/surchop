@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import { onAuthStateChanged, User } from 'firebase/auth';
+import React, {useEffect, useState} from 'react';
+import {Navigate, Route, Routes} from 'react-router-dom';
+import {onAuthStateChanged, User} from 'firebase/auth';
 
-import { auth } from './firebase';
+import {auth} from './firebase';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import MyVotesPage from './pages/MyVotesPage';
-import AddCouplePage from './pages/AddCouplePage';
+import AddCouplePage from './pages/AddCouple/AddCouplePage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import useCouples from './hooks/useCouples';
 import useVotes from './hooks/useVotes';
@@ -63,6 +63,8 @@ export default function App() {
                     path="/couple/:id"
                     element={<CoupleDetailPage couples={couples} user={user} onVote={handleVote} />}
                 />
+                <Route path="/modifier-couple/:id" element={<AddCouplePage user={user} isEdit/>}/>
+
                 <Route path="/valider-couples" element={<ValidateCouplesPage />} />
                 <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
                 <Route path="/faq" element={<FaqPage />} />
