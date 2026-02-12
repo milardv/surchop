@@ -10,6 +10,11 @@ export default function PrivacyPolicyPage() {
                 commercial, permettant aux utilisateurs de voter anonymement sur des couples fictifs
                 ou réels.
             </p>
+            <p className="mb-4">
+                Cette politique concerne le service Surchope, parfois recherché avec des variantes
+                orthographiques comme <strong>surchoper</strong>, <strong>surchopper</strong>,
+                <strong> surchoppe</strong> ou <strong>surchopper définition</strong>.
+            </p>
 
             <h2 className="text-lg font-semibold mt-6 mb-2">1. Données collectées</h2>
             <p>
@@ -19,6 +24,10 @@ export default function PrivacyPolicyPage() {
             <ul className="list-disc ml-6 mb-4">
                 <li>Adresse e-mail et photo de profil via Google (connexion Firebase Auth)</li>
                 <li>Identifiants anonymes de vote (UID, couple_id, choix A/B)</li>
+                <li>
+                    Identifiant visiteur en cookie technique (<code>surchope_voter_id</code>) pour
+                    limiter les multi-votes en mode invité
+                </li>
                 <li>
                     Éventuellement des images fournies par les utilisateurs (hébergées sur ImgBB)
                 </li>
@@ -31,21 +40,34 @@ export default function PrivacyPolicyPage() {
                 partagée ou exploitée à des fins commerciales.
             </p>
 
-            <h2 className="text-lg font-semibold mt-6 mb-2">3. Base légale</h2>
+            <h2 className="text-lg font-semibold mt-6 mb-2">
+                3. Cookies et identifiants techniques
+            </h2>
+            <p>
+                Surchope utilise un cookie technique pour attribuer un identifiant anonyme en mode
+                invité. Cet identifiant sert à associer vos votes à votre navigateur et à éviter le
+                multi-vote sur un même couple.
+            </p>
+            <p>
+                Ce cookie ne sert pas à la publicité ciblée et n’est pas utilisé pour vous profiler
+                à des fins commerciales.
+            </p>
+
+            <h2 className="text-lg font-semibold mt-6 mb-2">4. Base légale</h2>
             <p>
                 Le traitement repose sur le <strong>consentement explicite</strong> des
                 utilisateurs, notamment lors de la création d’un couple et du téléchargement
                 d’images.
             </p>
 
-            <h2 className="text-lg font-semibold mt-6 mb-2">4. Durée de conservation</h2>
+            <h2 className="text-lg font-semibold mt-6 mb-2">5. Durée de conservation</h2>
             <p>
                 Les données sont conservées tant que le compte utilisateur existe ou que le couple
                 reste publié. Les utilisateurs peuvent demander la suppression de leurs données à
                 tout moment.
             </p>
 
-            <h2 className="text-lg font-semibold mt-6 mb-2">5. Droit d’accès et de suppression</h2>
+            <h2 className="text-lg font-semibold mt-6 mb-2">6. Droit d’accès et de suppression</h2>
             <p>
                 Conformément au Règlement Général sur la Protection des Données (RGPD), vous pouvez
                 demander :
@@ -63,7 +85,7 @@ export default function PrivacyPolicyPage() {
                 </a>
             </p>
 
-            <h2 className="text-lg font-semibold mt-6 mb-2">6. Hébergement et sous-traitants</h2>
+            <h2 className="text-lg font-semibold mt-6 mb-2">7. Hébergement et sous-traitants</h2>
             <p>Les données sont hébergées par :</p>
             <ul className="list-disc ml-6 mb-4">
                 <li>
@@ -79,7 +101,7 @@ export default function PrivacyPolicyPage() {
                 aux clauses contractuelles types de la Commission européenne.
             </p>
 
-            <h2 className="text-lg font-semibold mt-6 mb-2">7. Contact</h2>
+            <h2 className="text-lg font-semibold mt-6 mb-2">8. Contact</h2>
             <p>
                 Pour toute question ou réclamation concernant vos données, contactez :
                 <a href="mailto:contact@surchope.fr" className="text-blue-600 underline ml-1">

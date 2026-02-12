@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { collection, doc, getDocs, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { User } from 'firebase/auth';
 
 import { db } from '../firebase';
 import { Couple, VoteDoc, VoteView } from '../models/models';
+import { getOrCreateGuestVoterId } from '../utils/voterIdentity';
 
 export default function useVotes(user: User | null, couples: Couple[]) {
     const [votesAll, setVotesAll] = useState<VoteView[]>([]);
-    const [myVotes, setMyVotes] = useState<Record<string, 'A' | 'B' | 'tie'>>({});
+    const [votesLoaded, setVotesLoaded] = useState(false);
+    const voterId = useMemo(() => user?.uid ?? getOrCreateGuestVoterId(), [user?.uid]);
 
     // 📦 Charger tous les votes une seule fois au montage
     useEffect(() => {
@@ -22,32 +24,34 @@ export default function useVotes(user: User | null, couples: Couple[]) {
                 setVotesAll(allVotes);
             } catch (err) {
                 console.error('Erreur de chargement des votes :', err);
+            } finally {
+                setVotesLoaded(true);
             }
         };
         fetchVotes();
     }, []);
 
     // 🧠 Dérive les votes personnels
-    useEffect(() => {
-        if (!user) return setMyVotes({});
+    const myVotes = useMemo<Record<string, 'A' | 'B' | 'tie'>>(() => {
+        if (!voterId) return {};
 
         const mine: Record<string, 'A' | 'B' | 'tie'> = {};
         for (const v of votesAll) {
-            if (v.uid !== user.uid) continue;
+            if (v.uid !== voterId) continue;
             const couple = couples.find((c) => c.id === v.couple_id);
             if (!couple) continue;
 
             if (v.people_voted_id === 'tie') mine[v.couple_id] = 'tie';
             else mine[v.couple_id] = v.people_voted_id === couple.personA.id ? 'A' : 'B';
         }
-        setMyVotes(mine);
-    }, [user, votesAll, couples]);
+        return mine;
+    }, [voterId, votesAll, couples]);
 
     // 🗳️ Gestion du vote (transaction sécurisée)
     const handleVote = async (c: Couple, choice: 'A' | 'B' | 'tie') => {
-        if (!user) return;
+        if (!voterId) return;
 
-        const voteId = `${c.id}_${user.uid}`;
+        const voteId = `${c.id}_${voterId}`;
         const voteRef = doc(db, 'votes', voteId);
         const coupleRef = doc(db, 'couples', c.id);
         const chosenPersonId =
@@ -94,7 +98,7 @@ export default function useVotes(user: User | null, couples: Couple[]) {
                     voteRef,
                     {
                         couple_id: c.id,
-                        uid: user.uid,
+                        uid: voterId,
                         people_voted_id: chosenPersonId,
                         updatedAt: serverTimestamp(),
                     },
@@ -103,13 +107,12 @@ export default function useVotes(user: User | null, couples: Couple[]) {
             });
 
             // 🧠 Met à jour localement l’état sans rechargement
-            setMyVotes((s) => ({ ...s, [c.id]: choice }));
             setVotesAll((prev) => {
-                const existing = prev.find((v) => v.id === `${c.id}_${user.uid}`);
+                const existing = prev.find((v) => v.id === voteId);
                 const updated: VoteView = {
-                    id: `${c.id}_${user.uid}`,
+                    id: voteId,
                     couple_id: c.id,
-                    uid: user.uid,
+                    uid: voterId,
                     people_voted_id: chosenPersonId,
                     updatedAt: new Date(),
                 };
@@ -121,5 +124,5 @@ export default function useVotes(user: User | null, couples: Couple[]) {
         }
     };
 
-    return { votesAll, myVotes, handleVote };
+    return { votesAll, myVotes, handleVote, votesLoaded };
 }

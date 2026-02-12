@@ -5,7 +5,15 @@ export default function FaqPage() {
     const items = [
         {
             q: 'Qu’est-ce que “surchoper” ?',
-            a: 'Surchoper, c’est sortir avec quelqu’un considéré comme plus attractif que soi. Sur Surchope, tu votes pour savoir qui surchope qui dans des couples improbables, drôles ou célèbres.',
+            a: 'Surchoper, c’est être en couple avec quelqu’un considéré comme plus attractif que soi. Sur Surchope, tu votes pour savoir qui surchope qui dans des couples improbables, drôles ou célèbres.',
+        },
+        {
+            q: 'Surchoper, surchopper ou surchoppe : quelle orthographe ?',
+            a: 'Les trois orthographes sont recherchées sur Google. Sur ce site, on utilise surtout “surchoper”, mais “surchopper”, “surchoppe” ou “surchopper définition” renvoient à la même idée.',
+        },
+        {
+            q: 'Surchopper définition : ça veut dire quoi ?',
+            a: 'La définition de surchopper (ou surchoper) est simple : être avec quelqu’un perçu comme plus “canon” que soi. Le jeu Surchope reprend exactement ce principe en mode vote fun.',
         },
         {
             q: 'Comment fonctionne le jeu ?',
@@ -21,7 +29,7 @@ export default function FaqPage() {
         },
         {
             q: 'Puis-je jouer sans compte ?',
-            a: "Tu peux juste voir les couples et leurs stats. Le compte te permet de voter, de sauvegarder tes votes et d'ajouter des couples.",
+            a: 'Oui. Tu peux voter et voir ton historique en mode invité. Un compte Google reste utile pour ajouter ou modifier des couples, et pour retrouver ton profil sur plusieurs appareils.',
         },
         {
             q: 'Puis-je jouer sur mobile ?',

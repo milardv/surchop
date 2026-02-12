@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
     collection,
-    getDocs,
-    updateDoc,
-    doc,
-    where,
-    query,
-    getDoc,
     deleteDoc,
+    doc,
+    getDoc,
+    getDocs,
+    query,
+    updateDoc,
+    where,
 } from 'firebase/firestore';
 
 import { db } from '../firebase';
@@ -118,14 +118,6 @@ export default function ValidateCouplesPage() {
                             <div>
                                 <div className="font-medium">
                                     {c.personA?.display_name} ❤️ {c.personB?.display_name}
-                                </div>
-                                <div className="text-xs text-gray-500 capitalize">
-                                    {c.category === 'friends' ? '👫 Amis' : '🌍 People'}
-                                    {c.isFictional && (
-                                        <span className="ml-2 inline-flex items-center text-purple-600 font-medium">
-                                            ✨ Fictif
-                                        </span>
-                                    )}
                                 </div>
                             </div>
                         </div>

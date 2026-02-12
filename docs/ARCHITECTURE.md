@@ -61,7 +61,7 @@ L’objectif de Surchope est de proposer une application ludique, rapide et mini
     personB_display_name: string,
     personA_image_url: string,
     personB_image_url: string,
-    category: 'friends' | 'people',
+    category: Category | null,
     createdBy: string,
     createdAt: Timestamp,
     count_a: number,

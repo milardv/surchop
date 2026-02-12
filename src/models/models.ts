@@ -6,7 +6,11 @@ export type Person = {
     count?: number;
 };
 
-type CoupleCategory = 'people' | 'friends';
+export type Category = {
+    id: string;
+    name: string;
+    lucideId: string;
+};
 
 export type Couple = {
     id: string;
@@ -16,7 +20,7 @@ export type Couple = {
     count_b?: number;
     count_tie: number;
     createdAt?: any;
-    category: CoupleCategory;
+    category: Category;
     validated: boolean;
     isFictional: boolean;
     personA?: Person;

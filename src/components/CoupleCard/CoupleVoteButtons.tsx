@@ -4,29 +4,16 @@ import { Couple } from '../../models/models';
 
 export default function CoupleVoteButtons({
     couple,
-    user,
-    canVote,
     myChoice,
     onVote,
-    onLoginClick, // 👈 nouveau
 }: {
     couple: Couple;
-    user: any;
-    canVote: boolean;
     myChoice?: 'A' | 'B' | 'tie';
     onVote?: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
-    onLoginClick?: () => void; // 👈 callback optionnel
 }) {
     const [voted, setVoted] = useState<'A' | 'B' | 'tie' | null>(null);
-    const [showLoginHint, setShowLoginHint] = useState(false);
 
     const handleVote = (choice: 'A' | 'B' | 'tie') => {
-        if (!canVote) {
-            // 👇 petit feedback visuel si l’utilisateur n’est pas connecté
-            setShowLoginHint(true);
-            setTimeout(() => setShowLoginHint(false), 2000);
-            return;
-        }
         if (!onVote) return;
         setVoted(choice);
         onVote(couple, choice);
@@ -35,7 +22,7 @@ export default function CoupleVoteButtons({
 
     const baseClasses =
         'flex-1 px-3 py-2 rounded-full border font-medium text-sm transition-all duration-200 ease-out active:scale-95 text-center focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]/50 focus:ring-offset-2';
-    const disabledClasses = !canVote ? 'opacity-60 cursor-pointer' : ''; // 👈 cursor-pointer même désactivé
+    const disabledClasses = !onVote ? 'opacity-60 cursor-not-allowed' : '';
 
     const getAnimationClasses = (choice: 'A' | 'B' | 'tie') => {
         if (voted !== choice) return '';
@@ -62,6 +49,7 @@ export default function CoupleVoteButtons({
                         <button
                             key={choice}
                             onClick={() => handleVote(choice as 'A' | 'B' | 'tie')}
+                            disabled={!onVote}
                             className={`${baseClasses} ${disabledClasses} ${
                                 myChoice === choice
                                     ? choice === 'tie'
@@ -78,23 +66,6 @@ export default function CoupleVoteButtons({
                         </button>
                     ))}
                 </div>
-
-                {/* 🔐 Message clair si non connecté */}
-                {showLoginHint && !user && (
-                    <div className="text-sm text-primary mt-2 animate-pulse">
-                        Connecte-toi pour voter ❤️
-                    </div>
-                )}
-
-                {/* 🔘 Optionnel : bouton de connexion */}
-                {!user && showLoginHint && onLoginClick && (
-                    <button
-                        onClick={onLoginClick}
-                        className="mt-2 px-4 py-1.5 text-sm rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition"
-                    >
-                        Se connecter avec Google
-                    </button>
-                )}
             </div>
         </>
     );

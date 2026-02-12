@@ -1,7 +1,3 @@
-import { collection, getDocs, updateDoc } from 'firebase/firestore';
-
-import { db } from '@/firebase';
-
 export async function fetchWikipediaImage(name: string): Promise<string | null> {
     try {
         const response = await fetch(
@@ -20,12 +16,4 @@ export async function fetchWikipediaImage(name: string): Promise<string | null> 
         console.error('Erreur lors de la récupération de l’image Wikipédia', e);
         return null;
     }
-}
-async function setAllCouplesNonFictional() {
-    const couplesSnap = await getDocs(collection(db, 'couples'));
-    const updates = couplesSnap.docs.map((docSnap) =>
-        updateDoc(docSnap.ref, { isFictional: false }),
-    );
-    await Promise.all(updates);
-    alert('✅ Tous les couples ont été mis à jour en "réel" (isFictional = false)');
 }
