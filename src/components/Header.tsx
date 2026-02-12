@@ -1,9 +1,9 @@
-import {Link, useLocation} from 'react-router-dom';
-import {User} from 'firebase/auth';
-import {CheckSquare, Heart, Home, LogOut, Play, UserPlus} from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { User } from 'firebase/auth';
+import { CheckSquare, Heart, Home, LogOut, Play, UserPlus } from 'lucide-react';
 import React from 'react';
 
-import {loginWithGoogle, logout} from '../firebase';
+import { loginWithGoogle, logout } from '../firebase';
 
 export default function Header({ user }: { user: User | null }) {
     const location = useLocation();
@@ -49,7 +49,7 @@ export default function Header({ user }: { user: User | null }) {
                 ${active ? 'text-primary scale-[1.1] font-semibold' : 'text-muted-foreground hover:text-foreground'}
             `}
             >
-                <Icon size={26} className="mb-1"/>
+                <Icon size={26} className="mb-1" />
                 <span className="text-[13px] tracking-wide">{label}</span>
             </Link>
         );
@@ -72,7 +72,7 @@ export default function Header({ user }: { user: User | null }) {
                     {/* Navigation desktop */}
                     <nav className="hidden md:flex items-center gap-1">
                         <NavItem to="/" label="Couples" icon={Home} />
-                        {user && <NavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />}
+                        <NavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />
                         <NavItem to="/jouer" label="Jouer" icon={Play} accent />
                         {user && <NavItem to="/ajouter-couple" label="Ajouter" icon={UserPlus} />}
                         {isAdmin && (
@@ -144,9 +144,7 @@ export default function Header({ user }: { user: User | null }) {
                 >
                     <div className="max-w-5xl mx-auto flex items-center justify-around px-4 h-full">
                         <BottomNavItem to="/" label="Couples" icon={Home} />
-                        {user && (
-                            <BottomNavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />
-                        )}
+                        <BottomNavItem to="/mes-votes" label="Mes votes" icon={CheckSquare} />
                         <BottomNavItem to="/jouer" label="Jouer" icon={Play} />
                         {user && (
                             <BottomNavItem to="/ajouter-couple" label="Ajouter" icon={UserPlus} />

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import Cropper from 'react-easy-crop';
 
 import Button from '@/components/ui/Button';
@@ -16,30 +16,85 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
     const [cropping, setCropping] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    type ImageSource = 'local' | 'direct' | 'proxy';
+    type LoadedImage = {
+        image: HTMLImageElement;
+        source: ImageSource;
+        cleanup?: () => void;
+    };
+
     const onCropComplete = useCallback((_croppedArea, pixels) => {
         setCroppedAreaPixels(pixels);
     }, []);
 
-    const createImage = async (url: string): Promise<HTMLImageElement> => {
-        if (url.startsWith('data:') || url.startsWith('blob:')) {
-            return loadImage(url);
-        }
+    const isRemoteHttpUrl = (url: string) => /^https?:\/\//i.test(url);
+    const isCanvasSecurityError = (err: unknown) =>
+        err instanceof DOMException && err.name === 'SecurityError';
 
+    const loadImage = (src: string, withCrossOrigin = false): Promise<HTMLImageElement> =>
+        new Promise((resolve, reject) => {
+            const img = new Image();
+
+            if (withCrossOrigin) {
+                img.crossOrigin = 'anonymous';
+            }
+
+            img.onload = () => resolve(img);
+            img.onerror = (e) => reject(e);
+            img.src = src;
+        });
+
+    const createImageViaProxy = async (url: string): Promise<LoadedImage> => {
         const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
         const res = await fetch(proxyUrl);
         if (!res.ok) throw new Error(`Erreur proxy: ${res.status}`);
 
         const blob = await res.blob();
         const localUrl = URL.createObjectURL(blob);
-        return loadImage(localUrl);
+        const image = await loadImage(localUrl);
+
+        return {
+            image,
+            source: 'proxy',
+            cleanup: () => URL.revokeObjectURL(localUrl),
+        };
     };
 
-    const loadImage = (src: string): Promise<HTMLImageElement> =>
+    const createImage = async (
+        url: string,
+        strategy: 'auto' | 'proxy' = 'auto',
+    ): Promise<LoadedImage> => {
+        if (url.startsWith('data:') || url.startsWith('blob:') || !isRemoteHttpUrl(url)) {
+            const image = await loadImage(url);
+            return { image, source: 'local' };
+        }
+
+        if (strategy === 'proxy') {
+            return createImageViaProxy(url);
+        }
+
+        try {
+            const image = await loadImage(url, true);
+            return { image, source: 'direct' };
+        } catch {
+            return createImageViaProxy(url);
+        }
+    };
+
+    const canvasToBlob = (canvas: HTMLCanvasElement): Promise<Blob> =>
         new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = (e) => reject(e);
-            img.src = src;
+            try {
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Échec de la conversion en image.'));
+                    },
+                    'image/jpeg',
+                    0.9,
+                );
+            } catch (err) {
+                reject(err);
+            }
         });
 
     const getCroppedImage = async () => {
@@ -50,9 +105,12 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
 
         setCropping(true);
         setError(null);
+        let cleanup: (() => void) | undefined;
 
         try {
-            const image = await createImage(imageSrc);
+            const loaded = await createImage(imageSrc);
+            cleanup = loaded.cleanup;
+
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             if (!ctx) throw new Error("Impossible d'obtenir le contexte du canvas");
@@ -61,21 +119,41 @@ export default function ImageCropperModal({ imageSrc, onCancel, onCrop }: Props)
             canvas.width = width;
             canvas.height = height;
 
-            ctx.drawImage(image, x, y, width, height, 0, 0, width, height);
+            ctx.drawImage(loaded.image, x, y, width, height, 0, 0, width, height);
 
-            canvas.toBlob(
-                (blob) => {
-                    setCropping(false);
-                    if (blob) onCrop(blob);
-                    else setError('Échec de la conversion en image.');
-                },
-                'image/jpeg',
-                0.9,
-            );
+            let blob: Blob;
+            try {
+                blob = await canvasToBlob(canvas);
+            } catch (err) {
+                if (isCanvasSecurityError(err) && loaded.source === 'direct') {
+                    cleanup?.();
+                    cleanup = undefined;
+
+                    const proxyLoaded = await createImage(imageSrc, 'proxy');
+                    cleanup = proxyLoaded.cleanup;
+
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.drawImage(proxyLoaded.image, x, y, width, height, 0, 0, width, height);
+                    blob = await canvasToBlob(canvas);
+                } else {
+                    throw err;
+                }
+            }
+
+            onCrop(blob);
+            setCropping(false);
         } catch (err: any) {
             console.error('Erreur lors du recadrage :', err);
-            setError(err.message || 'Erreur inconnue lors du recadrage.');
+            if (err?.message?.includes('Erreur proxy: 413')) {
+                setError(
+                    "L'image est trop volumineuse pour le proxy. Essaie une URL plus légère ou télécharge l'image puis envoie le fichier.",
+                );
+            } else {
+                setError(err.message || 'Erreur inconnue lors du recadrage.');
+            }
             setCropping(false);
+        } finally {
+            cleanup?.();
         }
     };
 

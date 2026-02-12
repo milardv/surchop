@@ -1,11 +1,11 @@
-import {useState} from 'react';
+import { useState } from 'react';
 
-import {PersonForm} from './types';
-import {useLoadCouple} from './useLoadCouple';
-import {useNameValidation} from './useNameValidation';
-import {useSubmitCouple} from './useSubmitCouple';
+import { PersonForm } from './types';
+import { useLoadCouple } from './useLoadCouple';
+import { useNameValidation } from './useNameValidation';
+import { useSubmitCouple } from './useSubmitCouple';
 
-import {Category} from '@/models/models';
+import { Category } from '@/models/models';
 
 export function useAddCoupleForm(
     user: any,
@@ -30,12 +30,13 @@ export function useAddCoupleForm(
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [nameErrors, setNameErrors] = useState<{ A?: string; B?: string }>({});
+    const [showModerationModal, setShowModerationModal] = useState(false);
 
     // Load couple if editing
     useLoadCouple(isEdit, coupleId, setPersonA, setPersonB, setConsentChecked, setCategory);
 
     // Validation nom
-    const {checkPersonExists} = useNameValidation(isEdit, personA, personB);
+    const { checkPersonExists } = useNameValidation(isEdit, personA, personB);
 
     const handleBlur = async (which: 'A' | 'B') => {
         const target = which === 'A' ? personA : personB;
@@ -48,7 +49,7 @@ export function useAddCoupleForm(
         }));
     };
 
-    const {submit} = useSubmitCouple(user, navigate, isEdit, category, coupleId);
+    const { submit } = useSubmitCouple(user, navigate, isEdit, category, coupleId);
 
     const handleSubmit = async (e: any) => {
         e.preventDefault();
@@ -56,12 +57,20 @@ export function useAddCoupleForm(
         setLoading(true);
 
         try {
-            await submit(personA, personB);
+            const result = await submit(personA, personB);
+            if (!isEdit && result?.created) {
+                setShowModerationModal(true);
+            }
         } catch (err: any) {
             setError(err.toString());
         } finally {
             setLoading(false);
         }
+    };
+
+    const closeModerationModal = () => {
+        setShowModerationModal(false);
+        navigate('/');
     };
 
     const canSubmit =
@@ -88,5 +97,7 @@ export function useAddCoupleForm(
         canSubmit,
         handleBlur,
         handleSubmit,
+        showModerationModal,
+        closeModerationModal,
     };
 }

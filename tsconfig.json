@@ -3,9 +3,16 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react-jsx",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
-    "lib": ["ESNext", "DOM", "WebWorker"]
+    "lib": [
+      "ESNext",
+      "DOM",
+      "WebWorker"
+    ]
   }
 }

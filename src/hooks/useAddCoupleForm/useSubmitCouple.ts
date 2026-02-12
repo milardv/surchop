@@ -12,7 +12,7 @@ export function useSubmitCouple(
     category: Category | null,
     coupleId?: string,
 ) {
-    async function submit(personA: any, personB: any) {
+    async function submit(personA: any, personB: any): Promise<{ created?: boolean }> {
         if (!user) throw 'Vous devez être connecté';
 
         const aImg = personA.file ? await uploadToImgBB(personA.file) : personA.image_url;
@@ -48,7 +48,7 @@ export function useSubmitCouple(
             );
 
             navigate(`/couple/${coupleId}`);
-            return;
+            return {};
         }
 
         // 🆕 MODE CRÉATION
@@ -76,7 +76,7 @@ export function useSubmitCouple(
             validated: false,
         });
 
-        navigate('/');
+        return { created: true };
     }
 
     return { submit };

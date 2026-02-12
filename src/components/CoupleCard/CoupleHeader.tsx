@@ -1,9 +1,10 @@
-import {Film, Heart, Pencil, Share2, Trash2} from 'lucide-react';
-import {User} from 'firebase/auth';
+import * as Icons from 'lucide-react';
+import { Pencil, Share2, Tag, Trash2 } from 'lucide-react';
+import { User } from 'firebase/auth';
 import React from 'react';
-import {useNavigate} from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-import {Couple} from '../../models/models';
+import { Couple } from '../../models/models';
 
 export default function CoupleHeader({
     couple,
@@ -18,6 +19,12 @@ export default function CoupleHeader({
 }) {
     const isAdmin = user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2';
     const navigate = useNavigate();
+    const category = couple.category as any;
+    const categoryName = category?.name || 'Sans catégorie';
+    const categoryLucideId = category?.lucideId;
+    const CategoryIcon = (
+        categoryLucideId ? Icons[categoryLucideId as keyof typeof Icons] : null
+    ) as React.ComponentType<{ size?: number; strokeWidth?: number }> | null;
 
     const handleShare = async (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -40,29 +47,13 @@ export default function CoupleHeader({
 
     return (
         <div className="flex items-center gap-3 opacity-90 hover:opacity-100 transition">
-            {/* 🏷️ Badge fictif ou réel */}
-            {couple.isFictional !== undefined && (
-                <div
-                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
-                        ${
-                            couple.isFictional
-                                ? 'bg-purple-100 text-purple-700'
-                                : 'bg-pink-100 text-pink-700'
-                        }
-                    `}
-                    title={couple.isFictional ? 'Couple fictif' : 'Couple réel'}
-                >
-                    {couple.isFictional ? (
-                        <>
-                            <Film size={14} strokeWidth={2} /> <span>Fictif</span>
-                        </>
-                    ) : (
-                        <>
-                            <Heart size={14} strokeWidth={2.2} /> <span>Réel</span>
-                        </>
-                    )}
-                </div>
-            )}
+            <div
+                className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700"
+                title={categoryName}
+            >
+                {CategoryIcon ? <CategoryIcon size={14} strokeWidth={2.1} /> : <Tag size={14} />}
+                <span>{categoryName}</span>
+            </div>
 
             {/* 🗑️ Bouton admin supprimer */}
             {isAdmin && onDelete && (
@@ -90,7 +81,7 @@ export default function CoupleHeader({
                     title="Modifier ce couple"
                     className="p-1.5 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-100/40 transition active:scale-95"
                 >
-                    <Pencil size={18}/>
+                    <Pencil size={18} />
                 </button>
             )}
 

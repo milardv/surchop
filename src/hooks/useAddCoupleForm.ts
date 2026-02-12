@@ -47,6 +47,7 @@ export function useAddCoupleForm(
     const [nameErrors, setNameErrors] = useState<{ A?: string; B?: string }>({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showModerationModal, setShowModerationModal] = useState(false);
 
     // ---------------------------------------------------------
     // 🟪 1. Chargement d’un couple existant en mode édition
@@ -216,14 +217,18 @@ export function useAddCoupleForm(
                 setDoc(aRef, { couple_id: coupleRef.id }, { merge: true }),
                 setDoc(bRef, { couple_id: coupleRef.id }, { merge: true }),
             ]);
-
-            navigate('/');
+            setShowModerationModal(true);
         } catch (err: any) {
             console.error(err);
             setError(err.message || 'Erreur inconnue');
         } finally {
             setLoading(false);
         }
+    };
+
+    const closeModerationModal = () => {
+        setShowModerationModal(false);
+        navigate('/');
     };
 
     // ---------------------------------------------------------
@@ -253,5 +258,7 @@ export function useAddCoupleForm(
         canSubmit,
         handleBlur,
         handleSubmit,
+        showModerationModal,
+        closeModerationModal,
     };
 }
