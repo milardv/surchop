@@ -1,10 +1,10 @@
 import { useParams } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 
-import { Couple } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeLoader from '../components/SurchopeLoader';
 
+import { Couple } from '@/models/models';
 import BackButton from '@/components/ui/BackButton';
 
 export default function CoupleDetailPage({

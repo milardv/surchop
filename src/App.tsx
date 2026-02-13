@@ -20,7 +20,7 @@ import FaqPage from '@/pages/Faq';
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
     const { couples, loading, deleteCouple } = useCouples();
-    const { votesAll, myVotes, handleVote } = useVotes(user, couples);
+    const { votesAll, myVotes, handleVote, votesLoaded } = useVotes(user, couples);
 
     useEffect(() => onAuthStateChanged(auth, setUser), []);
 
@@ -38,6 +38,7 @@ export default function App() {
                             myVotes={myVotes}
                             onVote={handleVote}
                             loading={loading}
+                            votesLoaded={votesLoaded}
                             deleteCouple={deleteCouple}
                         />
                     }

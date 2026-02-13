@@ -157,11 +157,18 @@ export default function HomePage({
         return () => observer.disconnect();
     }, [filteredCouples.length, hasMore]);
 
+    const handleVote = (couple: Couple, choice: 'A' | 'B' | 'tie') => {
+        if (!voteOrderSnapshot) {
+            setVoteOrderSnapshot({ ...myVotes });
+        }
+        onVote(couple, choice);
+    };
+
     return (
         <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 relative text-foreground">
             {showIntro && <SurchopeIntroModal onClose={() => setShowIntro(false)} />}
 
-            {initialLoading || !votesLoaded ? (
+            {initialLoading && couples.length === 0 ? (
                 <SurchopeLoader />
             ) : (
                 <>
@@ -224,7 +231,7 @@ export default function HomePage({
                                         couple={c}
                                         user={user}
                                         myChoice={myVotes[c.id]}
-                                        onVote={onVote}
+                                        onVote={handleVote}
                                         onlyMyVotes={false}
                                         onDelete={deleteCouple}
                                     />

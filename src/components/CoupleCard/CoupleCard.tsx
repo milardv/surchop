@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { User } from 'firebase/auth';
 
-import { Couple } from '../../models/models';
 import PersonInfoModal from '../PersonInfoModal';
 import CoupleHeader from './CoupleHeader';
 import CoupleGauge from './CoupleGauge';
 import CoupleVoteButtons from './CoupleVoteButtons';
 import ReportMenu from '../ReportMenu';
 
+import { Couple } from '@/models/models';
 import { loginWithGoogle } from '@/firebase';
 
 export default function CoupleCard({
@@ -58,15 +58,6 @@ export default function CoupleCard({
                         onVote={onVote}
                         onLoginClick={() => loginWithGoogle()}
                     />
-                </div>
-            )}
-
-            {/* Message si non connecté */}
-            {!user && !compact && (
-                <div className="mt-4 text-center">
-                    <div className="inline-block bg-primary/10 text-primary text-sm font-medium px-3 py-2 rounded-full shadow-sm">
-                        Connecte-toi pour voter
-                    </div>
                 </div>
             )}
 

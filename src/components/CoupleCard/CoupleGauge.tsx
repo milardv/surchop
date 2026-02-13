@@ -1,7 +1,8 @@
 import React from 'react';
 
 import Gauge from '../Gauge';
-import { Couple } from '../../models/models';
+
+import { Couple } from '@/models/models';
 
 export default function CoupleGauge({
     couple,
@@ -89,7 +90,7 @@ export default function CoupleGauge({
                 {renderPerson(couple.personB, 'B')}
             </div>
 
-            <div className="w-48 mt-3">
+            <div className="w-[70%] mt-3 mx-auto">
                 {onlyMyVotes ? (
                     <div className="text-xs text-center text-muted-foreground italic">
                         Pour toi, <span className="text-primary font-medium">{resultText}</span>

@@ -10,8 +10,8 @@ import {
     deleteDoc,
 } from 'firebase/firestore';
 
-import { db } from '../firebase';
-import { Couple, Person } from '../models/models';
+import { db } from '@/firebase';
+import { Couple, Person } from '@/models/models';
 
 export default function useCouples() {
     const [couples, setCouples] = useState<Couple[]>([]);
@@ -19,48 +19,66 @@ export default function useCouples() {
     const personCache = new Map<string, Person>();
 
     useEffect(() => {
+        let cancelled = false;
+        const fallbackTimer = setTimeout(() => {
+            if (!cancelled) setLoading(false);
+        }, 5000);
+
         const q = query(collection(db, 'couples'), where('validated', '==', true));
 
-        const unsub = onSnapshot(q, (snap) => {
-            const changes = snap.docChanges();
-            if (changes.length === 0) return;
-
-            changes.forEach(async (change) => {
-                const data = change.doc.data() as Couple;
-                const coupleId = change.doc.id;
-
-                if (change.type === 'removed') {
-                    setCouples((prev) => prev.filter((x) => x.id !== coupleId));
+        const unsub = onSnapshot(
+            q,
+            (snap) => {
+                const changes = snap.docChanges();
+                if (changes.length === 0) {
+                    if (!cancelled) setLoading(false);
+                    clearTimeout(fallbackTimer);
                     return;
                 }
 
-                const [a, b] = await Promise.all([
-                    loadPerson(data.people_a_id),
-                    loadPerson(data.people_b_id),
-                ]);
-                if (!a || !b) return;
+                changes.forEach(async (change) => {
+                    const data = change.doc.data() as Couple;
+                    const coupleId = change.doc.id;
 
-                const newCouple: Couple = {
-                    ...data,
-                    id: coupleId,
-                    personA: a,
-                    personB: b,
-                };
+                    if (change.type === 'removed') {
+                        setCouples((prev) => prev.filter((x) => x.id !== coupleId));
+                        return;
+                    }
 
-                setCouples((prev) => {
-                    const exists = prev.find((x) => x.id === coupleId);
-                    if (!exists && change.type === 'added') {
-                        return [...prev, newCouple];
-                    }
-                    if (exists && change.type === 'modified') {
-                        return prev.map((x) => (x.id === coupleId ? newCouple : x));
-                    }
-                    return prev;
+                    const [a, b] = await Promise.all([
+                        loadPerson(data.people_a_id),
+                        loadPerson(data.people_b_id),
+                    ]);
+                    if (!a || !b) return;
+
+                    const newCouple: Couple = {
+                        ...data,
+                        id: coupleId,
+                        personA: a,
+                        personB: b,
+                    };
+
+                    setCouples((prev) => {
+                        const exists = prev.find((x) => x.id === coupleId);
+                        if (!exists && change.type === 'added') {
+                            return [...prev, newCouple];
+                        }
+                        if (exists && change.type === 'modified') {
+                            return prev.map((x) => (x.id === coupleId ? newCouple : x));
+                        }
+                        return prev;
+                    });
                 });
-            });
 
-            setLoading(false);
-        });
+                if (!cancelled) setLoading(false);
+                clearTimeout(fallbackTimer);
+            },
+            (err) => {
+                console.error('Erreur de chargement des couples :', err);
+                if (!cancelled) setLoading(false);
+                clearTimeout(fallbackTimer);
+            },
+        );
 
         async function loadPerson(id: string): Promise<Person | null> {
             if (personCache.has(id)) return personCache.get(id)!;
@@ -71,8 +89,12 @@ export default function useCouples() {
             return person;
         }
 
-        return () => unsub();
-    }, []);
+        return () => {
+            cancelled = true;
+            clearTimeout(fallbackTimer);
+            unsub();
+        };
+    }, [personCache]);
 
     const deleteCouple = async (id: string, userUid: string) => {
         if (userUid !== 'EuindCjjeTYx5ABLPCRWdflHy2c2') {

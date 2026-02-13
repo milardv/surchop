@@ -1,35 +1,64 @@
 import { useEffect, useMemo, useState } from 'react';
-import { collection, doc, getDocs, runTransaction, serverTimestamp } from 'firebase/firestore';
+import {
+    collection,
+    doc,
+    getDocs,
+    query,
+    runTransaction,
+    serverTimestamp,
+    where,
+} from 'firebase/firestore';
 import { User } from 'firebase/auth';
 
-import { db } from '../firebase';
-import { Couple, VoteDoc, VoteView } from '../models/models';
-import { getOrCreateGuestVoterId } from '../utils/voterIdentity';
+import { db } from '@/firebase';
+import { Couple, VoteDoc, VoteView } from '@/models/models';
+import { getOrCreateGuestVoterId } from '@/utils/voterIdentity';
 
 export default function useVotes(user: User | null, couples: Couple[]) {
     const [votesAll, setVotesAll] = useState<VoteView[]>([]);
     const [votesLoaded, setVotesLoaded] = useState(false);
     const voterId = useMemo(() => user?.uid ?? getOrCreateGuestVoterId(), [user?.uid]);
 
-    // 📦 Charger tous les votes une seule fois au montage
+    // 📦 Charger les votes du visiteur courant (compte ou invité)
     useEffect(() => {
+        let cancelled = false;
+        const fallbackTimer = setTimeout(() => {
+            if (!cancelled) setVotesLoaded(true);
+        }, 5000);
+
         const fetchVotes = async () => {
+            if (!voterId) {
+                if (!cancelled) {
+                    setVotesAll([]);
+                    setVotesLoaded(true);
+                }
+                return;
+            }
+
+            if (!cancelled) setVotesLoaded(false);
             try {
-                const snap = await getDocs(collection(db, 'votes'));
+                const votesQuery = query(collection(db, 'votes'), where('uid', '==', voterId));
+                const snap = await getDocs(votesQuery);
                 const allVotes: VoteView[] = snap.docs.map((docSnap) => {
                     const v = docSnap.data() as VoteDoc;
                     const updatedAt = (v as any).updatedAt?.toDate?.() as Date | undefined;
                     return { id: docSnap.id, ...v, updatedAt };
                 });
-                setVotesAll(allVotes);
+                if (!cancelled) setVotesAll(allVotes);
             } catch (err) {
                 console.error('Erreur de chargement des votes :', err);
             } finally {
-                setVotesLoaded(true);
+                if (!cancelled) setVotesLoaded(true);
+                clearTimeout(fallbackTimer);
             }
         };
         fetchVotes();
-    }, []);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(fallbackTimer);
+        };
+    }, [voterId]);
 
     // 🧠 Dérive les votes personnels
     const myVotes = useMemo<Record<string, 'A' | 'B' | 'tie'>>(() => {

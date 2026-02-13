@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
-import { Couple } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeFooter from '../components/SurchopeFooter';
 
+import { Couple } from '@/models/models';
 import BackButton from '@/components/ui/BackButton';
 
 export default function PlayModePage({
@@ -20,7 +19,6 @@ export default function PlayModePage({
     myVotes: Record<string, 'A' | 'B' | 'tie'>;
     onVote: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
 }) {
-    const navigate = useNavigate();
     const [couplesToPlay] = useState(() => couples.filter((c) => !myVotes[c.id]));
     const [index, setIndex] = useState(0);
     const [finished, setFinished] = useState(false);
