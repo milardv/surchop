@@ -4,6 +4,7 @@ import { ArrowRight, Globe, Heart, Sparkles, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import CoupleCard from '../components/CoupleCard/CoupleCard';
+import VoteProgress from '../components/VoteProgress';
 import SurchopeIntroModal from '../components/SurchopeIntroModal';
 import SurchopeLoader from '../components/SurchopeLoader';
 import SurchopeFooter from '../components/SurchopeFooter';
@@ -211,6 +212,9 @@ export default function HomePage({
                             Mode rafale <ArrowRight size={17} />
                         </Link>
                     </section>
+                    {votesLoaded && !initialLoading && (
+                        <VoteProgress votes={Object.keys(myVotes).length} />
+                    )}
                     {/* 🧭 Barre de filtres */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
                         <div className="w-full sm:w-[260px]">

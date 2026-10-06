@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeFooter from '../components/SurchopeFooter';
+import VoteProgress from '../components/VoteProgress';
 
 import { Couple } from '@/models/models';
 import BackButton from '@/components/ui/BackButton';
@@ -17,6 +18,7 @@ export default function PlayModePage({
     couples: Couple[];
     user: any;
     myVotes: Record<string, 'A' | 'B' | 'tie'>;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     onVote: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
 }) {
     const [couplesToPlay] = useState(() => couples.filter((c) => !myVotes[c.id]));
@@ -68,6 +70,10 @@ export default function PlayModePage({
                     Reviens bientôt, de nouveaux duos t’attendent !
                 </p>
 
+                <div className="w-full text-left">
+                    <VoteProgress votes={Object.keys(myVotes).length} />
+                </div>
+
                 <BackButton to="/" label="Retour à la liste" />
 
                 <motion.div
@@ -98,6 +104,31 @@ export default function PlayModePage({
                 <div className="text-sm text-muted-foreground">
                     {index + 1}/{couplesToPlay.length}
                 </div>
+            </div>
+
+            <div className="w-full space-y-3">
+                <div>
+                    <div className="mb-1.5 flex justify-between text-xs font-semibold text-gray-600">
+                        <span>Défi express</span>
+                        <span className="tabular-nums">
+                            {index}/{couplesToPlay.length} duos votés
+                        </span>
+                    </div>
+                    <div
+                        className="h-2 overflow-hidden rounded-full bg-pink-100"
+                        role="progressbar"
+                        aria-label="Progression du défi express"
+                        aria-valuemin={0}
+                        aria-valuemax={couplesToPlay.length}
+                        aria-valuenow={index}
+                    >
+                        <div
+                            className="h-full rounded-full bg-primary transition-[width] duration-200 ease-out"
+                            style={{ width: `${(index / couplesToPlay.length) * 100}%` }}
+                        />
+                    </div>
+                </div>
+                <VoteProgress votes={Object.keys(myVotes).length} compact />
             </div>
 
             {/* Titre */}
