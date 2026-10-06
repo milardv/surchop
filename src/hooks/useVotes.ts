@@ -14,10 +14,69 @@ import { db } from '@/firebase';
 import { Couple, VoteDoc, VoteView } from '@/models/models';
 import { getOrCreateGuestVoterId } from '@/utils/voterIdentity';
 
+type VoteChoice = 'A' | 'B' | 'tie';
+
+function getVoteChoice(vote: VoteDoc, couple: Couple): VoteChoice {
+    if (vote.people_voted_id === couple.personA.id) return 'A';
+    if (vote.people_voted_id === couple.personB.id) return 'B';
+    return 'tie';
+}
+
+function updateVoteCounts(
+    coupleData: Record<string, number>,
+    previousChoice: VoteChoice | undefined,
+    choice: VoteChoice,
+) {
+    const delta = (candidate: VoteChoice) =>
+        Number(choice === candidate) - Number(previousChoice === candidate);
+    return {
+        count_a: Math.max(0, (coupleData.count_a ?? 0) + delta('A')),
+        count_b: Math.max(0, (coupleData.count_b ?? 0) + delta('B')),
+        count_tie: Math.max(0, (coupleData.count_tie ?? 0) + delta('tie')),
+    };
+}
+
+async function recordReferralParticipation(voterId: string) {
+    const referrerCode = localStorage.getItem('surchope_pending_referral');
+    const ownCode = localStorage.getItem(`surchope_referral_code_${voterId}`);
+    if (!referrerCode) return;
+    if (referrerCode === ownCode) {
+        localStorage.removeItem('surchope_pending_referral');
+        return;
+    }
+
+    try {
+        const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(voterId));
+        const referralId = Array.from(new Uint8Array(digest), (byte) =>
+            byte.toString(16).padStart(2, '0'),
+        ).join('');
+        const referralRef = doc(db, 'referrals', referralId);
+        await runTransaction(db, async (tx) => {
+            const referralSnap = await tx.get(referralRef);
+            if (!referralSnap.exists()) {
+                tx.set(referralRef, { referrerCode, createdAt: serverTimestamp() });
+            }
+        });
+        localStorage.removeItem('surchope_pending_referral');
+    } catch (error) {
+        console.error('Impossible de valider cette invitation :', error);
+    }
+}
+
 export default function useVotes(user: User | null, couples: Couple[]) {
     const [votesAll, setVotesAll] = useState<VoteView[]>([]);
     const [votesLoaded, setVotesLoaded] = useState(false);
     const voterId = useMemo(() => user?.uid ?? getOrCreateGuestVoterId(), [user?.uid]);
+
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        const referralCode = url.searchParams.get('ref');
+        if (!referralCode) return;
+
+        localStorage.setItem('surchope_pending_referral', referralCode);
+        url.searchParams.delete('ref');
+        window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    }, []);
 
     // 📦 Charger les votes du visiteur courant (compte ou invité)
     useEffect(() => {
@@ -85,6 +144,7 @@ export default function useVotes(user: User | null, couples: Couple[]) {
         const coupleRef = doc(db, 'couples', c.id);
         const chosenPersonId =
             choice === 'A' ? c.personA.id : choice === 'B' ? c.personB.id : 'tie';
+        let createdVote = false;
 
         try {
             await runTransaction(db, async (tx) => {
@@ -93,36 +153,19 @@ export default function useVotes(user: User | null, couples: Couple[]) {
                     tx.get(coupleRef),
                 ]);
                 if (!coupleSnap.exists()) throw new Error('Couple not found');
-                const coupleData = coupleSnap.data() as any;
-
-                let { count_a = 0, count_b = 0, count_tie = 0 } = coupleData;
-                if (!voteSnap.exists()) {
-                    // Nouveau vote
-                    if (choice === 'A') count_a++;
-                    else if (choice === 'B') count_b++;
-                    else count_tie++;
-                } else {
-                    // Mise à jour du vote existant
-                    const prev = voteSnap.data() as VoteDoc;
-                    const prevChoice =
-                        prev.people_voted_id === c.personA.id
-                            ? 'A'
-                            : prev.people_voted_id === c.personB.id
-                              ? 'B'
-                              : 'tie';
-                    if (prevChoice === choice) return; // rien à changer
-
-                    if (prevChoice === 'A') count_a--;
-                    else if (prevChoice === 'B') count_b--;
-                    else count_tie--;
-
-                    if (choice === 'A') count_a++;
-                    else if (choice === 'B') count_b++;
-                    else count_tie++;
-                }
+                const previousChoice = voteSnap.exists()
+                    ? getVoteChoice(voteSnap.data() as VoteDoc, c)
+                    : undefined;
+                if (previousChoice === choice) return;
+                createdVote = !voteSnap.exists();
+                const counts = updateVoteCounts(
+                    coupleSnap.data() as Record<string, number>,
+                    previousChoice,
+                    choice,
+                );
 
                 // 🔄 Sauvegarde transactionnelle
-                tx.set(coupleRef, { count_a, count_b, count_tie }, { merge: true });
+                tx.set(coupleRef, counts, { merge: true });
                 tx.set(
                     voteRef,
                     {
@@ -148,10 +191,12 @@ export default function useVotes(user: User | null, couples: Couple[]) {
                 if (existing) return prev.map((v) => (v.id === existing.id ? updated : v));
                 return [...prev, updated];
             });
+
+            if (createdVote) await recordReferralParticipation(voterId);
         } catch (err) {
             console.error('Erreur pendant le vote :', err);
         }
     };
 
-    return { votesAll, myVotes, handleVote, votesLoaded };
+    return { votesAll, myVotes, handleVote, votesLoaded, voterId };
 }

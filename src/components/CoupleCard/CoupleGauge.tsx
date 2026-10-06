@@ -6,11 +6,13 @@ export default function CoupleGauge({
     couple,
     myChoice,
     onlyMyVotes,
+    revealResultsAfterVote,
     onSelectPerson,
 }: {
     couple: Couple;
     myChoice?: 'A' | 'B' | 'tie';
     onlyMyVotes: boolean;
+    revealResultsAfterVote?: boolean;
     // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     onSelectPerson: (...args: [string]) => void;
 }) {
@@ -80,6 +82,10 @@ export default function CoupleGauge({
                 {onlyMyVotes ? (
                     <div className="text-xs text-center text-muted-foreground italic">
                         Pour toi, <span className="text-primary font-medium">{resultText}</span>
+                    </div>
+                ) : revealResultsAfterVote && !myChoice ? (
+                    <div className="rounded-xl bg-muted/70 px-3 py-2 text-center text-xs font-medium text-muted-foreground">
+                        Vote pour découvrir la tendance
                     </div>
                 ) : (
                     <Gauge couple={couple} />

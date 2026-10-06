@@ -12,15 +12,18 @@ import useCouples from './hooks/useCouples';
 import useVotes from './hooks/useVotes';
 import CoupleDetailPage from './pages/CoupleDetailPage';
 import PlayModePage from './pages/PlayModePage';
+import FriendsChallengePage from './pages/FriendsChallengePage';
 
 import StyleGuide from '@/tools/StyleGuide';
 import ValidateCouplesPage from '@/pages/ValidateCouplesPage';
 import FaqPage from '@/pages/Faq';
+import useReferrals from '@/hooks/useReferrals';
 
 export default function App() {
     const [user, setUser] = useState<User | null>(null);
     const { couples, loading, deleteCouple } = useCouples();
-    const { votesAll, myVotes, handleVote, votesLoaded } = useVotes(user, couples);
+    const { votesAll, myVotes, handleVote, votesLoaded, voterId } = useVotes(user, couples);
+    const { code: referralCode, referralCount, trackingReady } = useReferrals(voterId);
 
     useEffect(() => onAuthStateChanged(auth, setUser), []);
 
@@ -40,6 +43,9 @@ export default function App() {
                             loading={loading}
                             votesLoaded={votesLoaded}
                             deleteCouple={deleteCouple}
+                            referralCode={referralCode}
+                            referralCount={referralCount}
+                            referralTrackingReady={trackingReady}
                         />
                     }
                 />
@@ -55,6 +61,21 @@ export default function App() {
                     }
                 />
                 <Route
+                    path="/defi"
+                    element={
+                        <FriendsChallengePage
+                            couples={couples}
+                            myVotes={myVotes}
+                            user={user}
+                            loading={loading}
+                            onVote={handleVote}
+                            referralCode={referralCode}
+                            referralCount={referralCount}
+                            referralTrackingReady={trackingReady}
+                        />
+                    }
+                />
+                <Route
                     path="/mes-votes"
                     element={<MyVotesPage user={user} couples={couples} votesAll={votesAll} />}
                 />
@@ -62,7 +83,14 @@ export default function App() {
                 <Route path="/ajouter-couple" element={<AddCouplePage user={user} />} />
                 <Route
                     path="/couple/:id"
-                    element={<CoupleDetailPage couples={couples} user={user} onVote={handleVote} />}
+                    element={
+                        <CoupleDetailPage
+                            couples={couples}
+                            user={user}
+                            myVotes={myVotes}
+                            onVote={handleVote}
+                        />
+                    }
                 />
                 <Route path="/modifier-couple/:id" element={<AddCouplePage user={user} isEdit />} />
 

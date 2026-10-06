@@ -16,6 +16,7 @@ export default function CoupleCard({
     onVote,
     compact = false,
     onlyMyVotes = false,
+    revealResultsAfterVote = false,
     onDelete,
 }: {
     couple: Couple;
@@ -25,6 +26,7 @@ export default function CoupleCard({
     onVote?: (...args: [Couple, 'A' | 'B' | 'tie']) => void;
     compact?: boolean;
     onlyMyVotes?: boolean;
+    revealResultsAfterVote?: boolean;
     // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     onDelete?: (...args: [string, string]) => void;
 }) {
@@ -105,6 +107,7 @@ export default function CoupleCard({
                     couple={displayedCouple}
                     myChoice={localChoice}
                     onlyMyVotes={onlyMyVotes}
+                    revealResultsAfterVote={revealResultsAfterVote}
                     onSelectPerson={setSelectedPerson}
                 />
             </div>

@@ -10,10 +10,13 @@ import BackButton from '@/components/ui/BackButton';
 export default function CoupleDetailPage({
     couples,
     user,
+    myVotes,
     onVote,
 }: {
     couples: Couple[];
     user: any;
+    myVotes: Record<string, 'A' | 'B' | 'tie'>;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     onVote: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
 }) {
     const { id } = useParams();
@@ -23,8 +26,8 @@ export default function CoupleDetailPage({
 
     useEffect(() => {
         if (!couple) return;
-        setMyChoice(undefined);
-    }, [couple]);
+        setMyChoice(myVotes[couple.id]);
+    }, [couple, myVotes]);
 
     if (!couple)
         return (
@@ -51,6 +54,7 @@ export default function CoupleDetailPage({
                 onVote={handleVote}
                 compact={false}
                 onlyMyVotes={false}
+                revealResultsAfterVote
                 myChoice={myChoice}
             />
 

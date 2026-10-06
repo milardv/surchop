@@ -1,9 +1,10 @@
 import { type ComponentType, useEffect, useMemo, useRef, useState } from 'react';
 import * as Icons from 'lucide-react';
-import { ArrowRight, Globe, Heart, Sparkles, Tag } from 'lucide-react';
+import { ArrowRight, CalendarHeart, Globe, Heart, Sparkles, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import CoupleCard from '../components/CoupleCard/CoupleCard';
+import ReferralInvite from '../components/ReferralInvite';
 import VoteProgress from '../components/VoteProgress';
 import SurchopeIntroModal from '../components/SurchopeIntroModal';
 import SurchopeLoader from '../components/SurchopeLoader';
@@ -29,6 +30,9 @@ export default function HomePage({
     loading: initialLoading,
     votesLoaded,
     deleteCouple,
+    referralCode,
+    referralCount,
+    referralTrackingReady,
 }: {
     user: any;
     couples: Couple[];
@@ -39,6 +43,9 @@ export default function HomePage({
     votesLoaded: boolean;
     // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     deleteCouple?: (id: string, userUid: string) => void;
+    referralCode: string;
+    referralCount: number;
+    referralTrackingReady: boolean | null;
 }) {
     const { categories } = useCategories();
     const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +58,16 @@ export default function HomePage({
     > | null>(null);
     const [visibleCount, setVisibleCount] = useState(COUPLES_PAGE_SIZE);
     const loadMoreRef = useRef<HTMLDivElement | null>(null);
+    const coupleOfTheDay = useMemo(() => {
+        if (couples.length === 0) return undefined;
+        const today = new Date().toISOString().slice(0, 10);
+        const hash = [...today].reduce(
+            (value, character) => value * 31 + character.charCodeAt(0),
+            0,
+        );
+        const stableCouples = [...couples].sort((a, b) => a.id.localeCompare(b.id));
+        return stableCouples[Math.abs(hash) % stableCouples.length];
+    }, [couples]);
 
     const sortedCategories = useMemo(
         () =>
@@ -211,9 +228,44 @@ export default function HomePage({
                         >
                             Mode rafale <ArrowRight size={17} />
                         </Link>
+                        <Link
+                            to="/defi"
+                            className="relative mt-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-sm font-bold text-violet-800 transition-[transform,background-color] duration-150 ease-out hover:bg-violet-50 active:scale-[0.97] sm:mt-0"
+                        >
+                            Défier mes amis <ArrowRight size={17} />
+                        </Link>
                     </section>
                     {votesLoaded && !initialLoading && (
                         <VoteProgress votes={Object.keys(myVotes).length} />
+                    )}
+                    {coupleOfTheDay?.personA && coupleOfTheDay.personB && (
+                        <section className="space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                                    <CalendarHeart className="text-primary" size={20} />
+                                    Le couple du jour
+                                </h2>
+                                <Link
+                                    to={`/couple/${coupleOfTheDay.id}`}
+                                    className="text-xs font-semibold text-primary hover:underline"
+                                >
+                                    Partager le vote
+                                </Link>
+                            </div>
+                            <CoupleCard
+                                couple={coupleOfTheDay}
+                                user={user}
+                                myChoice={myVotes[coupleOfTheDay.id]}
+                                onVote={handleVote}
+                            />
+                        </section>
+                    )}
+                    {referralCode && (
+                        <ReferralInvite
+                            code={referralCode}
+                            referralCount={referralCount}
+                            trackingReady={referralTrackingReady}
+                        />
                     )}
                     {/* 🧭 Barre de filtres */}
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
