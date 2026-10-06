@@ -27,31 +27,31 @@ export default function VoteProgress({
     return (
         <section
             aria-label="Progression et badges de vote"
-            className={`rounded-2xl border border-pink-200/70 bg-white ${compact ? 'p-3' : 'p-4 sm:p-5'}`}
+            className={`rounded-[20px] bg-white ${compact ? 'p-4' : 'p-5'}`}
         >
             <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-pink-100 text-primary">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-accent text-secondary">
                         <CurrentIcon size={21} aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                        <h2 className="truncate text-sm font-bold text-gray-900">
+                        <h2 className="truncate text-lg font-extrabold text-foreground">
                             {earned ? BADGES[earned - 1].name : 'À toi de jouer'}
                         </h2>
-                        <p className="text-xs text-gray-600">
+                        <p className="text-xs text-muted-foreground">
                             {nextBadge
                                 ? `${nextBadge.votes - votes} vote${nextBadge.votes - votes > 1 ? 's' : ''} avant le badge ${nextBadge.name}`
                                 : 'Tous les badges sont à toi !'}
                         </p>
                     </div>
                 </div>
-                <span className="shrink-0 text-xs font-semibold tabular-nums text-gray-600">
+                <span className="shrink-0 text-sm font-extrabold tabular-nums text-secondary">
                     {votes} vote{votes > 1 ? 's' : ''}
                 </span>
             </div>
 
             <div
-                className="mt-3 h-2 overflow-hidden rounded-full bg-pink-100"
+                className="mt-4 h-2 overflow-hidden rounded-full bg-muted"
                 role="progressbar"
                 aria-label="Progression vers le prochain badge"
                 aria-valuemin={0}
@@ -66,7 +66,7 @@ export default function VoteProgress({
 
             {!compact && (
                 <ul
-                    className="mt-3 flex gap-2 overflow-x-auto pb-1"
+                    className="mt-4 flex gap-2 overflow-x-auto pb-1"
                     aria-label="Collection de badges"
                 >
                     {BADGES.map(({ votes: threshold, name, Icon }) => {
@@ -75,7 +75,7 @@ export default function VoteProgress({
                             <li
                                 key={name}
                                 aria-label={`${name}, ${unlocked ? 'débloqué' : `à ${threshold} votes`}`}
-                                className={`flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${unlocked ? 'bg-pink-50 text-primary' : 'bg-gray-50 text-gray-400'}`}
+                                className={`flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${unlocked ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}
                             >
                                 <Icon size={13} aria-hidden="true" />
                                 {name}

@@ -31,10 +31,10 @@ export default function ReferralInvite({
     };
 
     return (
-        <section className="rounded-2xl border border-pink-200 bg-rose-50/70 p-4 sm:p-5">
-            <div className="flex items-start justify-between gap-4">
+        <section className="rounded-[20px] bg-[#dff2f1] p-5 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-primary shadow-sm">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-white text-secondary">
                         {trackingReady && referralCount >= 3 ? (
                             <Gift size={20} />
                         ) : (
@@ -42,12 +42,12 @@ export default function ReferralInvite({
                         )}
                     </span>
                     <div>
-                        <h2 className="font-bold text-gray-900">
+                        <h2 className="font-display text-lg font-extrabold text-foreground">
                             {trackingReady && referralCount >= 3
                                 ? 'Badge Ambassadeur débloqué'
                                 : 'Fais tourner le jeu'}
                         </h2>
-                        <p className="mt-0.5 text-xs text-gray-600">
+                        <p className="mt-0.5 text-xs text-foreground/75">
                             {trackingReady === false
                                 ? 'Le partage marche, mais le suivi des participations doit être autorisé dans Firebase.'
                                 : trackingReady === null
@@ -62,13 +62,13 @@ export default function ReferralInvite({
                     type="button"
                     onClick={invite}
                     disabled={!code}
-                    className="inline-flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold text-white transition-[transform,background-color] duration-150 ease-out hover:bg-primary/90 active:scale-[0.97]"
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-secondary px-4 py-2 text-xs font-bold text-white transition-[transform,background-color] duration-150 ease-out active:scale-[0.97]"
                 >
                     Inviter <ArrowUpRight size={15} />
                 </button>
             </div>
             <div
-                className="mt-3 h-1.5 overflow-hidden rounded-full bg-pink-200"
+                className="mt-4 h-2 overflow-hidden rounded-full bg-white/70"
                 aria-label={
                     trackingReady === false
                         ? 'Suivi des invitations indisponible'
@@ -76,7 +76,7 @@ export default function ReferralInvite({
                 }
             >
                 <div
-                    className="h-full rounded-full bg-primary transition-[width] duration-200 ease-out"
+                    className="h-full rounded-full bg-secondary transition-[width] duration-200 ease-out"
                     style={{ width: `${trackingReady === false ? 0 : progress}%` }}
                 />
             </div>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Link, Navigate, Route, Routes } from 'react-router-dom';
 import { onAuthStateChanged, User } from 'firebase/auth';
 
 import { auth } from './firebase';
@@ -28,7 +28,7 @@ export default function App() {
     useEffect(() => onAuthStateChanged(auth, setUser), []);
 
     return (
-        <div className="pb-16 md:pb-0">
+        <div className="pb-20 md:pb-0">
             <Header user={user} />
 
             <Routes>
@@ -57,6 +57,7 @@ export default function App() {
                             user={user}
                             myVotes={myVotes}
                             onVote={handleVote}
+                            loading={loading || !votesLoaded}
                         />
                     }
                 />
@@ -92,7 +93,7 @@ export default function App() {
                         />
                     }
                 />
-                <Route path="/modifier-couple/:id" element={<AddCouplePage user={user} isEdit />} />
+                <Route path="/modifier-couple/:id" element={<AddCouplePage user={user} />} />
 
                 <Route path="/valider-couples" element={<ValidateCouplesPage />} />
                 <Route path="/confidentialite" element={<PrivacyPolicyPage />} />
@@ -101,11 +102,17 @@ export default function App() {
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
 
-            <footer className="text-center text-xs text-gray-500 py-6">
-                Fait avec amour, aucun jugement 😇 •{' '}
-                <a href="/confidentialite" className="underline hover:text-gray-700">
-                    Politique de confidentialité
-                </a>
+            <footer className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 border-t border-border px-4 pb-28 pt-6 text-center text-xs text-muted-foreground md:pb-6">
+                <span>Fait avec amour, sans jugement.</span>
+                <Link to="/faq" className="underline underline-offset-4 hover:text-primary">
+                    FAQ
+                </Link>
+                <Link
+                    to="/confidentialite"
+                    className="underline underline-offset-4 hover:text-primary"
+                >
+                    Confidentialité
+                </Link>
             </footer>
         </div>
     );

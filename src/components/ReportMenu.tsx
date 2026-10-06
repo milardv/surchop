@@ -44,7 +44,7 @@ Merci.
             {/* 🔘 Bouton de menu */}
             <DropdownMenuTrigger asChild>
                 <button
-                    className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] focus:ring-offset-2"
+                    className="grid h-10 w-10 place-items-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
                     title="Plus d’options"
                 >
                     <MoreVertical size={18} />

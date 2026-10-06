@@ -1,17 +1,18 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { User } from 'firebase/auth';
 import { deleteDoc, doc } from 'firebase/firestore';
-import { Trash2 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { ArrowRight, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { db } from '../firebase';
 import { Couple, VoteView } from '../models/models';
 import CoupleCard from '../components/CoupleCard/CoupleCard';
+import VoteProgress from '../components/VoteProgress';
 
 import SurchopeLoader from '@/components/SurchopeLoader';
-import Card from '@/components/ui/Card';
-import IconButton from '@/components/ui/IconButton';
 import { getOrCreateGuestVoterId } from '@/utils/voterIdentity';
+
+type VoteEntry = { id: string; couple: Couple; choice: 'A' | 'B' | 'tie'; updatedAt?: Date };
 
 export default function MyVotesPage({
     user,
@@ -25,9 +26,7 @@ export default function MyVotesPage({
     const voterId = useMemo(() => user?.uid ?? getOrCreateGuestVoterId(), [user?.uid]);
     const [loading, setLoading] = useState(true);
 
-    const [entries, setEntries] = useState<
-        { id: string; couple: Couple; choice: 'A' | 'B' | 'tie'; updatedAt?: Date }[]
-    >([]);
+    const [entries, setEntries] = useState<VoteEntry[]>([]);
 
     // 🔁 Chargement des votes du visiteur (connecté ou invité)
     useEffect(() => {
@@ -35,7 +34,7 @@ export default function MyVotesPage({
 
         const list = votesAll
             .filter((vote) => vote.uid === voterId)
-            .flatMap((vote: VoteView) => {
+            .flatMap<VoteEntry>((vote: VoteView) => {
                 const couple = couples.find((c) => c.id === vote.couple_id);
                 if (!couple || !couple.personA || !couple.personB) return [];
 
@@ -75,56 +74,63 @@ export default function MyVotesPage({
     };
 
     return (
-        <main className="max-w-5xl mx-auto px-4 py-6 space-y-4 text-foreground">
-            <h2 className="text-lg font-semibold mb-4 text-primary">Mon historique</h2>
+        <main className="mx-auto max-w-6xl space-y-6 px-4 pb-24 pt-6 text-foreground sm:px-6">
+            <header className="home-stage p-6 sm:p-8">
+                <h1 className="stage-title text-3xl sm:text-5xl">Tes choix, ton palmarès.</h1>
+                <p className="mt-3 text-sm text-white/80">
+                    Retrouve les duos que tu as départagés.
+                </p>
+            </header>
             {!user && (
-                <p className="text-xs text-muted-foreground -mt-2">
-                    Mode invité: historique lié à ce navigateur.
+                <p className="text-sm text-muted-foreground">
+                    En mode invité, cet historique reste lié à ce navigateur.
                 </p>
             )}
 
             {loading && <SurchopeLoader />}
 
             {!loading && entries.length === 0 && (
-                <div className="text-muted-foreground text-sm">
-                    Tu n’as encore voté pour aucun couple 😢
+                <div className="rounded-[20px] bg-white p-6">
+                    <h2 className="section-title">La partie commence ici.</h2>
+                    <p className="mt-2 text-sm text-muted-foreground">
+                        Tu n’as pas encore voté. Un premier duel t’attend !
+                    </p>
+                    <Link
+                        to="/jouer"
+                        className="stage-action mt-5 bg-primary px-5 text-sm text-white"
+                    >
+                        Jouer maintenant <ArrowRight size={17} />
+                    </Link>
                 </div>
             )}
 
-            <AnimatePresence>
-                {!loading &&
-                    entries.map((e) => (
-                        <motion.div
-                            key={e.id}
-                            layout
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <Card className="relative p-3 flex flex-col gap-2">
-                                {/* 🗑️ Bouton suppression */}
-                                <div className="">
-                                    <IconButton
-                                        icon={Trash2}
-                                        label="Supprimer ce vote"
-                                        color="default"
-                                        onClick={() => handleDeleteVote(e.id)}
-                                    />
-                                </div>
-
-                                {/* 💞 Couple */}
+            {!loading && entries.length > 0 && (
+                <>
+                    <VoteProgress votes={entries.length} />
+                    <h2 className="section-title">Tes duos</h2>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        {entries.map((entry) => (
+                            <div key={entry.id} className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => handleDeleteVote(entry.id)}
+                                    aria-label={`Supprimer le vote pour ${entry.couple.personA?.display_name} et ${entry.couple.personB?.display_name}`}
+                                    className="absolute right-4 top-3 z-10 grid h-11 w-11 place-items-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-primary"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
                                 <CoupleCard
-                                    couple={e.couple}
+                                    couple={entry.couple}
                                     user={user}
-                                    myChoice={e.choice}
-                                    onlyMyVotes={true}
+                                    myChoice={entry.choice}
+                                    onlyMyVotes
                                     compact
                                 />
-                            </Card>
-                        </motion.div>
-                    ))}
-            </AnimatePresence>
+                            </div>
+                        ))}
+                    </div>
+                </>
+            )}
         </main>
     );
 }

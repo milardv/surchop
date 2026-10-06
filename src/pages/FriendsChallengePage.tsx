@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Check, Copy, Share2, Sparkles, Users } from 'lucide-react';
+import { ArrowLeft, Check, Copy, Share2, Sparkles } from 'lucide-react';
 
 import CoupleCard from '@/components/CoupleCard/CoupleCard';
 import ReferralInvite from '@/components/ReferralInvite';
@@ -68,7 +68,7 @@ export default function FriendsChallengePage({
     const [searchParams, setSearchParams] = useSearchParams();
     const challengeIds = useMemo(
         () =>
-            [...new Set((searchParams.get('ids') ?? '').split(',').filter(Boolean))].slice(
+            Array.from(new Set((searchParams.get('ids') ?? '').split(',').filter(Boolean))).slice(
                 0,
                 MAX_CHALLENGE_COUPLES,
             ),
@@ -158,26 +158,23 @@ export default function FriendsChallengePage({
 
     if (!isChallenge) {
         return (
-            <main className="mx-auto max-w-3xl space-y-5 px-4 py-7 text-foreground">
+            <main className="mx-auto max-w-3xl space-y-5 px-4 pb-24 pt-6 text-foreground">
                 <Link
                     to="/"
                     className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground"
                 >
                     <ArrowLeft size={16} /> Accueil
                 </Link>
-                <div className="rounded-3xl bg-gradient-to-br from-rose-50 via-white to-amber-50 p-6 sm:p-8">
-                    <div className="flex items-center gap-2 text-sm font-bold text-primary">
-                        <Users size={17} /> DÉFI ENTRE AMIS
-                    </div>
-                    <h1 className="mt-2 text-2xl font-black tracking-tight text-gray-900 sm:text-3xl">
-                        Vous votez, vous comparez.
+                <div className="home-stage p-6 sm:p-8">
+                    <h1 className="stage-title max-w-xl text-3xl sm:text-5xl">
+                        Les mêmes duos. Vos avis.
                     </h1>
-                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-gray-600">
-                        Choisis entre 2 et 5 couples, puis partage le même défi. À la fin, comparez
-                        vos choix et découvrez les tendances des autres votes.
+                    <p className="mt-3 max-w-xl text-sm leading-relaxed text-white/80 sm:text-base">
+                        Choisis entre 2 et 5 duos, puis partage le même défi. À la fin, comparez vos
+                        choix et découvrez les tendances des autres votes.
                     </p>
-                    <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-primary">
-                        <Sparkles size={16} /> {selectedIds.length}/{MAX_CHALLENGE_COUPLES} couples
+                    <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-extrabold text-foreground">
+                        <Sparkles size={16} /> {selectedIds.length}/{MAX_CHALLENGE_COUPLES} duos
                         choisis
                     </div>
                 </div>
@@ -186,8 +183,9 @@ export default function FriendsChallengePage({
                     type="search"
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Filtrer les couples"
-                    className="h-11 w-full rounded-xl border border-border bg-white px-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                    placeholder="Chercher un duo"
+                    aria-label="Chercher un duo à ajouter au défi"
+                    className="h-12 w-full rounded-2xl border border-border bg-white px-4 text-base outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 />
                 <div className="max-h-[48vh] space-y-2 overflow-y-auto pr-1">
                     {filteredCouples.map((couple) => {
@@ -200,7 +198,7 @@ export default function FriendsChallengePage({
                                 aria-pressed={selected}
                                 disabled={disabled}
                                 onClick={() => toggleCouple(couple.id)}
-                                className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-xl border px-4 text-left transition-[background-color,border-color] disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'border-primary/50 bg-pink-50' : 'border-border bg-white hover:border-primary/30'}`}
+                                className={`flex min-h-14 w-full items-center justify-between gap-3 rounded-2xl border px-4 text-left transition-[background-color,border-color,transform] duration-150 active:scale-[.99] disabled:cursor-not-allowed disabled:opacity-50 ${selected ? 'border-primary/50 bg-[#fce8ee]' : 'border-border bg-white hover:border-primary/30'}`}
                             >
                                 <span className="min-w-0 truncate text-sm font-semibold">
                                     {couple.personA?.display_name}{' '}
@@ -278,7 +276,7 @@ export default function FriendsChallengePage({
     }).length;
 
     return (
-        <main className="mx-auto max-w-5xl space-y-5 px-4 py-6 text-foreground">
+        <main className="mx-auto max-w-5xl space-y-5 px-4 pb-24 pt-6 text-foreground">
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <button
                     type="button"
@@ -295,16 +293,11 @@ export default function FriendsChallengePage({
                     <Share2 size={16} /> Inviter des amis
                 </button>
             </div>
-            <header className="rounded-3xl bg-gradient-to-br from-rose-50 via-white to-amber-50 p-5 sm:p-7">
-                <p className="text-xs font-bold uppercase tracking-wider text-primary">
-                    {challengeIds.length === 2 ? 'Duel partagé' : 'Défi entre amis'}
-                </p>
-                <h1 className="mt-1 text-2xl font-black text-gray-900">
-                    Les mêmes duos. Vos avis.
-                </h1>
-                <p className="mt-1 text-sm text-gray-600">
-                    {challengeIds.length} couples à départager · les tendances se dévoilent après
-                    ton vote.
+            <header className="home-stage p-6 sm:p-8">
+                <h1 className="stage-title text-3xl sm:text-5xl">Les mêmes duos. Vos avis.</h1>
+                <p className="mt-3 text-sm text-white/80">
+                    {challengeIds.length} duos à départager · les tendances se dévoilent après ton
+                    vote.
                 </p>
             </header>
 

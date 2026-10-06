@@ -3,7 +3,7 @@ import { User } from 'firebase/auth';
 
 import PersonInfoModal from '../PersonInfoModal';
 import CoupleHeader from './CoupleHeader';
-import CoupleGauge from './CoupleGauge';
+import CoupleGauge, { CoupleResults } from './CoupleGauge';
 import CoupleVoteButtons from './CoupleVoteButtons';
 import ReportMenu from '../ReportMenu';
 
@@ -18,6 +18,7 @@ export default function CoupleCard({
     onlyMyVotes = false,
     revealResultsAfterVote = false,
     onDelete,
+    spotlight = false,
 }: {
     couple: Couple;
     user: User | null;
@@ -29,6 +30,7 @@ export default function CoupleCard({
     revealResultsAfterVote?: boolean;
     // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     onDelete?: (...args: [string, string]) => void;
+    spotlight?: boolean;
 }) {
     const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
     const [localChoice, setLocalChoice] = useState<'A' | 'B' | 'tie' | undefined>(myChoice);
@@ -89,9 +91,9 @@ export default function CoupleCard({
     };
 
     return (
-        <div className="relative rounded-3xl border border-border bg-card p-4 text-card-foreground shadow-sm transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
+        <article className={`duel-card ${spotlight ? 'duel-card--spotlight' : ''}`}>
             {/* En-tête */}
-            <div className="flex justify-between items-start mb-3">
+            <div className="mb-4 flex items-center justify-between gap-2">
                 <CoupleHeader
                     couple={displayedCouple}
                     user={user}
@@ -102,19 +104,13 @@ export default function CoupleCard({
             </div>
 
             {/* Contenu principal */}
-            <div className="flex flex-col items-center gap-4">
-                <CoupleGauge
-                    couple={displayedCouple}
-                    myChoice={localChoice}
-                    onlyMyVotes={onlyMyVotes}
-                    revealResultsAfterVote={revealResultsAfterVote}
-                    onSelectPerson={setSelectedPerson}
-                />
+            <div className="flex flex-col items-center">
+                <CoupleGauge couple={displayedCouple} onSelectPerson={setSelectedPerson} />
             </div>
 
             {/* Boutons de vote */}
             {!compact && (
-                <div className="mt-3">
+                <div className="mt-5">
                     <CoupleVoteButtons
                         couple={displayedCouple}
                         myChoice={localChoice}
@@ -123,10 +119,17 @@ export default function CoupleCard({
                 </div>
             )}
 
+            <CoupleResults
+                couple={displayedCouple}
+                myChoice={localChoice}
+                onlyMyVotes={onlyMyVotes}
+                revealResultsAfterVote={revealResultsAfterVote}
+            />
+
             {/* Modal info personne */}
             {selectedPerson && (
                 <PersonInfoModal name={selectedPerson} onClose={() => setSelectedPerson(null)} />
             )}
-        </div>
+        </article>
     );
 }

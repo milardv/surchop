@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import SurchopeLoader from '../components/SurchopeLoader';
@@ -43,10 +43,13 @@ export default function CoupleDetailPage({
     };
 
     return (
-        <main className="max-w-md mx-auto px-4 py-6 text-foreground">
-            <h1 className="text-2xl font-semibold text-center text-primary mb-4">
-                💘 {couple.personA.display_name} & {couple.personB.display_name}
-            </h1>
+        <main className="mx-auto max-w-xl space-y-5 px-4 pb-24 pt-6 text-foreground">
+            <header className="home-stage p-6 text-center sm:p-8">
+                <h1 className="stage-title text-3xl sm:text-4xl">
+                    {couple.personA.display_name} & {couple.personB.display_name}
+                </h1>
+                <p className="mt-3 text-sm text-white/80">À ton tour de départager ce duo.</p>
+            </header>
 
             <CoupleCard
                 couple={couple}
@@ -58,7 +61,7 @@ export default function CoupleDetailPage({
                 myChoice={myChoice}
             />
 
-            <BackButton to="/" label="Retour à la liste" className={'mt-8'} />
+            <BackButton to="/" label="Voir tous les duos" className="mt-8" />
         </main>
     );
 }

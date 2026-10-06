@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-06T15:59:36Z",
+  "title": "Design System: Surchope",
+  "extensions": {
+    "colorMeta": {
+      "arena": { "role": "secondary", "displayName": "Violet d'arène" },
+      "paper": { "role": "neutral", "displayName": "Papier chaud" },
+      "pink": { "role": "primary", "displayName": "Rose vote" },
+      "yellow": { "role": "tertiary", "displayName": "Jaune action" },
+      "cyan": { "role": "tertiary", "displayName": "Cyan vote" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Affiche", "purpose": "Titres et noms des personnes" },
+      "body": { "displayName": "Lecture", "purpose": "Actions, résultats et aide" }
+    },
+    "shadows": [
+      { "name": "duel", "value": "0 10px 26px #321e3b0d", "purpose": "Séparer le duel du fond" },
+      { "name": "navigation", "value": "0 10px 24px #24152f20", "purpose": "Garder la navigation mobile distincte" }
+    ],
+    "motion": [
+      { "name": "pop", "value": "150ms cubic-bezier(0.23, 1, 0.32, 1)", "purpose": "Retour tactile des boutons" },
+      { "name": "progress", "value": "200ms ease-out", "purpose": "Mise à jour des scores et de la progression" }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Action principale",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Lancer la rafale ou une action principale.",
+      "html": "<button class=\"ds-action\">Mode rafale</button>",
+      "css": ".ds-action{min-height:48px;padding:0 20px;border:0;border-radius:999px;background:hsl(47 100% 73%);color:hsl(267 33% 18%);font:800 14px 'DM Sans',sans-serif;transition:transform 150ms cubic-bezier(.23,1,.32,1)}.ds-action:active{transform:scale(.97)}.ds-action:focus-visible{outline:3px solid hsl(339 85% 54%);outline-offset:3px}"
+    },
+    {
+      "name": "Choix de vote",
+      "kind": "button",
+      "description": "Grande réponse tactile, sélection visible.",
+      "html": "<button class=\"ds-choice\" aria-pressed=\"false\">Je vote pour Alex</button>",
+      "css": ".ds-choice{min-height:52px;padding:8px 12px;border:0;border-radius:14px;background:#fce8ee;color:#7d244e;font:800 14px 'DM Sans',sans-serif;transition:transform 150ms cubic-bezier(.23,1,.32,1)}.ds-choice[aria-pressed=true]{background:#322044;color:#fff}.ds-choice:active{transform:scale(.97)}.ds-choice:focus-visible{outline:3px solid hsl(339 85% 54%);outline-offset:3px}"
+    },
+    {
+      "name": "Recherche",
+      "kind": "input",
+      "description": "Champ de recherche mobile sans zoom iOS.",
+      "html": "<input class=\"ds-search\" placeholder=\"Chercher un duo\" />",
+      "css": ".ds-search{height:48px;padding:0 16px;border:1px solid hsl(267 18% 82%);border-radius:16px;background:#fff;color:hsl(267 33% 18%);font:400 16px 'DM Sans',sans-serif}.ds-search:focus-visible{outline:3px solid hsl(339 85% 54%);outline-offset:3px}"
+    },
+    {
+      "name": "Duel",
+      "kind": "card",
+      "refersTo": "duel-card",
+      "description": "Portraits, choix puis chiffres de vote.",
+      "html": "<article class=\"ds-duel\"><strong>Alex VS Sam</strong><p>Trois choix, des votes visibles.</p></article>",
+      "css": ".ds-duel{padding:16px;border:1px solid #e4d6df;border-radius:22px;background:#fffdf8;color:hsl(267 33% 18%);box-shadow:0 10px 26px #321e3b0d;font-family:'DM Sans',sans-serif}.ds-duel strong{font-family:'Bricolage Grotesque',sans-serif;font-size:20px}"
+    },
+    {
+      "name": "Puce de catégorie",
+      "kind": "chip",
+      "description": "Contexte discret avant le duel.",
+      "html": "<span class=\"ds-chip\">Cinéma</span>",
+      "css": ".ds-chip{display:inline-flex;align-items:center;min-height:36px;padding:0 12px;border-radius:999px;background:hsl(34 44% 92%);color:#322044;font:700 12px 'DM Sans',sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Le carnet de duels pop",
+    "overview": "L'expérience commence par un duel réel, pas une promesse abstraite. Les portraits, trois choix clairs et les votes exacts font le jeu. La page conserve une énergie d'arcade douce, sans transformer les personnes en spectacle cruel.",
+    "keyCharacteristics": ["Affichage mobile en une colonne", "Violet d'arène pour les introductions", "Jaune pour les actions", "Rose, jaune et cyan pour les résultats"],
+    "rules": [{ "name": "The Honest Score Rule", "body": "Chaque nombre de votes est réel ; la largeur colorée n'est jamais le seul moyen de lire le score.", "section": "colors" }],
+    "dos": ["Afficher les personnes, les choix et les chiffres avant les mécaniques de partage.", "Garder les cibles tactiles d'au moins 44 px et une indication de focus visible.", "Limiter les transitions d'interface à 200 ms environ et respecter la réduction du mouvement."],
+    "donts": ["Ne jamais inventer un score, une récompense ou un classement.", "Ne pas cacher l'option d'égalité ni pousser un vote sur une personne."]
+  }
+}

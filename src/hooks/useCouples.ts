@@ -16,67 +16,41 @@ import { Couple, Person } from '@/models/models';
 export default function useCouples() {
     const [couples, setCouples] = useState<Couple[]>([]);
     const [loading, setLoading] = useState(true);
-    const personCache = new Map<string, Person>();
 
     useEffect(() => {
         let cancelled = false;
-        const fallbackTimer = setTimeout(() => {
-            if (!cancelled) setLoading(false);
-        }, 5000);
+        let snapshotVersion = 0;
+        const personCache = new Map<string, Person>();
 
         const q = query(collection(db, 'couples'), where('validated', '==', true));
 
         const unsub = onSnapshot(
             q,
-            (snap) => {
-                const changes = snap.docChanges();
-                if (changes.length === 0) {
-                    if (!cancelled) setLoading(false);
-                    clearTimeout(fallbackTimer);
-                    return;
+            async (snap) => {
+                const version = ++snapshotVersion;
+                try {
+                    const resolved = await Promise.all(
+                        snap.docs.map(async (coupleDoc) => {
+                            const data = coupleDoc.data() as Couple;
+                            const [personA, personB] = await Promise.all([
+                                loadPerson(data.people_a_id),
+                                loadPerson(data.people_b_id),
+                            ]);
+                            if (!personA || !personB) return null;
+                            return { ...data, id: coupleDoc.id, personA, personB } as Couple;
+                        }),
+                    );
+                    if (cancelled || version !== snapshotVersion) return;
+                    setCouples(resolved.filter((couple): couple is Couple => couple !== null));
+                } catch (error) {
+                    console.error('Erreur de chargement des personnes :', error);
+                } finally {
+                    if (!cancelled && version === snapshotVersion) setLoading(false);
                 }
-
-                changes.forEach(async (change) => {
-                    const data = change.doc.data() as Couple;
-                    const coupleId = change.doc.id;
-
-                    if (change.type === 'removed') {
-                        setCouples((prev) => prev.filter((x) => x.id !== coupleId));
-                        return;
-                    }
-
-                    const [a, b] = await Promise.all([
-                        loadPerson(data.people_a_id),
-                        loadPerson(data.people_b_id),
-                    ]);
-                    if (!a || !b) return;
-
-                    const newCouple: Couple = {
-                        ...data,
-                        id: coupleId,
-                        personA: a,
-                        personB: b,
-                    };
-
-                    setCouples((prev) => {
-                        const exists = prev.find((x) => x.id === coupleId);
-                        if (!exists && change.type === 'added') {
-                            return [...prev, newCouple];
-                        }
-                        if (exists && change.type === 'modified') {
-                            return prev.map((x) => (x.id === coupleId ? newCouple : x));
-                        }
-                        return prev;
-                    });
-                });
-
-                if (!cancelled) setLoading(false);
-                clearTimeout(fallbackTimer);
             },
             (err) => {
                 console.error('Erreur de chargement des couples :', err);
                 if (!cancelled) setLoading(false);
-                clearTimeout(fallbackTimer);
             },
         );
 
@@ -91,10 +65,9 @@ export default function useCouples() {
 
         return () => {
             cancelled = true;
-            clearTimeout(fallbackTimer);
             unsub();
         };
-    }, [personCache]);
+    }, []);
 
     const deleteCouple = async (id: string, userUid: string) => {
         if (userUid !== 'EuindCjjeTYx5ABLPCRWdflHy2c2') {

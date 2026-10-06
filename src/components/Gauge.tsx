@@ -8,18 +8,17 @@ export default function Gauge({ couple }: { couple: Couple }) {
     const pctA = total ? (aVotes / total) * 100 : 0;
     const pctB = total ? (bVotes / total) * 100 : 0;
     const pctTie = total ? (tieVotes / total) * 100 : 0;
-    const isAWinner = aVotes > bVotes;
-
     return (
-        <div className="mt-3 w-full select-none" aria-label={`${total} votes au total`}>
-            <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
-                <span className="font-semibold uppercase tracking-wide">Avis de la communauté</span>
-                <span className="rounded-full bg-muted px-2.5 py-1 font-bold text-foreground">
-                    {total} {total > 1 ? 'votes' : 'vote'}
+        <div className="w-full select-none" aria-label={`${total} votes au total`}>
+            <div className="mb-2 flex items-end justify-between gap-2">
+                <span className="text-xs font-bold text-muted-foreground">Le public a voté</span>
+                <span className="font-display text-2xl font-extrabold leading-none tabular-nums text-foreground">
+                    {total}{' '}
+                    <span className="text-xs font-semibold">vote{total > 1 ? 's' : ''}</span>
                 </span>
             </div>
             <div
-                className="flex h-3 overflow-hidden rounded-full bg-muted shadow-inner"
+                className="flex h-3 overflow-hidden rounded-full bg-muted"
                 role="img"
                 aria-label={`${aVotes} votes pour ${couple.personA?.display_name}, ${bVotes} pour ${couple.personB?.display_name}, ${tieVotes} égalités`}
             >
@@ -32,44 +31,46 @@ export default function Gauge({ couple }: { couple: Couple }) {
                     style={{ width: `${pctTie}%` }}
                 />
                 <div
-                    className="bg-violet-500 transition-[width] duration-200 ease-out"
+                    className="bg-cyan-400 transition-[width] duration-200 ease-out"
                     style={{ width: `${pctB}%` }}
                 />
             </div>
-            <div className="mt-2 grid grid-cols-3 gap-1 text-center">
-                <div className="rounded-xl bg-primary/5 px-1.5 py-2 text-primary">
-                    <div className="truncate text-[11px] font-medium">
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                <div className="min-w-0">
+                    <span className="mx-auto mb-1 block h-2 w-2 rounded-full bg-primary" />
+                    <span className="block truncate font-semibold">
                         {couple.personA?.display_name}
-                    </div>
-                    <div className="text-sm font-extrabold">
+                    </span>
+                    <strong className="block text-base tabular-nums">
                         {aVotes}{' '}
-                        <span className="text-[10px] font-semibold">({Math.round(pctA)}%)</span>
-                    </div>
+                        <span className="text-[10px] font-medium text-muted-foreground">
+                            {Math.round(pctA)}%
+                        </span>
+                    </strong>
                 </div>
-                <div className="rounded-xl bg-amber-50 px-1.5 py-2 text-amber-700">
-                    <div className="text-[11px] font-medium">Égalité</div>
-                    <div className="text-sm font-extrabold">
+                <div className="min-w-0">
+                    <span className="mx-auto mb-1 block h-2 w-2 rounded-full bg-amber-300" />
+                    <span className="block truncate font-semibold">Égalité</span>
+                    <strong className="block text-base tabular-nums">
                         {tieVotes}{' '}
-                        <span className="text-[10px] font-semibold">({Math.round(pctTie)}%)</span>
-                    </div>
+                        <span className="text-[10px] font-medium text-muted-foreground">
+                            {Math.round(pctTie)}%
+                        </span>
+                    </strong>
                 </div>
-                <div className="rounded-xl bg-violet-50 px-1.5 py-2 text-violet-700">
-                    <div className="truncate text-[11px] font-medium">
+                <div className="min-w-0">
+                    <span className="mx-auto mb-1 block h-2 w-2 rounded-full bg-cyan-400" />
+                    <span className="block truncate font-semibold">
                         {couple.personB?.display_name}
-                    </div>
-                    <div className="text-sm font-extrabold">
+                    </span>
+                    <strong className="block text-base tabular-nums">
                         {bVotes}{' '}
-                        <span className="text-[10px] font-semibold">({Math.round(pctB)}%)</span>
-                    </div>
+                        <span className="text-[10px] font-medium text-muted-foreground">
+                            {Math.round(pctB)}%
+                        </span>
+                    </strong>
                 </div>
             </div>
-            {total > 0 && (
-                <p className="mt-2 text-center text-xs text-muted-foreground">
-                    {aVotes === bVotes
-                        ? 'Match nul, le public hésite 😳'
-                        : `${isAWinner ? couple.personA?.display_name : couple.personB?.display_name} mène le classement 💘`}
-                </p>
-            )}
         </div>
     );
 }

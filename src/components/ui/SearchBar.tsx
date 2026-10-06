@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 
 type SearchBarProps = {
     value: string;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     onChange: (v: string) => void;
     placeholder?: string;
     className?: string;
@@ -30,7 +31,8 @@ export default function SearchBar({
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 placeholder={placeholder}
-                className="w-full border border-border rounded-full pl-10 pr-4 py-2 text-sm bg-background text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))] placeholder:text-muted-foreground/60"
+                aria-label="Rechercher un duo"
+                className="h-12 w-full rounded-2xl border border-border bg-white pl-10 pr-4 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             />
         </div>
     );

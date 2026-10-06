@@ -1,14 +1,12 @@
 import { type ComponentType, useEffect, useMemo, useRef, useState } from 'react';
 import * as Icons from 'lucide-react';
-import { ArrowRight, CalendarHeart, Globe, Heart, Sparkles, Tag } from 'lucide-react';
+import { ArrowRight, CalendarHeart, Globe, Shuffle, Sparkles, Tag, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import CoupleCard from '../components/CoupleCard/CoupleCard';
 import ReferralInvite from '../components/ReferralInvite';
 import VoteProgress from '../components/VoteProgress';
-import SurchopeIntroModal from '../components/SurchopeIntroModal';
 import SurchopeLoader from '../components/SurchopeLoader';
-import SurchopeFooter from '../components/SurchopeFooter';
 
 import useCategories from '@/hooks/useCategories';
 import SearchBar from '@/components/ui/SearchBar';
@@ -49,7 +47,6 @@ export default function HomePage({
 }) {
     const { categories } = useCategories();
     const [searchQuery, setSearchQuery] = useState('');
-    const [showIntro, setShowIntro] = useState(false);
     const [filter, setFilter] = useState<string>('all');
     const [orderSeed] = useState(() => Math.random());
     const [voteOrderSnapshot, setVoteOrderSnapshot] = useState<Record<
@@ -61,7 +58,7 @@ export default function HomePage({
     const coupleOfTheDay = useMemo(() => {
         if (couples.length === 0) return undefined;
         const today = new Date().toISOString().slice(0, 10);
-        const hash = [...today].reduce(
+        const hash = Array.from(today).reduce(
             (value, character) => value * 31 + character.charCodeAt(0),
             0,
         );
@@ -113,15 +110,6 @@ export default function HomePage({
         setVoteOrderSnapshot({ ...myVotes });
     }, [votesLoaded, initialLoading, myVotes, voteOrderSnapshot]);
 
-    // 🧠 Gère le message d’intro
-    useEffect(() => {
-        const alreadySeen = localStorage.getItem('surchope_intro_seen');
-        if (!alreadySeen) {
-            setShowIntro(true);
-            localStorage.setItem('surchope_intro_seen', 'true');
-        }
-    }, []);
-
     // 🔍 Filtrage par recherche texte
     const filteredCouples = useMemo(() => {
         const votesForOrdering = voteOrderSnapshot ?? myVotes;
@@ -158,6 +146,10 @@ export default function HomePage({
         () => filteredCouples.slice(0, visibleCount),
         [filteredCouples, visibleCount],
     );
+    const spotlightCouple =
+        filteredCouples.find((couple) => !myVotes[couple.id]) ?? filteredCouples[0];
+    const feedCouples = visibleCouples.filter((couple) => couple.id !== spotlightCouple?.id);
+    const remainingCount = couples.filter((couple) => !myVotes[couple.id]).length;
     const hasMore = visibleCouples.length < filteredCouples.length;
 
     useEffect(() => {
@@ -195,71 +187,104 @@ export default function HomePage({
     };
 
     return (
-        <main className="max-w-5xl mx-auto px-4 py-6 space-y-6 relative text-foreground">
-            {showIntro && <SurchopeIntroModal onClose={() => setShowIntro(false)} />}
-
+        <main className="mx-auto max-w-6xl space-y-8 px-4 pb-24 pt-5 text-foreground sm:px-6 sm:pt-8">
             {initialLoading && couples.length === 0 ? (
                 <SurchopeLoader />
             ) : (
                 <>
-                    <section className="relative overflow-hidden rounded-3xl border border-pink-200/70 bg-gradient-to-br from-pink-50 via-white to-rose-100/80 p-5 shadow-sm sm:flex sm:items-center sm:justify-between sm:p-7">
-                        <div
-                            className="pointer-events-none absolute -right-5 -top-8 text-8xl opacity-[0.08]"
-                            aria-hidden="true"
-                        >
-                            💘
-                        </div>
-                        <div className="relative">
-                            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-3 py-1 text-xs font-semibold text-primary shadow-sm">
-                                <Sparkles size={14} /> Le grand jeu des duos
-                            </div>
-                            <h1 className="text-2xl font-black tracking-tight text-gray-900 sm:text-3xl">
-                                Alors, qui va le mieux ensemble ?
+                    <section className="home-stage px-5 py-5 sm:px-9 sm:py-10">
+                        <div className="relative z-10 max-w-2xl">
+                            <h1 className="stage-title max-w-xl text-[clamp(2.2rem,7vw,4.7rem)]">
+                                Alors, qui surchope&nbsp;?
                             </h1>
-                            <p className="mt-1 text-sm text-gray-600">
-                                {couples.filter((couple) => !myVotes[couple.id]).length} duos
-                                attendent ton verdict{' '}
-                                <Heart className="inline h-4 w-4 text-primary" />
+                            <p className="mt-3 hidden max-w-md text-sm font-medium text-white/80 sm:block sm:text-base">
+                                Un duel, trois choix. Vote et découvre ce que les autres en pensent.
                             </p>
-                        </div>
-                        <Link
-                            to="/jouer"
-                            className="relative mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-white shadow-md transition-[transform,box-shadow] duration-150 ease-out hover:shadow-lg active:scale-[0.97] sm:mt-0"
-                        >
-                            Mode rafale <ArrowRight size={17} />
-                        </Link>
-                        <Link
-                            to="/defi"
-                            className="relative mt-2 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-violet-200 bg-white px-5 py-2.5 text-sm font-bold text-violet-800 transition-[transform,background-color] duration-150 ease-out hover:bg-violet-50 active:scale-[0.97] sm:mt-0"
-                        >
-                            Défier mes amis <ArrowRight size={17} />
-                        </Link>
-                    </section>
-                    {votesLoaded && !initialLoading && (
-                        <VoteProgress votes={Object.keys(myVotes).length} />
-                    )}
-                    {coupleOfTheDay?.personA && coupleOfTheDay.personB && (
-                        <section className="space-y-3">
-                            <div className="flex items-center justify-between gap-3">
-                                <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
-                                    <CalendarHeart className="text-primary" size={20} />
-                                    Le couple du jour
-                                </h2>
+                            <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 sm:mt-5">
+                                <span className="inline-flex min-h-10 items-center gap-2 text-sm font-bold text-white sm:rounded-full sm:bg-white/10 sm:px-4">
+                                    <Shuffle size={17} /> {remainingCount} duo
+                                    {remainingCount > 1 ? 's' : ''} à voir
+                                </span>
                                 <Link
-                                    to={`/couple/${coupleOfTheDay.id}`}
-                                    className="text-xs font-semibold text-primary hover:underline"
+                                    to="/jouer"
+                                    className="stage-action bg-accent px-5 text-sm text-foreground"
                                 >
-                                    Partager le vote
+                                    <Zap size={17} fill="currentColor" /> Mode rafale{' '}
+                                    <ArrowRight size={16} />
                                 </Link>
                             </div>
-                            <CoupleCard
-                                couple={coupleOfTheDay}
-                                user={user}
-                                myChoice={myVotes[coupleOfTheDay.id]}
-                                onVote={handleVote}
-                            />
+                        </div>
+                    </section>
+
+                    <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1.45fr)_minmax(290px,.8fr)]">
+                        <section aria-labelledby="spotlight-title" className="min-w-0 space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <h2 id="spotlight-title" className="section-title">
+                                    À toi de jouer
+                                </h2>
+                                <span className="text-xs font-bold text-muted-foreground">
+                                    {spotlightCouple && !myVotes[spotlightCouple.id]
+                                        ? 'Nouveau duel'
+                                        : 'À revoir'}
+                                </span>
+                            </div>
+                            {spotlightCouple?.personA && spotlightCouple.personB ? (
+                                <CoupleCard
+                                    couple={spotlightCouple}
+                                    user={user}
+                                    myChoice={myVotes[spotlightCouple.id]}
+                                    onVote={handleVote}
+                                    onDelete={deleteCouple}
+                                    spotlight
+                                />
+                            ) : (
+                                <p className="rounded-2xl bg-white p-6 text-muted-foreground">
+                                    Aucun duo pour le moment. Reviens bientôt !
+                                </p>
+                            )}
                         </section>
-                    )}
+
+                        <aside className="space-y-4 lg:pt-11" aria-label="Défis et progression">
+                            {votesLoaded && !initialLoading && (
+                                <VoteProgress votes={Object.keys(myVotes).length} />
+                            )}
+                            <Link
+                                to="/defi"
+                                className="mission-surface group flex items-center justify-between gap-4 text-foreground transition-transform duration-150 active:scale-[.98]"
+                            >
+                                <span>
+                                    <strong className="block font-display text-xl font-extrabold">
+                                        Joue avec tes amis
+                                    </strong>
+                                    <span className="mt-1 block text-sm">
+                                        Les mêmes duos, des avis parfois opposés.
+                                    </span>
+                                </span>
+                                <ArrowRight className="shrink-0" size={22} />
+                            </Link>
+                            {coupleOfTheDay && (
+                                <Link
+                                    to={`/couple/${coupleOfTheDay.id}`}
+                                    className="flex min-h-12 items-center justify-between gap-2 rounded-2xl bg-white px-4 text-sm font-bold text-foreground"
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <CalendarHeart size={19} className="text-primary" /> Duo du
+                                        jour
+                                    </span>
+                                    <ArrowRight size={17} />
+                                </Link>
+                            )}
+                            {user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2' && (
+                                <Link
+                                    to="/valider-couples"
+                                    className="flex min-h-12 items-center justify-between rounded-2xl bg-white px-4 text-sm font-bold text-secondary"
+                                >
+                                    Duos à valider <ArrowRight size={17} />
+                                </Link>
+                            )}
+                        </aside>
+                    </div>
+
                     {referralCode && (
                         <ReferralInvite
                             code={referralCode}
@@ -267,12 +292,25 @@ export default function HomePage({
                             trackingReady={referralTrackingReady}
                         />
                     )}
-                    {/* 🧭 Barre de filtres */}
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-                        <div className="w-full sm:w-[260px]">
+
+                    <section aria-labelledby="explore-title" className="space-y-4">
+                        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+                            <div>
+                                <h2 id="explore-title" className="section-title">
+                                    Tous les duos
+                                </h2>
+                                <p className="mt-1 text-sm text-muted-foreground">
+                                    Explore, vote et compare les scores.
+                                </p>
+                            </div>
+                            <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                                <Sparkles size={15} /> L’ordre change à chaque visite
+                            </span>
+                        </div>
+                        <div className="grid gap-3 sm:grid-cols-[220px_1fr]">
                             <Select value={filter} onValueChange={setFilter}>
-                                <SelectTrigger className="h-11 rounded-full border-gray-200 bg-white/80 backdrop-blur-sm shadow-sm">
-                                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                                <SelectTrigger className="h-12 rounded-2xl border-border bg-white px-4 text-base font-semibold shadow-none">
+                                    <div className="flex items-center gap-2">
                                         {selectedCategory?.id === 'all' ? (
                                             <Globe size={18} />
                                         ) : (
@@ -283,7 +321,7 @@ export default function HomePage({
                                 </SelectTrigger>
                                 <SelectContent
                                     position="popper"
-                                    className="z-[80] rounded-xl border border-gray-200 bg-white p-2 shadow-xl"
+                                    className="z-[80] rounded-xl border-border bg-white p-2 shadow-xl"
                                 >
                                     {filterOptions.map((category) => (
                                         <SelectItem
@@ -303,51 +341,44 @@ export default function HomePage({
                                     ))}
                                 </SelectContent>
                             </Select>
+                            <SearchBar
+                                value={searchQuery}
+                                onChange={setSearchQuery}
+                                placeholder="Chercher un duo ou un prénom"
+                                className="sm:w-full"
+                            />
                         </div>
-
-                        {/* 🔍 Barre de recherche */}
-                        <SearchBar
-                            value={searchQuery}
-                            onChange={setSearchQuery}
-                            placeholder="Rechercher un couple ou un prénom..."
-                        />
-                    </div>
-                    {/* 💑 Liste des couples */}
-                    {filteredCouples.length === 0 ? (
-                        <p className="text-center text-muted-foreground mt-6">
-                            Aucun couple trouvé 😢
-                        </p>
-                    ) : (
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-4 pb-24">
-                            {visibleCouples.map((c) =>
-                                c.personA && c.personB ? (
-                                    <CoupleCard
-                                        key={c.id}
-                                        couple={c}
-                                        user={user}
-                                        myChoice={myVotes[c.id]}
-                                        onVote={handleVote}
-                                        onlyMyVotes={false}
-                                        onDelete={deleteCouple}
-                                    />
-                                ) : null,
-                            )}
-                            {hasMore && (
-                                <div
-                                    ref={loadMoreRef}
-                                    className="sm:col-span-2 lg:col-span-2 flex justify-center py-6"
-                                >
-                                    <div className="text-sm text-muted-foreground animate-pulse">
-                                        Chargement de plus de couples…
+                        {filteredCouples.length === 0 ? (
+                            <p className="rounded-2xl bg-white px-5 py-8 text-center text-muted-foreground">
+                                Aucun duo trouvé. Essaie une autre recherche.
+                            </p>
+                        ) : (
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                {feedCouples.map((couple) =>
+                                    couple.personA && couple.personB ? (
+                                        <CoupleCard
+                                            key={couple.id}
+                                            couple={couple}
+                                            user={user}
+                                            myChoice={myVotes[couple.id]}
+                                            onVote={handleVote}
+                                            onDelete={deleteCouple}
+                                        />
+                                    ) : null,
+                                )}
+                                {hasMore && (
+                                    <div
+                                        ref={loadMoreRef}
+                                        className="col-span-full flex justify-center py-6 text-sm text-muted-foreground"
+                                    >
+                                        Chargement de plus de duos…
                                     </div>
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                )}
+                            </div>
+                        )}
+                    </section>
                 </>
             )}
-
-            <SurchopeFooter />
         </main>
     );
 }

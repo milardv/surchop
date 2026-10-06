@@ -1,10 +1,12 @@
 import * as Icons from 'lucide-react';
 import { Pencil, Share2, Tag, Trash2 } from 'lucide-react';
 import { User } from 'firebase/auth';
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Couple } from '../../models/models';
+
+import { shareLink } from '@/utils/shareLink';
 
 export default function CoupleHeader({
     couple,
@@ -14,11 +16,13 @@ export default function CoupleHeader({
 }: {
     couple: Couple;
     user: User | null;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
     onDelete?: (id: string, userUid: string) => void;
     compact?: boolean;
 }) {
     const isAdmin = user?.uid === 'EuindCjjeTYx5ABLPCRWdflHy2c2';
     const navigate = useNavigate();
+    const [shareStatus, setShareStatus] = useState('');
     const category = couple.category as any;
     const categoryName = category?.name || 'Sans catégorie';
     const categoryLucideId = category?.lucideId;
@@ -28,27 +32,20 @@ export default function CoupleHeader({
 
     const handleShare = async (e: React.MouseEvent) => {
         e.stopPropagation();
-        const baseUrl = window.location.origin;
-        const shareUrl = `${baseUrl}/couple/${couple.id}`;
+        const shareUrl = `${window.location.origin}/couple/${couple.id}`;
         const shareText = `💘 Vote pour ce couple sur Surchope : ${couple.personA?.display_name} & ${couple.personB.display_name} 😏`;
-
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: 'Surchope 💘',
-                    text: shareText,
-                    url: shareUrl,
-                });
-            } catch (err) {
-                console.log('Partage annulé :', err);
-            }
+        try {
+            const result = await shareLink(shareUrl, 'Surchope', shareText);
+            setShareStatus(result === 'copied' ? 'Lien copié' : 'Lien partagé');
+        } catch {
+            setShareStatus('Partage impossible');
         }
     };
 
     return (
-        <div className="flex items-center gap-3 opacity-90 hover:opacity-100 transition">
+        <div className="flex flex-wrap items-center gap-1">
             <div
-                className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-pink-100 text-pink-700"
+                className="flex min-h-9 items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-bold text-secondary"
                 title={categoryName}
             >
                 {CategoryIcon ? <CategoryIcon size={14} strokeWidth={2.1} /> : <Tag size={14} />}
@@ -65,7 +62,7 @@ export default function CoupleHeader({
                         }
                     }}
                     title="Supprimer ce couple"
-                    className="p-1.5 rounded-full text-destructive/80 hover:text-destructive focus:outline-none focus:ring-2 focus:ring-[hsl(var(--destructive))]/40 transition active:scale-95"
+                    className="grid h-10 w-10 place-items-center rounded-full text-red-700 transition-transform duration-150 active:scale-[.97]"
                 >
                     <Trash2 size={18} />
                 </button>
@@ -79,7 +76,7 @@ export default function CoupleHeader({
                         navigate(`/modifier-couple/${couple.id}`);
                     }}
                     title="Modifier ce couple"
-                    className="p-1.5 rounded-full text-blue-600 hover:text-blue-700 hover:bg-blue-100/40 transition active:scale-95"
+                    className="grid h-10 w-10 place-items-center rounded-full text-secondary transition-transform duration-150 active:scale-[.97]"
                 >
                     <Pencil size={18} />
                 </button>
@@ -90,10 +87,16 @@ export default function CoupleHeader({
                 <button
                     onClick={handleShare}
                     title="Partager"
-                    className="p-1.5 rounded-full text-primary hover:text-primary/80 hover:bg-primary/10 transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]/40"
+                    aria-label="Partager ce duo"
+                    className="grid h-10 w-10 place-items-center rounded-full text-primary transition-transform duration-150 active:scale-[.97]"
                 >
                     <Share2 size={20} strokeWidth={2.1} />
                 </button>
+            )}
+            {shareStatus && (
+                <span role="status" className="text-xs font-semibold text-primary">
+                    {shareStatus}
+                </span>
             )}
         </div>
     );
