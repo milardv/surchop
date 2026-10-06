@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Check, Heart, Scale } from 'lucide-react';
 
 import { Couple } from '../../models/models';
 
@@ -9,64 +9,45 @@ export default function CoupleVoteButtons({
 }: {
     couple: Couple;
     myChoice?: 'A' | 'B' | 'tie';
-    onVote?: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
+    onVote?: (...args: [Couple, 'A' | 'B' | 'tie']) => void;
 }) {
-    const [voted, setVoted] = useState<'A' | 'B' | 'tie' | null>(null);
-
-    const handleVote = (choice: 'A' | 'B' | 'tie') => {
-        if (!onVote) return;
-        setVoted(choice);
-        onVote(couple, choice);
-        setTimeout(() => setVoted(null), 700);
-    };
-
-    const baseClasses =
-        'flex-1 px-3 py-2 rounded-full border font-medium text-sm transition-all duration-200 ease-out active:scale-95 text-center focus:outline-none focus:ring-2 focus:ring-[hsl(var(--primary))]/50 focus:ring-offset-2';
-    const disabledClasses = !onVote ? 'opacity-60 cursor-not-allowed' : '';
-
-    const getAnimationClasses = (choice: 'A' | 'B' | 'tie') => {
-        if (voted !== choice) return '';
-        return choice === 'tie'
-            ? 'animate-[pop_0.4s_ease-out] bg-secondary/10 border-secondary text-secondary'
-            : 'animate-[pop_0.4s_ease-out] bg-primary/10 border-primary text-primary shadow-sm';
-    };
+    const options = [
+        { choice: 'A' as const, label: couple.personA?.display_name ?? 'A', Icon: Heart },
+        { choice: 'tie' as const, label: 'Égalité', Icon: Scale },
+        { choice: 'B' as const, label: couple.personB?.display_name ?? 'B', Icon: Heart },
+    ];
 
     return (
-        <>
-            <style>
-                {`
-                @keyframes pop {
-                    0% { transform: scale(1); }
-                    50% { transform: scale(1.12); }
-                    100% { transform: scale(1); }
-                }
-            `}
-            </style>
-
-            <div className="mt-4 flex flex-col items-center gap-2 w-full">
-                <div className="flex gap-3 justify-center w-full">
-                    {['A', 'tie', 'B'].map((choice) => (
+        <div className="mt-4 w-full">
+            <p className="mb-2 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {myChoice ? 'Ton verdict' : 'À toi de choisir'}
+            </p>
+            <div className="flex w-full gap-2">
+                {options.map(({ choice, label, Icon }) => {
+                    const selected = myChoice === choice;
+                    const tie = choice === 'tie';
+                    return (
                         <button
                             key={choice}
-                            onClick={() => handleVote(choice as 'A' | 'B' | 'tie')}
+                            type="button"
+                            onClick={() => onVote?.(couple, choice)}
                             disabled={!onVote}
-                            className={`${baseClasses} ${disabledClasses} ${
-                                myChoice === choice
-                                    ? choice === 'tie'
-                                        ? 'bg-secondary/10 border-secondary text-secondary'
-                                        : 'bg-primary/10 border-primary text-primary'
-                                    : 'bg-background border-border text-foreground hover:bg-muted'
-                            } ${getAnimationClasses(choice as any)}`}
+                            aria-pressed={selected}
+                            className={`flex min-h-11 min-w-0 flex-1 items-center justify-center gap-1.5 rounded-2xl border px-2 py-2 text-center text-xs font-semibold transition-[transform,background-color,border-color,box-shadow] duration-150 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm ${
+                                selected
+                                    ? tie
+                                        ? 'border-amber-300 bg-amber-50 text-amber-800 shadow-sm'
+                                        : 'border-primary/40 bg-primary/10 text-primary shadow-sm'
+                                    : 'border-border bg-background text-foreground hover:border-primary/30 hover:bg-primary/5'
+                            }`}
                         >
-                            {choice === 'A'
-                                ? couple.personA?.display_name
-                                : choice === 'B'
-                                  ? couple.personB?.display_name
-                                  : 'Égalité'}
+                            {selected ? <Check size={15} /> : <Icon size={15} />}
+                            <span className="truncate">{label}</span>
                         </button>
-                    ))}
-                </div>
+                    );
+                })}
             </div>
-        </>
+        </div>
     );
 }

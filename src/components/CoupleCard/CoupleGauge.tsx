@@ -1,5 +1,3 @@
-import React from 'react';
-
 import Gauge from '../Gauge';
 
 import { Couple } from '@/models/models';
@@ -13,7 +11,8 @@ export default function CoupleGauge({
     couple: Couple;
     myChoice?: 'A' | 'B' | 'tie';
     onlyMyVotes: boolean;
-    onSelectPerson: (name: string) => void;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
+    onSelectPerson: (...args: [string]) => void;
 }) {
     const renderPerson = (
         person: { display_name: string; image_url?: string },
@@ -25,20 +24,20 @@ export default function CoupleGauge({
                 : 'ring-secondary bg-secondary/25 text-secondary';
 
         return (
-            <div
+            <button
                 key={index}
-                className="flex items-center gap-2 flex-col cursor-pointer relative"
-                onClick={() => onSelectPerson(person?.display_name)}
+                type="button"
+                aria-label={`En savoir plus sur ${person.display_name}`}
+                className="group relative flex cursor-pointer flex-col items-center gap-2 rounded-2xl text-inherit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                onClick={() => onSelectPerson(person.display_name)}
             >
-                {/* 💫 Halo animé (agrandi pour correspondre à la nouvelle taille) */}
                 <div
-                    className={`absolute w-32 h-32 md:w-40 md:h-40 rounded-full blur-md animate-pulse-ring -z-10 ${colorClass}`}
+                    className={`pointer-events-none absolute inset-1 rounded-full blur-xl opacity-50 ${colorClass}`}
                 />
 
-                {/* 🖼️ Image avec halo dégradé visible */}
                 <div className="relative flex items-center justify-center">
                     <div
-                        className="relative w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden flex items-center justify-center transition-transform duration-300 bg-muted hover:scale-105 shadow-lg ring-4 ring-white"
+                        className="person-avatar relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-muted shadow-lg ring-4 ring-white transition-transform duration-150 ease-out group-active:scale-[0.97] md:h-40 md:w-40"
                         style={{ zIndex: 1 }}
                     >
                         {person?.image_url ? (
@@ -58,7 +57,7 @@ export default function CoupleGauge({
                 <div className="font-medium text-base text-center transition-colors duration-200">
                     {person?.display_name}
                 </div>
-            </div>
+            </button>
         );
     };
 
@@ -71,19 +70,6 @@ export default function CoupleGauge({
 
     return (
         <>
-            <style>
-                {`
-          @keyframes pulse-ring {
-            0% { transform: scale(0.9); opacity: 0.6; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(0.9); opacity: 0.6; }
-          }
-          .animate-pulse-ring {
-            animation: pulse-ring 1.6s infinite ease-in-out;
-          }
-        `}
-            </style>
-
             <div className="flex-1 flex items-center justify-center gap-4 relative">
                 {renderPerson(couple.personA, 'A')}
                 <span className="text-muted-foreground text-lg font-semibold select-none">vs</span>

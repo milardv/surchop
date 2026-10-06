@@ -21,10 +21,12 @@ export default function CoupleCard({
     couple: Couple;
     user: User | null;
     myChoice?: 'A' | 'B' | 'tie';
-    onVote?: (c: Couple, choice: 'A' | 'B' | 'tie') => void;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
+    onVote?: (...args: [Couple, 'A' | 'B' | 'tie']) => void;
     compact?: boolean;
     onlyMyVotes?: boolean;
-    onDelete?: (id: string, userUid: string) => void;
+    // eslint-disable-next-line no-unused-vars -- ESLint's base rule misreads TypeScript callback signatures.
+    onDelete?: (...args: [string, string]) => void;
 }) {
     const [selectedPerson, setSelectedPerson] = useState<string | null>(null);
     const [localChoice, setLocalChoice] = useState<'A' | 'B' | 'tie' | undefined>(myChoice);
@@ -85,7 +87,7 @@ export default function CoupleCard({
     };
 
     return (
-        <div className="relative p-4 rounded-2xl bg-card text-card-foreground border border-border shadow-sm hover:shadow-md transition-all duration-200">
+        <div className="relative rounded-3xl border border-border bg-card p-4 text-card-foreground shadow-sm transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
             {/* En-tête */}
             <div className="flex justify-between items-start mb-3">
                 <CoupleHeader
@@ -112,8 +114,6 @@ export default function CoupleCard({
                 <div className="mt-3">
                     <CoupleVoteButtons
                         couple={displayedCouple}
-                        user={user}
-                        canVote={!!user && !!onVote}
                         myChoice={localChoice}
                         onVote={handleVote}
                     />

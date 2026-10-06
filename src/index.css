@@ -11,13 +11,15 @@
     width: 100%;
 }
 
-html, body {
+html,
+body {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
 
 @keyframes pulse-heart {
-    0%, 100% {
+    0%,
+    100% {
         transform: scale(1);
     }
     25% {
@@ -67,7 +69,22 @@ html, body {
     animation: fadeIn 0.15s ease-out;
 }
 
+@media (hover: hover) and (pointer: fine) {
+    .person-avatar:hover {
+        transform: scale(1.03);
+    }
+}
 
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
 
 @layer base {
     :root {
@@ -121,13 +138,11 @@ html, body {
     }
 }
 
-
-
 @layer base {
-  * {
-    @apply border-border;
+    * {
+        @apply border-border;
     }
-  body {
-    @apply bg-background text-foreground;
+    body {
+        @apply bg-background text-foreground;
     }
 }
